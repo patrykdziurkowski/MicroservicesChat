@@ -11,3 +11,6 @@ EXPOSE 8080
 ARG JAR_FILE=app/target/*.jar
 COPY --from=build ${JAR_FILE} app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
+
+HEALTHCHECK --interval=5s --timeout=1s --start-period=10s --retries=10 \
+    CMD curl -I http://localhost:8080
