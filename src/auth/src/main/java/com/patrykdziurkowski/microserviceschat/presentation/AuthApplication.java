@@ -1,13 +1,13 @@
-package com.patrykdziurkowski.microserviceschat.chat;
+package com.patrykdziurkowski.microserviceschat.presentation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ChatApplication {
+public class AuthApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ChatApplication.class, args);
+		SpringApplication.run(AuthApplication.class, args);
 	}
 
 }

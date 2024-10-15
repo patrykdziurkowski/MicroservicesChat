@@ -1,4 +1,4 @@
-package com.patrykdziurkowski.microserviceschat.auth;
+package com.patrykdziurkowski.microserviceschat.presentation;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
