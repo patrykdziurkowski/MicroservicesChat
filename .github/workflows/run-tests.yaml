@@ -1,1 +1,23 @@
 name: Run Tests
+on:
+  [push, pull_request]
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - run: echo "Installing Maven."
+      - name: Install Maven
+        run: sudo apt-get update && sudo apt-get install -y maven
+
+      - run: echo "Running tests for auth module."
+      - name: Run the Maven verify phase
+        run: mvn -f src/auth/pom.xml --batch-mode --update-snapshots verify
+      - run: echo "Running tests for chat module."
+      - name: Run the Maven verify phase
+        run: mvn -f src/chat/pom.xml --batch-mode --update-snapshots verify
