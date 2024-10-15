@@ -9,4 +9,9 @@ public class HomeController {
     public String index() {
         return "Placeholder text for the chat module.";
     }
+
+    @GetMapping("/Placeholder")
+    public String placeholder() {
+        return "Placeholder endpoint for the chat module.";
+    }
 }
