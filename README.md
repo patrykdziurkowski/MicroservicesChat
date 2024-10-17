@@ -10,6 +10,7 @@ Additionally, GitHub Actions Secrets defines the following:
 * `REGISTRY_PATH` - the address of your container registry (i.e. `example.azurecr.io`). Must not end with a `/` or contain protocol elements such as `http://` etc.
 * `REGISTRY_USERNAME` - your Azure Container Registry username.
 * `REGISTRY_PASSWORD` - your Azure Container Registry password.
+* `DNS_NAME_LABEL` - a unique identifier for your website's DNS.
 
 ## Setup guide
 ### Option 1: Run the docker compose locally

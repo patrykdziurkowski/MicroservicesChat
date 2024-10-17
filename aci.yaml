@@ -36,4 +36,4 @@ properties:
     ports:
       - protocol: tcp
         port: 80
-    dnsNameLabel: chatappcr
+    dnsNameLabel: ${DNS_NAME_LABEL}

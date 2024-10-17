@@ -50,3 +50,4 @@ jobs:
           REGISTRY_PATH: ${{ secrets.REGISTRY_PATH }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          DNS_NAME_LABEL: ${{ secrets.DNS_NAME_LABEL }}
