@@ -1,25 +1,23 @@
 services:
   auth:
-    image: mc_auth
+    image: ${REGISTRY_PATH}/mc_auth:latest
     build:
       context: ./src/auth
       dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
   chat:
-    image: mc_chat
+    image: ${REGISTRY_PATH}/mc_chat:latest
     build:
       context: ./src/chat
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "80:80"
     depends_on:
       db:
         condition: service_healthy
       auth:
         condition: service_healthy
   db:
-    image: mc_db
+    image: ${REGISTRY_PATH}/mc_db:latest
     build:
       context: ./src/db
       dockerfile: Dockerfile

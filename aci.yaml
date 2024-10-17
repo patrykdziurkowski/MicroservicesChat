@@ -1,0 +1,38 @@
+apiVersion: 2019-12-01
+location: polandcentral
+name: chatapplication
+properties:
+  containers:
+    - name: auth
+      properties:
+        image: ${REGISTRY_PATH}/mc_auth:latest
+        resources:
+          requests:
+            cpu: 1
+            memoryInGb: 0.3
+    - name: chat
+      properties:
+        image: ${REGISTRY_PATH}/mc_chat:latest
+        ports:
+        - port: 80
+        resources:
+          requests:
+            cpu: 1
+            memoryInGb: 0.3
+    - name: db
+      properties:
+        image: ${REGISTRY_PATH}/mc_db:latest
+        resources:
+          requests:
+            cpu: 1
+            memoryInGb: 2
+  osType: Linux
+  imageRegistryCredentials:
+    - server: ${REGISTRY_PATH}
+      username: ${REGISTRY_USERNAME}
+      password: ${REGISTRY_PASSWORD}
+  ipAddress:
+    type: Public
+    ports:
+      - protocol: tcp
+        port: 80
