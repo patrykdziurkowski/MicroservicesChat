@@ -1,23 +1,21 @@
 services:
   auth:
-    image: ${REGISTRY_PATH}/mc_auth:latest
+    image: ${REGISTRY_PATH:-localhost}/mc_auth:latest # $REGISTRY_PATH or localhost if not set
     build:
       context: ./src/auth
       dockerfile: Dockerfile
   chat:
-    image: ${REGISTRY_PATH}/mc_chat:latest
+    image: ${REGISTRY_PATH:-localhost}/mc_chat:latest
     build:
       context: ./src/chat
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     depends_on:
       db:
         condition: service_healthy
       auth:
         condition: service_healthy
   db:
-    image: ${REGISTRY_PATH}/mc_db:latest
+    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
     build:
       context: ./src/db
       dockerfile: Dockerfile
@@ -25,3 +23,21 @@ services:
         password: ${MSSQL_SA_PASSWORD}
     environment:
       - ACCEPT_EULA=Y
+  https-proxy:
+    image: ${REGISTRY_PATH:-localhost}/mc_http-proxy:latest
+    build:
+      context: ./src/http-proxy
+      dockerfile: Dockerfile
+      args:
+        BUILD_FILE: ${DEPLOYMENT_TYPE:-Caddyfile-local}
+    ports:
+      - "80:80" # For HTTP
+      - "443:443" # For HTTPS
+    environment:
+      - CHAT_HOSTNAME=${CHAT_HOSTNAME:-localhost} # $HOSTNAME if set or localhost otherwise
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  caddy_data:
+  caddy_config:
