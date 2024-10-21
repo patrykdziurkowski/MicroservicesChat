@@ -1,3 +1,0 @@
-localhost {
-    reverse_proxy chat:8080
-}

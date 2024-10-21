@@ -29,12 +29,11 @@ services:
       context: ./src/http-proxy
       dockerfile: Dockerfile
       args:
-        BUILD_FILE: ${DEPLOYMENT_TYPE:-Caddyfile-local}
+        CHAT_DOMAIN: ${CHAT_DOMAIN:-localhost}
+        CHAT_MODULE_ADDRESS: ${CHAT_MODULE_ADDRESS:-chat:8080}
     ports:
       - "80:80" # For HTTP
       - "443:443" # For HTTPS
-    environment:
-      - CHAT_HOSTNAME=${CHAT_HOSTNAME:-localhost} # $HOSTNAME if set or localhost otherwise
     volumes:
       - caddy_data:/data
       - caddy_config:/config

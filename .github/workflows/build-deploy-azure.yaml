@@ -37,20 +37,14 @@ jobs:
         env:
           REGISTRY_PATH: ${{ secrets.REGISTRY_PATH }}
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
-          AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
-          DNS_NAME_LABEL: ${{ secrets.DNS_NAME_LABEL }}
-          CHAT_HOSTNAME: ${{ secrets.DNS_NAME_LABEL }}.${{ secrets.AZURE_LOCATION }}.azurecontainer.io
-          DEPLOYMENT_TYPE: Caddyfile-remote
+          CHAT_DOMAIN: ${{ secrets.DNS_NAME_LABEL }}.${{ secrets.AZURE_LOCATION }}.azurecontainer.io
+          CHAT_MODULE_ADDRESS: http://localhost:8080
 
       - name: Push Docker Image
         run: docker compose push
         env:
           REGISTRY_PATH: ${{ secrets.REGISTRY_PATH }}
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
-          AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
-          DNS_NAME_LABEL: ${{ secrets.DNS_NAME_LABEL }}
-          CHAT_HOSTNAME: ${{ secrets.DNS_NAME_LABEL }}.${{ secrets.AZURE_LOCATION }}.azurecontainer.io
-          DEPLOYMENT_TYPE: Caddyfile-remote
 
       - name: Deploy to Azure Container Instances   
         run: az container create --resource-group ChatGroup --file aci.yaml

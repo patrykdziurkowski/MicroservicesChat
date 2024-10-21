@@ -44,8 +44,6 @@ properties:
           - port: 80
           - port: 443
         volumeMounts:
-          - name: proxy-caddyfile
-            mountPath: /etc/caddy
           - name: proxy-data
             mountPath: /data
           - name: proxy-config
@@ -64,11 +62,6 @@ properties:
         port: 443
     dnsNameLabel: ${DNS_NAME_LABEL}
   volumes:
-  - name: proxy-caddyfile
-    azureFile: 
-      shareName: proxy-caddyfile
-      storageAccountName: ${AZURE_STORAGE_ACCOUNT}
-      storageAccountKey: ${AZURE_STORAGE_KEY}
   - name: proxy-data
     azureFile: 
       shareName: proxy-data
