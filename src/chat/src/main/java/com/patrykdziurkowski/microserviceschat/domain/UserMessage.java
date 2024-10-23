@@ -18,6 +18,9 @@ public class UserMessage extends Message {
         this.isDeleted = false;
         this.ownerId = ownerId;
     }
+    public void setIsDeleted() {
+        isDeleted = true;
+    }
     public UUID getOwnerId() {
         return ownerId;
     }
