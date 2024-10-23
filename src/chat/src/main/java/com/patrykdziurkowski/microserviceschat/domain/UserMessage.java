@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class UserMessage extends Message {
@@ -9,6 +10,11 @@ public class UserMessage extends Message {
     UserMessage() {}
     public UserMessage(String text, UUID ownerId) {
         super(text);
+        this.isDeleted = false;
+        this.ownerId = ownerId;
+    }
+    public UserMessage(String text, UUID ownerId, LocalDateTime datePosted) {
+        super(text, datePosted);
         this.isDeleted = false;
         this.ownerId = ownerId;
     }
