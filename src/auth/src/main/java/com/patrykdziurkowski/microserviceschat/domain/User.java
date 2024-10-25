@@ -2,8 +2,17 @@ package com.patrykdziurkowski.microserviceschat.domain;
 
 import java.util.UUID;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "Users")
 public class User {
+    @Id
     private UUID id;
+    @Column(unique = true)
     private String userName;
     private String passwordHash;
 
@@ -27,5 +36,9 @@ public class User {
 
     public String getUserName() {
         return this.userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
