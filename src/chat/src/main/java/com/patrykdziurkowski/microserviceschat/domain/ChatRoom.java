@@ -77,11 +77,11 @@ public class ChatRoom {
         return join(currentUserId, null);
     }
 
-    public boolean join(UUID currentUserId, String givenPassword) {
-        if (passwordHash.isPresent() && givenPassword.isEmpty()) {
+    public boolean join(UUID currentUserId, String givenPasswordHash) {
+        if (passwordHash.isPresent() && givenPasswordHash.isEmpty()) {
             return false;
         }
-        if (passwordHash.isPresent() && !passwordHash.get().equals(givenPassword)) {
+        if (passwordHash.isPresent() && !passwordHash.get().equals(givenPasswordHash)) {
             return false;
         }
         if (memberIds.contains(currentUserId)) {
