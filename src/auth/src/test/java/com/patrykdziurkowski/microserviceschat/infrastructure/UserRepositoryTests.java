@@ -33,6 +33,7 @@ public class UserRepositoryTests {
     @Autowired
     private UserRepository userRepository;
 
+    @SuppressWarnings("resource")
     @Container
     @ServiceConnection
     private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
