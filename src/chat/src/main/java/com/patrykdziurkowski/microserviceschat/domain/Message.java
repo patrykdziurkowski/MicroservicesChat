@@ -9,23 +9,29 @@ public class Message {
     private LocalDateTime datePosted;
 
     Message() {}
+
     public Message(String text) {
         this.id = UUID.randomUUID();
         this.text = text;
         this.datePosted = LocalDateTime.now();
     }
+
     public Message(String text, LocalDateTime datePosted) {
         this.id = UUID.randomUUID();
         this.text = text;
         this.datePosted = datePosted;
     }
+
     public String getText() {
         return text;
     }
+
     public LocalDateTime getDatePosted() {
         return datePosted;
     }
+
     public UUID getId() {
         return id;
     }
+    
 }

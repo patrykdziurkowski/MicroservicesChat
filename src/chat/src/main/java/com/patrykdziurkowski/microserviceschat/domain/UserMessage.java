@@ -13,18 +13,23 @@ public class UserMessage extends Message {
         this.isDeleted = false;
         this.ownerId = ownerId;
     }
+    
     public UserMessage(String text, UUID ownerId, LocalDateTime datePosted) {
         super(text, datePosted);
         this.isDeleted = false;
         this.ownerId = ownerId;
     }
+
     public void setIsDeleted() {
         isDeleted = true;
     }
+
     public UUID getOwnerId() {
         return ownerId;
     }
+
     public boolean getIsDeleted() {
         return isDeleted;
     }
+    
 }
