@@ -120,6 +120,7 @@ public class ChatRoom extends AggreggateRoot {
         if (memberIds.contains(currentUserId) == false) {
             return false;
         }
+        totalMessageCount++;
         messages.add(new UserMessage(text, currentUserId, datePosted));
         return true;
     }
@@ -137,6 +138,7 @@ public class ChatRoom extends AggreggateRoot {
             if (hasDeletePermissions == false) {
                 return false;
             }
+            totalMessageCount--;
             raiseDomainEvent(new MessageDeletedEvent(messageId));
             return true;
         }
