@@ -1,8 +1,13 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.FavoriteUnsetEvent;
+import com.patrykdziurkowski.microserviceschat.domain.shared.DomainEvent;
 
 public class FavoriteChatRoomTests {
     @Test
@@ -14,7 +19,8 @@ public class FavoriteChatRoomTests {
 
         favoriteChatRoom.unsetFavorite(currentUserId);
 
-        assert(favoriteChatRoom.getIsFlaggedForDeletion() == true);
+        DomainEvent event = favoriteChatRoom.getDomainEvents().get(0);
+        assertTrue(event instanceof FavoriteUnsetEvent);
     }
 
     @Test
@@ -26,6 +32,6 @@ public class FavoriteChatRoomTests {
 
         favoriteChatRoom.unsetFavorite(currentUserId);
 
-        assert(favoriteChatRoom.getIsFlaggedForDeletion() == false);
+        assertTrue(favoriteChatRoom.getDomainEvents().isEmpty());
     }
 }

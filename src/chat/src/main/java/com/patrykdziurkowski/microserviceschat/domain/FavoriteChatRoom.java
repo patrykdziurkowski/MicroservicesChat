@@ -2,26 +2,28 @@ package com.patrykdziurkowski.microserviceschat.domain;
 
 import java.util.UUID;
 
-public class FavoriteChatRoom {
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.FavoriteUnsetEvent;
+import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
+
+public class FavoriteChatRoom extends AggreggateRoot {
     private UUID id;
     private UUID chatRoomId;
     private UUID userId;
-    private boolean isFlaggedForDeletion;
 
-    FavoriteChatRoom() {}
+    FavoriteChatRoom() {
+    }
 
     public FavoriteChatRoom(UUID chatRoomId, UUID currentUserId) {
         this.id = UUID.randomUUID();
         this.chatRoomId = chatRoomId;
         this.userId = currentUserId;
-        this.isFlaggedForDeletion = false;
     }
 
     public boolean unsetFavorite(UUID currentUserId) {
         if (currentUserId != userId) {
             return false;
         }
-        this.isFlaggedForDeletion = true;
+        raiseDomainEvent(new FavoriteUnsetEvent(id));
         return true;
     }
 
@@ -37,8 +39,4 @@ public class FavoriteChatRoom {
         return userId;
     }
 
-    public boolean getIsFlaggedForDeletion() {
-        return isFlaggedForDeletion;
-    }
-    
 }

@@ -5,19 +5,22 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ChatRoom {
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
+
+public class ChatRoom extends AggreggateRoot {
     private UUID id;
     private UUID ownerId;
     private String name;
     private boolean isPublic;
-    private boolean isFlaggedForDeletion;
     private ArrayList<UUID> memberIds = new ArrayList<UUID>();
     private ArrayList<Message> messages = new ArrayList<Message>();
     private int totalMessageCount;
     private Optional<String> passwordHash;
-    
 
-    ChatRoom() {}
+    ChatRoom() {
+    }
 
     public ChatRoom(UUID ownerId, String name, boolean isPublic) {
         this(ownerId, name, isPublic, null);
@@ -28,7 +31,6 @@ public class ChatRoom {
         this.ownerId = ownerId;
         this.name = name;
         this.isPublic = isPublic;
-        this.isFlaggedForDeletion = false;
         this.passwordHash = Optional.ofNullable(passwordHash);
         this.memberIds = new ArrayList<UUID>();
         this.messages = new ArrayList<Message>();
@@ -39,7 +41,7 @@ public class ChatRoom {
         if (currentUserId != ownerId) {
             return false;
         }
-        isFlaggedForDeletion = true;
+        raiseDomainEvent(new ChatDissolvedEvent(id));
         return true;
     }
 
@@ -97,7 +99,7 @@ public class ChatRoom {
         }
         memberIds.remove(memberIds.indexOf(currentUserId));
         if (memberIds.size() == 0) {
-            isFlaggedForDeletion = true;
+            raiseDomainEvent(new ChatDissolvedEvent(id));
             return true;
         }
         if (currentUserId == ownerId) {
@@ -131,7 +133,7 @@ public class ChatRoom {
             if (hasDeletePermissions == false) {
                 return false;
             }
-            userMessage.setIsDeleted();
+            raiseDomainEvent(new MessageDeletedEvent(messageId));
             return true;
         }
         return false;
@@ -151,10 +153,6 @@ public class ChatRoom {
 
     public boolean getIsPublic() {
         return isPublic;
-    }
-
-    public boolean getIsFlaggedForDeletion() {
-        return isFlaggedForDeletion;
     }
 
     public ArrayList<UUID> getMemberIds() {

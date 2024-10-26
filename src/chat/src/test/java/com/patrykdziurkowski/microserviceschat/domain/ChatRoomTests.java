@@ -1,9 +1,15 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.shared.DomainEvent;
 
 public class ChatRoomTests {
 
@@ -15,7 +21,7 @@ public class ChatRoomTests {
 
         chatRoom.postMessage(currentUserId, "Test message");
 
-        assert(chatRoom.getMessages().size() == 1);
+        assertTrue(chatRoom.getMessages().size() == 1);
     }
 
     @Test
@@ -26,7 +32,7 @@ public class ChatRoomTests {
 
         chatRoom.postMessage(currentUserId, "Test message");
 
-        assert(chatRoom.getMessages().size() == 0);
+        assertTrue(chatRoom.getMessages().size() == 0);
     }
 
     @Test
@@ -38,9 +44,8 @@ public class ChatRoomTests {
 
         chatRoom.postMessage(currentUserId, "Test message", datePosted);
 
-        assert(chatRoom.getMessages().size() == 1);
+        assertTrue(chatRoom.getMessages().size() == 1);
     }
-
 
     @Test
     public void deleteMessage_givenValidDataOwnerOfChat_deletesMessageFromList() {
@@ -53,9 +58,9 @@ public class ChatRoomTests {
 
         chatRoom.deleteMessage(currentUserId, messageId);
 
-        UserMessage userMessage = (UserMessage) chatRoom.getMessages().get(0);
-        assert(chatRoom.getMessages().size() == 1);
-        assert(userMessage.getIsDeleted() == true);
+        assertTrue(chatRoom.getMessages().size() == 1);
+        DomainEvent event = chatRoom.getDomainEvents().get(0);
+        assertTrue(event instanceof MessageDeletedEvent);
     }
 
     @Test
@@ -69,9 +74,9 @@ public class ChatRoomTests {
 
         chatRoom.deleteMessage(currentUserId, messageId);
 
-        UserMessage userMessage = (UserMessage) chatRoom.getMessages().get(0);
-        assert(chatRoom.getMessages().size() == 1);
-        assert(userMessage.getIsDeleted() == true);
+        assertTrue(chatRoom.getMessages().size() == 1);
+        DomainEvent event = chatRoom.getDomainEvents().get(0);
+        assertTrue(event instanceof MessageDeletedEvent);
     }
 
     @Test
@@ -84,7 +89,7 @@ public class ChatRoomTests {
 
         chatRoom.deleteMessage(currentUserId, messageId);
 
-        assert(chatRoom.getMessages().size() == 1);
+        assertTrue(chatRoom.getMessages().size() == 1);
     }
 
     @Test
@@ -97,7 +102,7 @@ public class ChatRoomTests {
 
         chatRoom.deleteMessage(currentUserId, messageId);
 
-        assert(chatRoom.getMessages().size() == 1);
+        assertTrue(chatRoom.getMessages().size() == 1);
     }
 
     @Test
@@ -108,7 +113,8 @@ public class ChatRoomTests {
 
         chatRoom.dissolve(currentUserId);
 
-        assert(chatRoom.getIsFlaggedForDeletion() == true);
+        DomainEvent event = chatRoom.getDomainEvents().get(0);
+        assertTrue(event instanceof ChatDissolvedEvent);
     }
 
     @Test
@@ -119,7 +125,7 @@ public class ChatRoomTests {
 
         chatRoom.dissolve(currentUserId);
 
-        assert(chatRoom.getIsFlaggedForDeletion() == false);
+        assertTrue(chatRoom.getDomainEvents().isEmpty());
     }
 
     @Test
@@ -131,8 +137,8 @@ public class ChatRoomTests {
 
         chatRoom.inviteMember(newMember, currentUserId);
 
-        assert(chatRoom.getMemberIds().contains(newMember));
-        assert(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().contains(newMember));
+        assertTrue(chatRoom.getMemberIds().size() == 2);
     }
 
     @Test
@@ -144,7 +150,7 @@ public class ChatRoomTests {
 
         chatRoom.inviteMember(newMember, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
+        assertTrue(chatRoom.getMemberIds().size() == 1);
     }
 
     @Test
@@ -157,7 +163,7 @@ public class ChatRoomTests {
 
         chatRoom.inviteMember(newMember, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().size() == 2);
     }
 
     @Test
@@ -170,9 +176,9 @@ public class ChatRoomTests {
 
         chatRoom.removeMember(memberToRemove, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
+        assertTrue(chatRoom.getMemberIds().size() == 1);
     }
-    
+
     @Test
     public void removeMember_givenInvalidDataNoOwnerMemberTriesToRemoveMember_doesNotRemoveMember() {
         UUID ownerId = UUID.randomUUID();
@@ -183,8 +189,8 @@ public class ChatRoomTests {
 
         chatRoom.removeMember(memberToRmove, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 2);
-        assert(chatRoom.getMemberIds().contains(memberToRmove));
+        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().contains(memberToRmove));
     }
 
     @Test
@@ -196,8 +202,8 @@ public class ChatRoomTests {
 
         chatRoom.removeMember(memberToRmove, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
-        assert(chatRoom.getMemberIds().contains(ownerId));
+        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertTrue(chatRoom.getMemberIds().contains(ownerId));
     }
 
     @Test
@@ -209,7 +215,7 @@ public class ChatRoomTests {
 
         chatRoom.removeMember(memberToRmove, currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
+        assertTrue(chatRoom.getMemberIds().size() == 1);
     }
 
     @Test
@@ -222,8 +228,8 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId, password);
 
-        assert(chatRoom.getMemberIds().size() == 2);
-        assert(chatRoom.getMemberIds().contains(currentUserId));
+        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
 
     @Test
@@ -236,8 +242,8 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId, password);
 
-        assert(chatRoom.getMemberIds().size() == 1);
-        assert(!chatRoom.getMemberIds().contains(currentUserId));
+        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
     }
 
     @Test
@@ -248,8 +254,8 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 2);
-        assert(chatRoom.getMemberIds().contains(currentUserId));
+        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
 
     @Test
@@ -261,10 +267,10 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 2);
-        assert(chatRoom.getMemberIds().contains(currentUserId));
+        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
-    
+
     @Test
     public void leave_givenValidData_leavesChatRoom() {
         UUID ownerId = UUID.randomUUID();
@@ -274,8 +280,8 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
-        assert(!chatRoom.getMemberIds().contains(currentUserId));
+        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
     }
 
     @Test
@@ -286,7 +292,7 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
+        assertTrue(chatRoom.getMemberIds().size() == 1);
     }
 
     @Test
@@ -296,13 +302,12 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID anotherMember = UUID.randomUUID();
         chatRoom.join(anotherMember);
-        
 
         chatRoom.leave(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 1);
-        assert(!chatRoom.getMemberIds().contains(ownerId));
-        assert(chatRoom.getOwnerId().equals(anotherMember));
+        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertTrue(!chatRoom.getMemberIds().contains(ownerId));
+        assertTrue(chatRoom.getOwnerId().equals(anotherMember));
     }
 
     @Test
@@ -313,11 +318,9 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId);
 
-        assert(chatRoom.getMemberIds().size() == 0);
-        assert(chatRoom.getIsFlaggedForDeletion());
+        assertTrue(chatRoom.getMemberIds().size() == 0);
+        DomainEvent event = chatRoom.getDomainEvents().get(0);
+        assertTrue(event instanceof ChatDissolvedEvent);
     }
-
-
-
 
 }
