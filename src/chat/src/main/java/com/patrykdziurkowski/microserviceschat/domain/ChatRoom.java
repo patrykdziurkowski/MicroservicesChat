@@ -9,6 +9,8 @@ import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolved
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
+import jakarta.annotation.Nullable;
+
 public class ChatRoom extends AggreggateRoot {
     private UUID id;
     private UUID ownerId;
@@ -17,7 +19,8 @@ public class ChatRoom extends AggreggateRoot {
     private ArrayList<UUID> memberIds = new ArrayList<UUID>();
     private ArrayList<Message> messages = new ArrayList<Message>();
     private int totalMessageCount;
-    private Optional<String> passwordHash;
+    @Nullable
+    private String passwordHash;
 
     ChatRoom() {
     }
@@ -31,7 +34,7 @@ public class ChatRoom extends AggreggateRoot {
         this.ownerId = ownerId;
         this.name = name;
         this.isPublic = isPublic;
-        this.passwordHash = Optional.ofNullable(passwordHash);
+        this.passwordHash = passwordHash;
         this.memberIds = new ArrayList<UUID>();
         this.messages = new ArrayList<Message>();
         memberIds.add(ownerId);
@@ -49,7 +52,7 @@ public class ChatRoom extends AggreggateRoot {
         if (isPublic == false && currentUserId != ownerId) {
             return false;
         }
-        if (passwordHash.isPresent() && currentUserId != ownerId) {
+        if (getPasswordHash().isPresent() && currentUserId != ownerId) {
             return false;
         }
         if (memberIds.contains(newMemberId)) {
@@ -80,10 +83,11 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean join(UUID currentUserId, String givenPasswordHash) {
-        if (passwordHash.isPresent() && givenPasswordHash.isEmpty()) {
+        if (getPasswordHash().isPresent() && givenPasswordHash.isEmpty()) {
             return false;
         }
-        if (passwordHash.isPresent() && !passwordHash.get().equals(givenPasswordHash)) {
+        if (getPasswordHash().isPresent()
+                && getPasswordHash().get().equals(givenPasswordHash) == false) {
             return false;
         }
         if (memberIds.contains(currentUserId)) {
@@ -167,7 +171,7 @@ public class ChatRoom extends AggreggateRoot {
         return totalMessageCount;
     }
 
-    public String getPasswordHash() {
-        return passwordHash.orElse(null);
+    public Optional<String> getPasswordHash() {
+        return Optional.ofNullable(passwordHash);
     }
 }
