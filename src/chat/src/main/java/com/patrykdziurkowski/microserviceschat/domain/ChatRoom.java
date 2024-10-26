@@ -2,6 +2,7 @@ package com.patrykdziurkowski.microserviceschat.domain;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,8 +17,8 @@ public class ChatRoom extends AggreggateRoot {
     private UUID ownerId;
     private String name;
     private boolean isPublic;
-    private ArrayList<UUID> memberIds = new ArrayList<UUID>();
-    private ArrayList<Message> messages = new ArrayList<Message>();
+    private List<UUID> memberIds = new ArrayList<UUID>();
+    private List<Message> messages = new ArrayList<Message>();
     private int totalMessageCount;
     @Nullable
     private String passwordHash;
@@ -161,11 +162,11 @@ public class ChatRoom extends AggreggateRoot {
         return isPublic;
     }
 
-    public ArrayList<UUID> getMemberIds() {
+    public List<UUID> getMemberIds() {
         return memberIds;
     }
 
-    public ArrayList<Message> getMessages() {
+    public List<Message> getMessages() {
         return messages;
     }
 
