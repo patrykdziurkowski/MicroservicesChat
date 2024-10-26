@@ -12,9 +12,8 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
-        String text = "Test message";
 
-        chatRoom.postMessage(currentUserId, text);
+        chatRoom.postMessage(currentUserId, "Test message");
 
         assert(chatRoom.getMessages().size() == 1);
     }
@@ -24,9 +23,8 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
-        String text = "Test message";
 
-        chatRoom.postMessage(currentUserId, text);
+        chatRoom.postMessage(currentUserId, "Test message");
 
         assert(chatRoom.getMessages().size() == 0);
     }
@@ -36,25 +34,40 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
-        String text = "Test message";
         LocalDateTime datePosted = LocalDateTime.now();
 
-        chatRoom.postMessage(currentUserId, text, datePosted);
+        chatRoom.postMessage(currentUserId, "Test message", datePosted);
 
         assert(chatRoom.getMessages().size() == 1);
     }
 
 
     @Test
-    public void deleteMessage_givenValidData_deletesMessageFromList() {
+    public void deleteMessage_givenValidDataOwnerOfChat_deletesMessageFromList() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
-        UUID currentUserId = ownerId;
-        String text = "Test message";
-        chatRoom.postMessage(ownerId, text);
-        UUID messegeId = chatRoom.getMessages().get(0).getId();
+        UUID currentUserId = UUID.randomUUID();
+        chatRoom.inviteMember(currentUserId, ownerId);
+        chatRoom.postMessage(currentUserId, "Test message");
+        UUID messageId = chatRoom.getMessages().get(0).getId();
 
-        chatRoom.deleteMessage(currentUserId, messegeId);
+        chatRoom.deleteMessage(currentUserId, messageId);
+
+        UserMessage userMessage = (UserMessage) chatRoom.getMessages().get(0);
+        assert(chatRoom.getMessages().size() == 1);
+        assert(userMessage.getIsDeleted() == true);
+    }
+
+    @Test
+    public void deleteMessage_givenValidDataOwnerOfMessage_deletesMessageFromList() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
+        UUID currentUserId = UUID.randomUUID();
+        chatRoom.inviteMember(currentUserId, ownerId);
+        chatRoom.postMessage(currentUserId, "Test message");
+        UUID messageId = chatRoom.getMessages().get(0).getId();
+
+        chatRoom.deleteMessage(currentUserId, messageId);
 
         UserMessage userMessage = (UserMessage) chatRoom.getMessages().get(0);
         assert(chatRoom.getMessages().size() == 1);
@@ -66,11 +79,10 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
-        String text = "Test message";
-        chatRoom.postMessage(ownerId, text);
-        UUID messegeId = chatRoom.getMessages().get(0).getId();
+        chatRoom.postMessage(ownerId, "Test message");
+        UUID messageId = chatRoom.getMessages().get(0).getId();
 
-        chatRoom.deleteMessage(currentUserId, messegeId);
+        chatRoom.deleteMessage(currentUserId, messageId);
 
         assert(chatRoom.getMessages().size() == 1);
     }
@@ -80,11 +92,10 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
-        String text = "Test message";
-        chatRoom.postMessage(ownerId, text);
-        UUID messegeId = UUID.randomUUID();
+        chatRoom.postMessage(ownerId, "Test message");
+        UUID messageId = UUID.randomUUID();
 
-        chatRoom.deleteMessage(currentUserId, messegeId);
+        chatRoom.deleteMessage(currentUserId, messageId);
 
         assert(chatRoom.getMessages().size() == 1);
     }
@@ -118,7 +129,7 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.invateMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, currentUserId);
 
         assert(chatRoom.getMemberIds().contains(newMember));
         assert(chatRoom.getMemberIds().size() == 2);
@@ -131,7 +142,7 @@ public class ChatRoomTests {
         UUID currentUserId = UUID.randomUUID();
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.invateMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, currentUserId);
 
         assert(chatRoom.getMemberIds().size() == 1);
     }
@@ -142,9 +153,9 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
-        chatRoom.invateMember(newMember, ownerId);
+        chatRoom.inviteMember(newMember, ownerId);
 
-        chatRoom.invateMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, currentUserId);
 
         assert(chatRoom.getMemberIds().size() == 2);
     }
@@ -155,7 +166,7 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID memberToRemove = UUID.randomUUID();
-        chatRoom.invateMember(memberToRemove, ownerId);
+        chatRoom.inviteMember(memberToRemove, ownerId);
 
         chatRoom.removeMember(memberToRemove, currentUserId);
 
@@ -168,7 +179,7 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
         UUID memberToRmove = UUID.randomUUID();
-        chatRoom.invateMember(memberToRmove, ownerId);
+        chatRoom.inviteMember(memberToRmove, ownerId);
 
         chatRoom.removeMember(memberToRmove, currentUserId);
 
