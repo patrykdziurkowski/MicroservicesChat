@@ -1,4 +1,4 @@
-package com.patrykdziurkowski.microserviceschat.infrastructure;
+package com.patrykdziurkowski.microserviceschat.application;
 
 import java.util.List;
 import java.util.Optional;

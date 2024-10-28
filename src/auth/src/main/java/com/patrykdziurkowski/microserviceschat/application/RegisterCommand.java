@@ -4,7 +4,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.patrykdziurkowski.microserviceschat.domain.User;
-import com.patrykdziurkowski.microserviceschat.infrastructure.UserRepository;
 
 @Service
 public class RegisterCommand {

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
+import com.patrykdziurkowski.microserviceschat.application.UserRepository;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 
 import jakarta.persistence.EntityManager;
