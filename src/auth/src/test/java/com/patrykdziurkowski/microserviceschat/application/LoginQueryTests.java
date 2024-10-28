@@ -1,12 +1,8 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +18,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.patrykdziurkowski.microserviceschat.domain.User;
-import com.patrykdziurkowski.microserviceschat.infrastructure.UserRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 
 @SpringBootTest
@@ -33,13 +26,11 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 @ContextConfiguration(classes = AuthApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-class RegisterCommandTests {
+class LoginQueryTests {
+    @Autowired
+    private LoginQuery loginQuery;
     @Autowired
     private RegisterCommand registerCommand;
-    @Autowired
-    private UserRepositoryImpl userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @SuppressWarnings("resource")
     @Container
@@ -54,39 +45,36 @@ class RegisterCommandTests {
 
     @Test
     void registerCommand_shouldLoad() {
-        assertNotNull(registerCommand);
+        assertNotNull(loginQuery);
     }
 
     @Test
-    void execute_shouldCreateNewUser_ifNotExists() {
-        boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
-
-        assertTrue(isSuccess);
-        List<User> users = userRepository.get();
-        assertEquals(1, users.size());
-    }
-
-    @Test
-    void execute_shouldNotCreateNewUser_ifExists() {
-        User firstUser = new User("userName123", "someOtherPwd123@");
-        userRepository.save(firstUser);
-
-        boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
+    void execute_givenNonExistentUser_returnsFalse() {
+        boolean isSuccess = loginQuery.execute("fakeUser", "password123");
 
         assertFalse(isSuccess);
-        List<User> users = userRepository.get();
-        assertEquals(1, users.size());
     }
 
     @Test
-    void execute_shouldHashUserPassword_whenRegistered() {
-        boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
+    void execute_givenExistingUserWithWrongPassword_returnsFalse() {
+        boolean registrationIsSuccessful = registerCommand
+                .execute("existingUser", "differentPasswordHash");
 
-        List<User> users = userRepository.get();
-        User createdUser = users.get(0);
-        assertTrue(isSuccess);
-        assertEquals(1, users.size());
-        assertNotEquals("rawPassword", createdUser.getPasswordHash());
-        assertTrue(passwordEncoder.matches("rawPassword", createdUser.getPasswordHash()));
+        boolean isSuccess = loginQuery.execute("existingUser", "wrongPasswordHash");
+
+        assertTrue(registrationIsSuccessful);
+        assertFalse(isSuccess);
+    }
+
+    @Test
+    void execute_givenExistingUserWithCorrectPassword_returnsTrue() {
+        boolean isRegisterSuccess = registerCommand
+                .execute("existingUser", "correctPasswordHash");
+
+        boolean isLoginSuccess = loginQuery
+                .execute("existingUser", "correctPasswordHash");
+
+        assertTrue(isRegisterSuccess);
+        assertTrue(isLoginSuccess);
     }
 }

@@ -117,7 +117,7 @@ class UserRepositoryImplTests {
         Optional<User> result = userRepository.getByUserName("existingUser");
 
         assertTrue(result.isPresent());
-        assertTrue(user.login(user.getUserName(), "password1"));
+        assertEquals("existingUser", result.get().getUserName());
     }
 
     @Test
@@ -128,7 +128,6 @@ class UserRepositoryImplTests {
 
         User createdUser = userRepository.getById(user.getId()).get();
         assertEquals("userName123", createdUser.getUserName());
-        assertTrue(createdUser.login(user.getUserName(), "p@ssword"));
     }
 
     @Test
