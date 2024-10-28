@@ -24,10 +24,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Persistence;
-import jakarta.transaction.Transactional;
-
 @DataJpaTest
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)

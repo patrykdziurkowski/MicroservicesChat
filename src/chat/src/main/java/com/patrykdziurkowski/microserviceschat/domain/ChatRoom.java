@@ -1,18 +1,15 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
-import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
