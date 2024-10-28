@@ -5,6 +5,11 @@ import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "userMessage")
 public class UserMessage extends Message {
     private UUID ownerId;
 

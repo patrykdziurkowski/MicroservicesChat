@@ -19,7 +19,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
@@ -34,12 +33,11 @@ public class ChatRoom extends AggreggateRoot {
     private String name;
     private boolean isPublic;
 
-    // @ElementCollection
-    // @CollectionTable(name = "memberIds", joinColumns = @JoinColumn(name = "chatRoomId"))
-    // @Column(name = "id")
+    @ElementCollection
+    @CollectionTable(name = "memberIds", joinColumns = @JoinColumn(name = "chatRoomId"))
+    @Column(name = "id")
     private List<UUID> memberIds = new ArrayList<UUID>();
 
-    // @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "chatRoom")
     private List<UUID> messageIds = new ArrayList<UUID>();
 
     private int totalMessageCount;

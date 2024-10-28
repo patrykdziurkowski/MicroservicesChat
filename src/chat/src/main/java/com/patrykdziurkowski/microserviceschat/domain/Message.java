@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 
-@Entity(name = "message")
+@MappedSuperclass
 public class Message extends AggreggateRoot {
     @Id
     protected UUID id;
