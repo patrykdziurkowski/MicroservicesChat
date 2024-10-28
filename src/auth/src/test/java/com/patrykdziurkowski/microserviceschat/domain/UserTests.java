@@ -6,16 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class UserTests {
+class UserTests {
     @Test
-    public void constructor_shouldInitializeFields_whenGivenValidData() {
+    void constructor_shouldInitializeFields_whenGivenValidData() {
         User user = new User("username", "password");
 
         assertEquals(user.getUserName(), "username");
     }
 
     @Test
-    public void login_shouldReturnFalse_whenGivenMatchingUserNameButNotPassword() {
+    void login_shouldReturnFalse_whenGivenMatchingUserNameButNotPassword() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("username", "password123");
@@ -24,7 +24,7 @@ public class UserTests {
     }
 
     @Test
-    public void login_shouldReturnFalse_whenGivenMatchingPasswordButNotUserName() {
+    void login_shouldReturnFalse_whenGivenMatchingPasswordButNotUserName() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("username1", "password");
@@ -33,7 +33,7 @@ public class UserTests {
     }
 
     @Test
-    public void login_shouldReturnFalse_whenGivenNonMatchingUserNamePassword() {
+    void login_shouldReturnFalse_whenGivenNonMatchingUserNamePassword() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("username1", "3password");
@@ -42,7 +42,7 @@ public class UserTests {
     }
 
     @Test
-    public void login_shouldReturnFalse_whenGivenEmptyUserName() {
+    void login_shouldReturnFalse_whenGivenEmptyUserName() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("", "3password");
@@ -51,7 +51,7 @@ public class UserTests {
     }
 
     @Test
-    public void login_shouldReturnFalse_whenGivenEmptyPassword() {
+    void login_shouldReturnFalse_whenGivenEmptyPassword() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("username", "");
@@ -60,7 +60,7 @@ public class UserTests {
     }
 
     @Test
-    public void login_shouldReturnTrue_whenGivenMatchingUserNamePassword() {
+    void login_shouldReturnTrue_whenGivenMatchingUserNamePassword() {
         User user = new User("username", "password");
 
         boolean isLoggedIn = user.login("username", "password");

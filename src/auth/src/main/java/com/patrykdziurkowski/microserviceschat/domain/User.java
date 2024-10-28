@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -27,7 +28,8 @@ public class User {
     }
 
     public boolean login(String userName, String passwordHash) {
-        return this.userName == userName && this.passwordHash == passwordHash;
+        return Objects.equals(this.userName, userName)
+                && Objects.equals(this.passwordHash, passwordHash);
     }
 
     public UUID getId() {
