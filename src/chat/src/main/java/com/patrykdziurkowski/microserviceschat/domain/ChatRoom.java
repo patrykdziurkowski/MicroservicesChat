@@ -11,16 +11,41 @@ import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDelete
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
+
+@Entity
+@Table(name = "chatroom")
 public class ChatRoom extends AggreggateRoot {
+
+    @Id
     private UUID id;
+
     private UUID ownerId;
     private String name;
     private boolean isPublic;
+
+    // @ElementCollection
+    // @CollectionTable(name = "memberIds", joinColumns = @JoinColumn(name = "chatRoomId"))
+    // @Column(name = "id")
     private List<UUID> memberIds = new ArrayList<UUID>();
-    private List<Message> messages = new ArrayList<Message>();
+
+    // @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "chatRoom")
+    private List<UUID> messageIds = new ArrayList<UUID>();
+
     private int totalMessageCount;
+
     @Nullable
+    @Basic(optional = true)
     private String passwordHash;
 
     ChatRoom() {
@@ -37,7 +62,8 @@ public class ChatRoom extends AggreggateRoot {
         this.isPublic = isPublic;
         this.passwordHash = passwordHash;
         this.memberIds = new ArrayList<UUID>();
-        this.messages = new ArrayList<Message>();
+        this.messageIds = new ArrayList<UUID>();
+        this.totalMessageCount = 0;
         memberIds.add(ownerId);
     }
 
@@ -103,7 +129,7 @@ public class ChatRoom extends AggreggateRoot {
             return false;
         }
         memberIds.remove(memberIds.indexOf(currentUserId));
-        if (memberIds.size() == 0) {
+        if (memberIds.isEmpty()) {
             raiseDomainEvent(new ChatDissolvedEvent(id));
             return true;
         }
@@ -111,39 +137,6 @@ public class ChatRoom extends AggreggateRoot {
             ownerId = memberIds.get(0);
         }
         return true;
-    }
-
-    public boolean postMessage(UUID currentUserId, String text) {
-        return postMessage(currentUserId, text, LocalDateTime.now());
-    }
-
-    public boolean postMessage(UUID currentUserId, String text, LocalDateTime datePosted) {
-        if (memberIds.contains(currentUserId) == false) {
-            return false;
-        }
-        totalMessageCount++;
-        messages.add(new UserMessage(text, currentUserId, datePosted));
-        return true;
-    }
-
-    public boolean deleteMessage(UUID currentUserId, UUID messageId) {
-        for (Message message : messages) {
-            if (message instanceof UserMessage == false) {
-                continue;
-            }
-            UserMessage userMessage = (UserMessage) message;
-            if (userMessage.getId().equals(messageId) == false) {
-                continue;
-            }
-            boolean hasDeletePermissions = currentUserId == ownerId || currentUserId.equals(userMessage.getOwnerId());
-            if (hasDeletePermissions == false) {
-                return false;
-            }
-            totalMessageCount--;
-            raiseDomainEvent(new MessageDeletedEvent(messageId));
-            return true;
-        }
-        return false;
     }
 
     public UUID getId() {
@@ -166,8 +159,8 @@ public class ChatRoom extends AggreggateRoot {
         return memberIds;
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    public List<UUID> getMessageIds() {
+        return messageIds;
     }
 
     public int getTotalMessageCount() {

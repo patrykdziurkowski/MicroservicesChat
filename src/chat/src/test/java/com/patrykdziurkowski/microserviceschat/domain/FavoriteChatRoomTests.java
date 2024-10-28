@@ -11,7 +11,7 @@ import com.patrykdziurkowski.microserviceschat.domain.shared.DomainEvent;
 
 public class FavoriteChatRoomTests {
     @Test
-    public void unsetFavorite_givenValidData_changesIsFlaggedForDeletionToTrue() {
+    void unsetFavorite_givenValidData_changesIsFlaggedForDeletionToTrue() {
         UUID chatRoomId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         FavoriteChatRoom favoriteChatRoom = new FavoriteChatRoom(chatRoomId, ownerId);
@@ -24,7 +24,7 @@ public class FavoriteChatRoomTests {
     }
 
     @Test
-    public void unsetFavorite_givenInvalidData_doesNotChangeIsFlaggedForDeletion() {
+    void unsetFavorite_givenInvalidData_doesNotChangeIsFlaggedForDeletion() {
         UUID chatRoomId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         FavoriteChatRoom favoriteChatRoom = new FavoriteChatRoom(chatRoomId, ownerId);
