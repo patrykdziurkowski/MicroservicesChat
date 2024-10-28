@@ -29,7 +29,7 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 @ContextConfiguration(classes = AuthApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class UserRepositoryImplTests {
+class UserRepositoryImplTests {
     @Autowired
     private UserRepositoryImpl userRepository;
 
@@ -45,19 +45,19 @@ public class UserRepositoryImplTests {
             .withPassword("examplePassword123");
 
     @Test
-    public void repository_shouldLoad() {
+    void repository_shouldLoad() {
         assertNotNull(userRepository);
     }
 
     @Test
-    public void get_shouldReturnEmpty_whenNoUsers() {
+    void get_shouldReturnEmpty_whenNoUsers() {
         List<User> users = userRepository.get();
 
         assertEquals(0, users.size());
     }
 
     @Test
-    public void get_shouldReturnUser_whenSingleUserExists() {
+    void get_shouldReturnUser_whenSingleUserExists() {
         User user = new User("userName", "password");
         userRepository.save(user);
 
@@ -67,7 +67,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void get_shouldReturnThreeUsers_whenGivenThreeUsers() {
+    void get_shouldReturnThreeUsers_whenGivenThreeUsers() {
         List<User> users = new ArrayList<>();
         users.add(new User("userName1", "password"));
         users.add(new User("userName2", "password"));
@@ -80,9 +80,9 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void getById_shouldReturnEmpty_whenNoMatchingUserExists() {
+    void getById_shouldReturnEmpty_whenNoMatchingUserExists() {
         User user = new User("userName123", "password");
-        // Not saving the user: userRepository.save(user);
+        // Not saving the user
 
         Optional<User> result = userRepository.getById(user.getId());
 
@@ -90,7 +90,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void getById_shouldReturnExistingUser_whenMatchingUserExists() {
+    void getById_shouldReturnExistingUser_whenMatchingUserExists() {
         User user = new User("userName123", "password");
         userRepository.save(user);
 
@@ -103,14 +103,14 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void getByUserName_shouldReturnEmpty_whenNoUserWithMatchingName() {
+    void getByUserName_shouldReturnEmpty_whenNoUserWithMatchingName() {
         Optional<User> result = userRepository.getByUserName("nonExistantName");
 
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void getByUserName_shouldReturnUserWithMatchingName_ifExists() {
+    void getByUserName_shouldReturnUserWithMatchingName_ifExists() {
         User user = new User("existingUser", "password1");
         userRepository.save(user);
 
@@ -121,7 +121,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void save_shouldSaveNewEntity_whenNewUserSaved() {
+    void save_shouldSaveNewEntity_whenNewUserSaved() {
         User user = new User("userName123", "p@ssword");
 
         userRepository.save(user);
@@ -132,7 +132,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void save_shouldThrow_whenDuplicateNames() {
+    void save_shouldThrow_whenDuplicateNames() {
         User user1 = new User("userName123", "p@ssword");
         User user2 = new User("userName123", "p@ssword2");
 
@@ -141,7 +141,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void save_shouldNotDuplicateUser_whenSavedTwice() {
+    void save_shouldNotDuplicateUser_whenSavedTwice() {
         User user = new User("userName123", "p@ssword");
         List<User> users = new ArrayList<>();
         users.add(user);
@@ -154,7 +154,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void save_shouldUpdateUser_whenUserNameChanged() {
+    void save_shouldUpdateUser_whenUserNameChanged() {
         User user = new User("oldUserName", "p@ssword");
         userRepository.save(user);
         Optional<User> saveResult = userRepository.getByUserName("oldUserName");
@@ -168,7 +168,7 @@ public class UserRepositoryImplTests {
     }
 
     @Test
-    public void save_shouldUpdateMultipleUsers_whenUserNamesChanged() {
+    void save_shouldUpdateMultipleUsers_whenUserNamesChanged() {
         List<User> users = new ArrayList<>();
         users.add(new User("oldUserName1", "p@ssword"));
         users.add(new User("oldUserName2", "p@ssword"));
