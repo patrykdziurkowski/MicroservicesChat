@@ -29,9 +29,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 @ContextConfiguration(classes = AuthApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class UserRepositoryTests {
+public class UserRepositoryImplTests {
     @Autowired
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepository;
 
     @SuppressWarnings("resource")
     @Container
