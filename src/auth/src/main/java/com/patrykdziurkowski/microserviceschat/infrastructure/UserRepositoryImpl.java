@@ -31,10 +31,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> getById(UUID id) {
         User user = entityManager.find(User.class, id);
-        if (user == null) {
-            return Optional.empty();
-        }
-        return Optional.of(user);
+        return Optional.ofNullable(user);
     }
 
     @Override
