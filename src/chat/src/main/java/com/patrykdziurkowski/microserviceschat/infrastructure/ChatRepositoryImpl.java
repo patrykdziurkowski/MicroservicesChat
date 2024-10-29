@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
+import com.patrykdziurkowski.microserviceschat.application.ChatRepository;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.Message;
@@ -17,7 +18,7 @@ import jakarta.transaction.Transactional;
 
 @Repository
 @Transactional
-public class ChatRepository {
+public class ChatRepositoryImpl implements ChatRepository{
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -27,8 +28,8 @@ public class ChatRepository {
             .getResultList();
     }
 
-    public Optional<ChatRoom> getById(UUID id) {
-        return Optional.ofNullable(entityManager.find(ChatRoom.class, id));
+    public Optional<ChatRoom> getById(UUID chatId) {
+        return Optional.ofNullable(entityManager.find(ChatRoom.class, chatId));
     }
 
     public List<ChatRoom> getByMemberId(UUID memberId) {

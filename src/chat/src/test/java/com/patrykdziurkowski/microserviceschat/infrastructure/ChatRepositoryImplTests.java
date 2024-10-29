@@ -30,13 +30,13 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-class ChatRepositoryTests {
+class ChatRepositoryImplTests {
     @Autowired
-    private ChatRepository chatRepository;
+    private ChatRepositoryImpl chatRepository;
     @Autowired
-    private UserMessageRepository messageRepository;
+    private UserMessageRepositoryImpl messageRepository;
     @Autowired
-    private FavoriteChatRepository favoriteChatRepository;
+    private FavoriteChatRepositoryImpl favoriteChatRepository;
 
     @SuppressWarnings("resource")
     @Container
