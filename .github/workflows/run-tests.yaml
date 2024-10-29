@@ -11,13 +11,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - run: echo "Installing Maven."
       - name: Install Maven
         run: sudo apt-get update && sudo apt-get install -y maven
 
-      - run: echo "Running tests for auth module."
-      - name: Run the Maven verify phase
+      - name: Running tests for auth module.
         run: mvn -f src/auth/pom.xml --batch-mode --update-snapshots verify
-      - run: echo "Running tests for chat module."
-      - name: Run the Maven verify phase
+        env:
+          MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+      - name: Running tests for chat module.
         run: mvn -f src/chat/pom.xml --batch-mode --update-snapshots verify
+        env:
+          MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
