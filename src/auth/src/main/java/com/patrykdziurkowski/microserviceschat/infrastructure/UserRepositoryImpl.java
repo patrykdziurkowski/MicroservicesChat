@@ -67,9 +67,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private boolean userExists(User user) {
-        if (getById(user.getId()).isPresent()) {
-            return true;
-        }
-        return false;
+        return getById(user.getId()).isPresent();
     }
 }
