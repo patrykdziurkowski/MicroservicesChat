@@ -10,6 +10,7 @@ Define in a `.env` file located in project's root:
 ### To run the project remotely on Azure Container Instances
 Additionally, GitHub Actions Secrets defines the following:
 * `MSSQL_SA_PASSWORD` - used in Docker Compose to set the password of the database's admin account.
+* `JWT_SECRET` - a 256-bit secret key used to generate JWT keys.
 * `REGISTRY_PATH` - the address of your container registry (i.e. `example.azurecr.io`). Must not end with a `/` or contain protocol elements such as `http://` etc.
 * `REGISTRY_USERNAME` - your Azure Container Registry username.
 * `REGISTRY_PASSWORD` - your Azure Container Registry password.
