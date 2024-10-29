@@ -22,6 +22,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
 @DataJpaTest
@@ -31,6 +33,10 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 class ChatRepositoryTests {
     @Autowired
     private ChatRepository chatRepository;
+    @Autowired
+    private UserMessageRepository messageRepository;
+    @Autowired
+    private FavoriteChatRepository favoriteChatRepository;
 
     @SuppressWarnings("resource")
     @Container
@@ -75,7 +81,7 @@ class ChatRepositoryTests {
         chat.join(memberId);
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId).get();
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
 
         assertTrue(chats.contains(chat));
     }
@@ -87,7 +93,7 @@ class ChatRepositoryTests {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId).get();
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
 
         assertTrue(chats.contains(chat));
     }
@@ -99,7 +105,7 @@ class ChatRepositoryTests {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId).get();
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
 
         assertTrue(chats.contains(chat) == false);
     }
@@ -112,7 +118,7 @@ class ChatRepositoryTests {
         chat.join(memberId);
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId).get();
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
 
         assertTrue(chats.contains(chat));
     }
@@ -163,5 +169,125 @@ class ChatRepositoryTests {
         assertFalse(chats.isEmpty());
         assertTrue(chats.size() == 1);
     }
+
+    @Test
+    void save_shouldDeleteChat_whenChatDissolved() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        chatRepository.save(chat);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        assertTrue(chats.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndMessages_whenChatDissolved() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        UserMessage userMsg = new UserMessage(chat.getId(), "test", UUID.randomUUID());
+        chatRepository.save(chat);
+        messageRepository.save(userMsg);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.get();
+        assertTrue(chats.isEmpty());
+        assertTrue(msgs.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndNotMessages_whenChatDissolvedAndMessagesInAnotherChat() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        UserMessage userMsg = new UserMessage(UUID.randomUUID(), "test", UUID.randomUUID());
+        chatRepository.save(chat);
+        messageRepository.save(userMsg);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.get();
+        assertTrue(chats.isEmpty());
+        assertFalse(msgs.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndFavoriteChats_whenChatDissolved() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        FavoriteChatRoom favChat = new FavoriteChatRoom(chat.getId(),ownerId);
+        chatRepository.save(chat);
+        favoriteChatRepository.save(favChat);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<FavoriteChatRoom> favChats = favoriteChatRepository.get();
+        assertTrue(chats.isEmpty());
+        assertTrue(favChats.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndNotFavoriteChats_whenChatDissolvedAndFavoritedAnotherChats() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        FavoriteChatRoom favChat = new FavoriteChatRoom(UUID.randomUUID(),ownerId);
+        chatRepository.save(chat);
+        favoriteChatRepository.save(favChat);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<FavoriteChatRoom> favChats = favoriteChatRepository.get();
+        assertTrue(chats.isEmpty());
+        assertFalse(favChats.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndMembers_whenChatDissolved() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        chat.join(UUID.randomUUID());
+        chat.join(UUID.randomUUID());
+        chat.join(UUID.randomUUID());
+        chatRepository.save(chat);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UUID> memberIds = chatRepository.getMembers(chat.getId());
+        assertTrue(chats.isEmpty());
+        assertTrue(memberIds.isEmpty());
+    }
+
+    @Test
+    void save_shouldDeleteChatAndNotMembers_whenChatDissolvedAndMembersInDiffrentChat() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
+        ChatRoom diffChat = new ChatRoom(ownerId, "Chat", false);
+        diffChat.join(UUID.randomUUID());
+        diffChat.join(UUID.randomUUID());
+        diffChat.join(UUID.randomUUID());
+        chatRepository.save(chat);
+        chatRepository.save(diffChat);
+
+        chat.dissolve(ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UUID> memberIds = chatRepository.getMembers(diffChat.getId());
+        assertTrue(chats.size() == 1);
+        assertFalse(memberIds.isEmpty());
+    }
+
 
 }

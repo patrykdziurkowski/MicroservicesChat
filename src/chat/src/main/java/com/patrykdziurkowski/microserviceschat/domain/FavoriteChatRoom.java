@@ -5,7 +5,12 @@ import java.util.UUID;
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.FavoriteUnsetEvent;
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class FavoriteChatRoom extends AggreggateRoot {
+    @Id
     private UUID id;
     private UUID chatRoomId;
     private UUID userId;
@@ -23,7 +28,7 @@ public class FavoriteChatRoom extends AggreggateRoot {
         if (currentUserId != userId) {
             return false;
         }
-        raiseDomainEvent(new FavoriteUnsetEvent(id));
+        raiseDomainEvent(new FavoriteUnsetEvent());
         return true;
     }
 

@@ -56,7 +56,7 @@ public class UserMessageRepositoryTests {
 
         userMessageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.get().get();
+        List<UserMessage> userMessages = userMessageRepository.get();
         assertEquals(1, userMessages.size());
     }
 
@@ -67,13 +67,13 @@ public class UserMessageRepositoryTests {
         userMessageRepository.save(msg);
         userMessageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.get().get();
+        List<UserMessage> userMessages = userMessageRepository.get();
         assertEquals(1, userMessages.size());
     }
 
     @Test
     void get_shouldReturnEmpty_whenNoMessagesInDatabase() {
-        List<UserMessage> userMessages = userMessageRepository.get().get();
+        List<UserMessage> userMessages = userMessageRepository.get();
 
         assertTrue(userMessages.isEmpty());
     }
@@ -83,7 +83,7 @@ public class UserMessageRepositoryTests {
         UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
         userMessageRepository.save(msg);
         
-        List<UserMessage> userMessages = userMessageRepository.get().get();
+        List<UserMessage> userMessages = userMessageRepository.get();
 
         assertEquals(1,userMessages.size());
     }
@@ -115,7 +115,7 @@ public class UserMessageRepositoryTests {
         UserMessage msg = new UserMessage(UUID.randomUUID(), "text", msgOwnerId);
         userMessageRepository.save(msg);
 
-        UserMessage returnedMsg = userMessageRepository.getByOwnerId(msgOwnerId).get().get(0);
+        UserMessage returnedMsg = userMessageRepository.getByOwnerId(msgOwnerId).get(0);
 
         assertEquals(msg,returnedMsg);
     }
@@ -126,9 +126,9 @@ public class UserMessageRepositoryTests {
         UserMessage msg = new UserMessage(UUID.randomUUID(), "text", msgOwnerId);
         userMessageRepository.save(msg);
 
-        Optional<List<UserMessage>> returnedMsgs = userMessageRepository.getByOwnerId(UUID.randomUUID());
+        List<UserMessage> returnedMsgs = userMessageRepository.getByOwnerId(UUID.randomUUID());
 
-        assertFalse(returnedMsgs.get().size() > 0);
+        assertFalse(returnedMsgs.size() > 0);
     }
 
     @Test

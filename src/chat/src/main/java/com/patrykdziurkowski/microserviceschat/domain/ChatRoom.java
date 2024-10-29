@@ -66,7 +66,7 @@ public class ChatRoom extends AggreggateRoot {
         if (currentUserId != ownerId) {
             return false;
         }
-        raiseDomainEvent(new ChatDissolvedEvent(id));
+        raiseDomainEvent(new ChatDissolvedEvent());
         return true;
     }
 
@@ -125,7 +125,7 @@ public class ChatRoom extends AggreggateRoot {
         }
         memberIds.remove(memberIds.indexOf(currentUserId));
         if (memberIds.isEmpty()) {
-            raiseDomainEvent(new ChatDissolvedEvent(id));
+            raiseDomainEvent(new ChatDissolvedEvent());
             return true;
         }
         if (currentUserId == ownerId) {

@@ -30,7 +30,7 @@ public class UserMessage extends Message {
         if (hasDeletePermissions == false) {
             return false;
         }
-        raiseDomainEvent(new MessageDeletedEvent(id));
+        raiseDomainEvent(new MessageDeletedEvent());
         return true;
     }
     
