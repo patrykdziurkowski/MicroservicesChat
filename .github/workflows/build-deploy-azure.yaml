@@ -30,12 +30,14 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - run: az acr login --name ${{ secrets.REGISTRY_PATH }}
+      - name: Login to Azure Container Registry
+        run: az acr login --name ${{ secrets.REGISTRY_PATH }}
 
       - name: Build Docker Image
         run: docker compose build --no-cache
         env:
           REGISTRY_PATH: ${{ secrets.REGISTRY_PATH }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
           CHAT_DOMAIN: ${{ secrets.DNS_NAME_LABEL }}.${{ secrets.AZURE_LOCATION }}.azurecontainer.io
           CHAT_MODULE_ADDRESS: http://localhost:8080
@@ -44,6 +46,7 @@ jobs:
         run: docker compose push
         env:
           REGISTRY_PATH: ${{ secrets.REGISTRY_PATH }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
 
       - name: Deploy to Azure Container Instances   

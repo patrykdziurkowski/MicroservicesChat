@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +25,11 @@ import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
 
 @WebMvcTest(UserController.class)
+@TestPropertySource(properties = {
+        "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
+})
 @Import(WebSecurityConfig.class)
-@ContextConfiguration(classes = UserController.class)
+@ContextConfiguration(classes = { UserController.class, JwtTokenManager.class })
 class UserControllerTests {
     @Autowired
     private MockMvc mockMvc;
@@ -92,4 +98,43 @@ class UserControllerTests {
                 .andExpect(status().isCreated());
     }
 
+    @Test
+    void login_shouldReturnBadRequest_whenInputInvalid() throws Exception {
+        UserModel userModel = new UserModel("bad UserName", "P@ssword1!");
+        String userData = objectMapper.writeValueAsString(userModel);
+
+        mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userData)
+                .with(csrf()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void login_shouldReturnNotFound_whenLoginFails() throws Exception {
+        when(loginQuery.execute("existingUser", "P@ssword1!")).thenReturn(false);
+        UserModel userModel = new UserModel("existingUser", "P@ssword1!");
+        String userData = objectMapper.writeValueAsString(userModel);
+
+        mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userData)
+                .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void login_shouldReturnOkAndToken_whenLoginSucceeds() throws Exception {
+        when(loginQuery.execute("existingUser", "P@ssword1!")).thenReturn(true);
+        UserModel userModel = new UserModel("existingUser", "P@ssword1!");
+        String userData = objectMapper.writeValueAsString(userModel);
+
+        mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userData)
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
 }

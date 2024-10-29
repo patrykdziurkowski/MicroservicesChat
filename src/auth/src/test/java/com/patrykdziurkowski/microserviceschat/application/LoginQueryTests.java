@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -24,6 +25,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 @Rollback
 @Transactional
 @ContextConfiguration(classes = AuthApplication.class)
+@TestPropertySource(properties = {
+        "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
+})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
 class LoginQueryTests {
