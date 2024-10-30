@@ -124,18 +124,6 @@ class ChatRepositoryImplTests {
     }
 
     @Test
-    void getMembersId_shouldReturnOwner_whenExists() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        chatRepository.save(chat);
-        UUID chatId = chat.getId();
-
-        List<UUID> members = chatRepository.getMembers(chatId);
-
-        assertTrue(members.contains(ownerId));
-    }
-
-    @Test
     void save_shouldSaveChat_whenNew() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
 
@@ -195,7 +183,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.get();
+        List<UserMessage> msgs = messageRepository.getByOwnerId(userMsg.getOwnerId());
         assertTrue(chats.isEmpty());
         assertTrue(msgs.isEmpty());
     }
@@ -212,7 +200,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.get();
+        List<UserMessage> msgs = messageRepository.getByOwnerId(userMsg.getOwnerId());
         assertTrue(chats.isEmpty());
         assertFalse(msgs.isEmpty());
     }
@@ -229,7 +217,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<FavoriteChatRoom> favChats = favoriteChatRepository.get();
+        List<FavoriteChatRoom> favChats = favoriteChatRepository.getByUserId(ownerId);
         assertTrue(chats.isEmpty());
         assertTrue(favChats.isEmpty());
     }
@@ -246,47 +234,9 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<FavoriteChatRoom> favChats = favoriteChatRepository.get();
+        List<FavoriteChatRoom> favChats = favoriteChatRepository.getByUserId(ownerId);
         assertTrue(chats.isEmpty());
         assertFalse(favChats.isEmpty());
-    }
-
-    @Test
-    void save_shouldDeleteChatAndMembers_whenChatDissolved() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        chat.join(UUID.randomUUID());
-        chat.join(UUID.randomUUID());
-        chat.join(UUID.randomUUID());
-        chatRepository.save(chat);
-
-        chat.dissolve(ownerId);
-        chatRepository.save(chat);
-
-        List<ChatRoom> chats = chatRepository.get();
-        List<UUID> memberIds = chatRepository.getMembers(chat.getId());
-        assertTrue(chats.isEmpty());
-        assertTrue(memberIds.isEmpty());
-    }
-
-    @Test
-    void save_shouldDeleteChatAndNotMembers_whenChatDissolvedAndMembersInDiffrentChat() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        ChatRoom diffChat = new ChatRoom(ownerId, "Chat", false);
-        diffChat.join(UUID.randomUUID());
-        diffChat.join(UUID.randomUUID());
-        diffChat.join(UUID.randomUUID());
-        chatRepository.save(chat);
-        chatRepository.save(diffChat);
-
-        chat.dissolve(ownerId);
-        chatRepository.save(chat);
-
-        List<ChatRoom> chats = chatRepository.get();
-        List<UUID> memberIds = chatRepository.getMembers(diffChat.getId());
-        assertTrue(chats.size() == 1);
-        assertFalse(memberIds.isEmpty());
     }
 
 

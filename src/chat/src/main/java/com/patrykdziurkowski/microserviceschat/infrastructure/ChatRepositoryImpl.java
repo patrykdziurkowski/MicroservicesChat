@@ -40,14 +40,6 @@ public class ChatRepositoryImpl implements ChatRepository{
             .getResultList();
     }
 
-    public List<UUID> getMembers(UUID chatId) {
-        final String query = "SELECT m FROM ChatRoom c JOIN c.memberIds m WHERE c.id = :chatId";
-        return entityManager
-            .createQuery(query, UUID.class)
-            .setParameter("chatId", chatId)
-            .getResultList();
-    }
-
     public void save(ChatRoom chatRoom) {
         final boolean chatExists = chatExists(chatRoom.getId());
         if(chatExists) {
@@ -66,17 +58,17 @@ public class ChatRepositoryImpl implements ChatRepository{
 
     private void removeChat(ChatRoom chatRoom) {
         List<Message> messagesInChat = getMessagesInChat(chatRoom.getId());
-            if(messagesInChat.isEmpty() == false) {
-                for(Message message : messagesInChat) {
-                    entityManager.remove(message);
-                }
+        if(messagesInChat.isEmpty() == false) {
+            for(Message message : messagesInChat) {
+                entityManager.remove(message);
             }
+        }
         List<FavoriteChatRoom> favorited = getFavoriteInstances(chatRoom.getId());
-            if(favorited.isEmpty() == false) {
-                for(FavoriteChatRoom chat : favorited) {
-                    entityManager.remove(chat);
-                }
+        if(favorited.isEmpty() == false) {
+            for(FavoriteChatRoom chat : favorited) {
+                entityManager.remove(chat);
             }
+        }
         entityManager.remove(chatRoom);
     }
 

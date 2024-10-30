@@ -11,7 +11,6 @@ public interface ChatRepository {
     List<ChatRoom> get();
     Optional<ChatRoom> getById(UUID chatId);
     List<ChatRoom> getByMemberId(UUID memberId);
-    List<UUID> getMembers(UUID chatId);
     void save (ChatRoom chatRoom);
 
 }
