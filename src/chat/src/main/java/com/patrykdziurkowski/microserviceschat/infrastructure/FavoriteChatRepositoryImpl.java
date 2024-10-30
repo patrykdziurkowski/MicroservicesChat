@@ -20,12 +20,6 @@ public class FavoriteChatRepositoryImpl implements FavoriteChatRepository{
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<FavoriteChatRoom> get() {
-        return entityManager
-            .createQuery("SELECT f FROM FavoriteChatRoom f", FavoriteChatRoom.class)
-            .getResultList();
-    }
-
     public Optional<FavoriteChatRoom> getById(UUID chatId) {
         return Optional.ofNullable(entityManager
             .find(FavoriteChatRoom.class, chatId));

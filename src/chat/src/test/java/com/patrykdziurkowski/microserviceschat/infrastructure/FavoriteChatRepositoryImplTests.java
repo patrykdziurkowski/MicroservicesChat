@@ -50,21 +50,10 @@ public class FavoriteChatRepositoryImplTests {
     }
 
     @Test
-    void get_shouldReturnEmpty_whenNoChatRoomInDatabase() {
-        List<FavoriteChatRoom> chats = favoriteChatRepository.get();
+    void getByUserId_shouldReturnEmpty_whenNoChatRoomInDatabase() {
+        List<FavoriteChatRoom> chats = favoriteChatRepository.getByUserId(UUID.randomUUID());
 
         assertTrue(chats.isEmpty());
-    }
-
-    @Test
-    void get_shouldReturnChat_whenFavoriteChatRoomInDatabase() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
-        favoriteChatRepository.save(chat);
-
-        List<FavoriteChatRoom> chats = favoriteChatRepository.get();
-
-        assertFalse(chats.isEmpty());
-        assertTrue(chat.getId().equals(chats.get(0).getId()));
     }
 
     @Test
