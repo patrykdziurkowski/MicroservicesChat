@@ -34,8 +34,8 @@ public class FavoriteChatRepositoryImpl implements FavoriteChatRepository{
     }
 
     public void save(FavoriteChatRoom chatRoom) {
-        final boolean chatExists = favoriteChatExists(chatRoom.getId());
-        if(chatExists) {
+        final boolean favoriteChatExists = favoriteChatExists(chatRoom.getId());
+        if(favoriteChatExists) {
             entityManager.merge(chatRoom);
         } else {
             entityManager.persist(chatRoom);
