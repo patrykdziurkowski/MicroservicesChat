@@ -41,7 +41,7 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.inviteMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().contains(newMember));
         assertTrue(chatRoom.getMemberIds().size() == 2);
@@ -54,7 +54,7 @@ public class ChatRoomTests {
         UUID currentUserId = UUID.randomUUID();
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.inviteMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
     }
@@ -65,9 +65,9 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
-        chatRoom.inviteMember(newMember, ownerId);
+        chatRoom.inviteMember(newMember, "username",  ownerId);
 
-        chatRoom.inviteMember(newMember, currentUserId);
+        chatRoom.inviteMember(newMember, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
     }
@@ -78,9 +78,9 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID memberToRemove = UUID.randomUUID();
-        chatRoom.inviteMember(memberToRemove, ownerId);
+        chatRoom.inviteMember(memberToRemove, "username",  ownerId);
 
-        chatRoom.removeMember(memberToRemove, currentUserId);
+        chatRoom.removeMember(memberToRemove, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
     }
@@ -91,9 +91,9 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
         UUID memberToRmove = UUID.randomUUID();
-        chatRoom.inviteMember(memberToRmove, ownerId);
+        chatRoom.inviteMember(memberToRmove, "username",  ownerId);
 
-        chatRoom.removeMember(memberToRmove, currentUserId);
+        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
         assertTrue(chatRoom.getMemberIds().contains(memberToRmove));
@@ -106,7 +106,7 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID memberToRmove = ownerId;
 
-        chatRoom.removeMember(memberToRmove, currentUserId);
+        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
         assertTrue(chatRoom.getMemberIds().contains(ownerId));
@@ -119,7 +119,7 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID memberToRmove = UUID.randomUUID();
 
-        chatRoom.removeMember(memberToRmove, currentUserId);
+        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
     }
@@ -132,7 +132,7 @@ public class ChatRoomTests {
         UUID currentUserId = UUID.randomUUID();
         String password = "password";
 
-        chatRoom.join(currentUserId, password);
+        chatRoom.join(currentUserId, "username",  password);
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
@@ -146,7 +146,7 @@ public class ChatRoomTests {
         UUID currentUserId = UUID.randomUUID();
         String password = "wrongPassword";
 
-        chatRoom.join(currentUserId, password);
+        chatRoom.join(currentUserId, "username",  password);
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
         assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
@@ -158,7 +158,7 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
 
-        chatRoom.join(currentUserId);
+        chatRoom.join(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
@@ -169,9 +169,9 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
-        chatRoom.join(currentUserId);
+        chatRoom.join(currentUserId, "username");
 
-        chatRoom.join(currentUserId);
+        chatRoom.join(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
@@ -182,9 +182,9 @@ public class ChatRoomTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
-        chatRoom.join(currentUserId);
+        chatRoom.join(currentUserId, "username");
 
-        chatRoom.leave(currentUserId);
+        chatRoom.leave(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
         assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
@@ -196,7 +196,7 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
 
-        chatRoom.leave(currentUserId);
+        chatRoom.leave(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
     }
@@ -207,9 +207,9 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID anotherMember = UUID.randomUUID();
-        chatRoom.join(anotherMember);
+        chatRoom.join(anotherMember, "username");
 
-        chatRoom.leave(currentUserId);
+        chatRoom.leave(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 1);
         assertTrue(!chatRoom.getMemberIds().contains(ownerId));
@@ -222,7 +222,7 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
 
-        chatRoom.leave(currentUserId);
+        chatRoom.leave(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 0);
         DomainEvent event = chatRoom.getDomainEvents().get(0);

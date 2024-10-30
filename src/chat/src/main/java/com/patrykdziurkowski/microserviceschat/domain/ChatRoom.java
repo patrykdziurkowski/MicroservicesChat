@@ -6,6 +6,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MemberInvitedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MemberJoinedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MemberLeftEvent;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MemberRemovedEvent;
 import com.patrykdziurkowski.microserviceschat.domain.shared.AggreggateRoot;
 
 import jakarta.annotation.Nullable;
@@ -70,7 +74,7 @@ public class ChatRoom extends AggreggateRoot {
         return true;
     }
 
-    public boolean inviteMember(UUID newMemberId, UUID currentUserId) {
+    public boolean inviteMember(UUID newMemberId, String newMemberUsername, UUID currentUserId) {
         if (isPublic == false && currentUserId != ownerId) {
             return false;
         }
@@ -84,27 +88,29 @@ public class ChatRoom extends AggreggateRoot {
             return false;
         }
         memberIds.add(newMemberId);
+        raiseDomainEvent(new MemberInvitedEvent(newMemberUsername));
         return true;
     }
 
-    public boolean removeMember(UUID memberId, UUID currentUserId) {
+    public boolean removeMember(UUID memberId, String memberUsername, UUID currentUserId) {
         if (currentUserId != ownerId) {
             return false;
         }
         if (currentUserId == memberId) {
             return false;
         }
-        if (memberIds.remove(memberId)) {
-            return true;
+        if (memberIds.remove(memberId) == false) {
+            return false;
         }
-        return false;
+        raiseDomainEvent(new MemberRemovedEvent(memberUsername));
+        return true;
     }
 
-    public boolean join(UUID currentUserId) {
-        return join(currentUserId, null);
+    public boolean join(UUID currentUserId, String currentUserUsername) {
+        return join(currentUserId, currentUserUsername, null);
     }
 
-    public boolean join(UUID currentUserId, String givenPasswordHash) {
+    public boolean join(UUID currentUserId, String currentUserUsername, String givenPasswordHash) {
         if (getPasswordHash().isPresent() && givenPasswordHash.isEmpty()) {
             return false;
         }
@@ -115,11 +121,12 @@ public class ChatRoom extends AggreggateRoot {
         if (memberIds.contains(currentUserId)) {
             return false;
         }
+        raiseDomainEvent(new MemberJoinedEvent(currentUserUsername));
         memberIds.add(currentUserId);
         return true;
     }
 
-    public boolean leave(UUID currentUserId) {
+    public boolean leave(UUID currentUserId, String currentUserUsername) {
         if (!memberIds.contains(currentUserId)) {
             return false;
         }
@@ -131,6 +138,7 @@ public class ChatRoom extends AggreggateRoot {
         if (currentUserId == ownerId) {
             ownerId = memberIds.get(0);
         }
+        raiseDomainEvent(new MemberLeftEvent(currentUserUsername));
         return true;
     }
 
