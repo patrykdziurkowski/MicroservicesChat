@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.patrykdziurkowski.microserviceschat.application.UserMessageRepository;
+import com.patrykdziurkowski.microserviceschat.application.MessageRepository;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
 
@@ -17,7 +17,7 @@ import jakarta.transaction.Transactional;
 
 @Repository
 @Transactional
-public class UserMessageRepositoryImpl implements UserMessageRepository{
+public class MessageRepositoryImpl implements MessageRepository{
     @PersistenceContext
     EntityManager entityManager;
 

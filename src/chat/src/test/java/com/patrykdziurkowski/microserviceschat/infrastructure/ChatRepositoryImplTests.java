@@ -34,7 +34,7 @@ class ChatRepositoryImplTests {
     @Autowired
     private ChatRepositoryImpl chatRepository;
     @Autowired
-    private UserMessageRepositoryImpl messageRepository;
+    private MessageRepositoryImpl messageRepository;
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
 

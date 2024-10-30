@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
-public interface UserMessageRepository {
+public interface MessageRepository {
 
     List<UserMessage> getByAmount(UUID chatId, int lastMessageId, int messagesToRetrieve);
     Optional<UserMessage> getById(UUID messageId);

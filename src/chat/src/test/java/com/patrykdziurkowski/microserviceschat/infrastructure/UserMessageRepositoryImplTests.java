@@ -32,7 +32,7 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 @Testcontainers
 public class UserMessageRepositoryImplTests {
     @Autowired
-    private UserMessageRepositoryImpl userMessageRepository;
+    private MessageRepositoryImpl userMessageRepository;
 
     @SuppressWarnings("resource")
     @Container
