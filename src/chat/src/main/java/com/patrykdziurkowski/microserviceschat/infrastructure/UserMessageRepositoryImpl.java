@@ -21,33 +21,16 @@ public class UserMessageRepositoryImpl implements UserMessageRepository{
     @PersistenceContext
     EntityManager entityManager;
 
-    public List<UserMessage> get() {    
-        final String query = "SELECT m FROM UserMessage m";
+    // Last Message provided by lastMessageId is skipped
+    public List<UserMessage> getByAmount(UUID chatId, int lastMessagePosition, int messagesToRetrieve) {
+        final String query = "SELECT m FROM UserMessage m WHERE " + 
+                "m.chatRoomId = :chatId ORDER BY m.datePosted";
         return entityManager
             .createQuery(query, UserMessage.class)
-            .getResultList();
-    }    
-
-    // Last Message provided by lastMessageId is skipped
-    public Optional<List<UserMessage>> getByAmount(UUID chatId, Optional<UUID> lastMessageId, int messagesToRetrive) {
-        LocalDateTime dateOfMessage = LocalDateTime.now().withYear(1);
-        if(lastMessageId.isPresent()) {
-            Optional<UserMessage> lastMessage = getById(lastMessageId.get());
-            final boolean messageDoesntExistsInChat = lastMessage.isEmpty() 
-                || lastMessage.get().getChatRoomId().equals(chatId) == false;
-            if(messageDoesntExistsInChat) {
-                return Optional.empty();
-            }
-            dateOfMessage = messageDatePostedById(lastMessageId.get()).plusNanos(1000); // Rounding issues
-        }
-        final String query = "SELECT m FROM UserMessage m WHERE " + 
-                "m.chatRoomId = :chatId AND m.datePosted > :datePosted ORDER BY m.datePosted";
-        return Optional.ofNullable(entityManager
-            .createQuery(query, UserMessage.class)
             .setParameter("chatId", chatId)
-            .setParameter("datePosted", dateOfMessage)
-            .setMaxResults(messagesToRetrive)
-            .getResultList());
+            .setFirstResult(lastMessagePosition)
+            .setMaxResults(messagesToRetrieve)
+            .getResultList();
     }
 
     public Optional<UserMessage> getById(UUID messageId) {
@@ -85,12 +68,6 @@ public class UserMessageRepositoryImpl implements UserMessageRepository{
             .createQuery(query, Long.class)
             .setParameter("id", messageId)
             .getSingleResult() > 0;
-    }
-
-    private LocalDateTime messageDatePostedById(UUID messageId) {
-        return entityManager
-            .find(UserMessage.class, messageId)
-            .getDatePosted();
     }
     
 }

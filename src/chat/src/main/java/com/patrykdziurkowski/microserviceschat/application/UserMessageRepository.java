@@ -8,8 +8,7 @@ import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
 public interface UserMessageRepository {
 
-    List<UserMessage> get();
-    Optional<List<UserMessage>> getByAmount(UUID chatId, Optional<UUID> lastMessageId, int messagesToRetrive);
+    List<UserMessage> getByAmount(UUID chatId, int lastMessageId, int messagesToRetrieve);
     Optional<UserMessage> getById(UUID messageId);
     List<UserMessage> getByOwnerId(UUID messageOwnerId);
     void save(UserMessage message);
