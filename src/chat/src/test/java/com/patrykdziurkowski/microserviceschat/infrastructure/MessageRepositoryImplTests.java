@@ -30,9 +30,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class UserMessageRepositoryImplTests {
+public class MessageRepositoryImplTests {
     @Autowired
-    private MessageRepositoryImpl userMessageRepository;
+    private MessageRepositoryImpl messageRepository;
 
     @SuppressWarnings("resource")
     @Container
@@ -47,7 +47,7 @@ public class UserMessageRepositoryImplTests {
 
     @Test
     void repository_shouldLoad() {
-        assertNotNull(userMessageRepository);
+        assertNotNull(messageRepository);
     }
 
     @Test
@@ -55,9 +55,9 @@ public class UserMessageRepositoryImplTests {
         UUID chatId = UUID.randomUUID();
         UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
 
-        userMessageRepository.save(msg);
+        messageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.getByAmount(chatId, 0, 20);
+        List<UserMessage> userMessages = messageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
     }
 
@@ -66,16 +66,16 @@ public class UserMessageRepositoryImplTests {
         UUID chatId = UUID.randomUUID();
         UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
 
-        userMessageRepository.save(msg);
-        userMessageRepository.save(msg);
+        messageRepository.save(msg);
+        messageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.getByAmount(chatId, 0, 20);
+        List<UserMessage> userMessages = messageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
     }
 
     @Test
     void getByOwnerId_shouldReturnEmpty_whenNoMessagesInDatabase() {
-        List<UserMessage> userMessages = userMessageRepository.getByAmount(UUID.randomUUID(), 0 , 20);
+        List<UserMessage> userMessages = messageRepository.getByAmount(UUID.randomUUID(), 0 , 20);
 
         assertTrue(userMessages.isEmpty());
     }
@@ -86,9 +86,9 @@ public class UserMessageRepositoryImplTests {
     void getById_shouldReturnMessage_whenExistsAndValidId() {
         UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
         UUID msgId = msg.getId();
-        userMessageRepository.save(msg);
+        messageRepository.save(msg);
         
-        Optional<UserMessage> returnedMsg = userMessageRepository.getById(msgId);
+        Optional<UserMessage> returnedMsg = messageRepository.getById(msgId);
 
         assertEquals(msg,returnedMsg.get());
     }
@@ -96,9 +96,9 @@ public class UserMessageRepositoryImplTests {
     @Test
     void getById_shouldEmpty_whenExistsAndInvalidId() {
         UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
-        userMessageRepository.save(msg);
+        messageRepository.save(msg);
         
-        Optional<UserMessage> returnedMsg = userMessageRepository.getById(UUID.randomUUID());
+        Optional<UserMessage> returnedMsg = messageRepository.getById(UUID.randomUUID());
 
         assertFalse(returnedMsg.isPresent());
     }
@@ -109,10 +109,10 @@ public class UserMessageRepositoryImplTests {
         UserMessage msg;
         for(int i = 0; i < 3; i++) {
             msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
 
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 0, 3);
 
         int numberOfReturnedMsgs = returnedMsgs.size();
@@ -125,10 +125,10 @@ public class UserMessageRepositoryImplTests {
         UserMessage msg;
         for(int i = 0; i < 3; i++) {
             msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
 
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 0, 2);
 
         int numberOfReturnedMsgs = returnedMsgs.size();
@@ -142,10 +142,10 @@ public class UserMessageRepositoryImplTests {
 
         for(int i = 1; i < 5; i++) {
             msg = new UserMessage(chatRoomId, "msg" + i, UUID.randomUUID(), LocalDateTime.now().withHour(i));
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
         
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 2, 2);
 
         int numberOfReturnedMsgs = returnedMsgs.size();
@@ -160,10 +160,10 @@ public class UserMessageRepositoryImplTests {
         UserMessage msg;
         for(int i = 0; i < 3; i++) {
             msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
 
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 0, 20);
 
         int numberOfReturnedMsgs = returnedMsgs.size();
@@ -176,10 +176,10 @@ public class UserMessageRepositoryImplTests {
         UserMessage msg;
         for(int i = 0; i < 5; i++) {
             msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
 
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 0, 3);
 
         int numberOfReturnedMsgs = returnedMsgs.size();
@@ -192,10 +192,10 @@ public class UserMessageRepositoryImplTests {
         UserMessage msg;
         for(int i = 0; i < 5; i++) {
             msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            userMessageRepository.save(msg);
+            messageRepository.save(msg);
         }
 
-        List<UserMessage> returnedMsgs = userMessageRepository
+        List<UserMessage> returnedMsgs = messageRepository
             .getByAmount(chatRoomId, 39, 20);
 
         assertTrue(returnedMsgs.isEmpty());

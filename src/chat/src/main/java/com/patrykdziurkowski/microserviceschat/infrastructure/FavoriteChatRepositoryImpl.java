@@ -33,18 +33,18 @@ public class FavoriteChatRepositoryImpl implements FavoriteChatRepository{
             .getResultList();
     }
 
-    public void save(FavoriteChatRoom chatRoom) {
-        final boolean favoriteChatExists = favoriteChatExists(chatRoom.getId());
+    public void save(FavoriteChatRoom favoriteChatRoom) {
+        final boolean favoriteChatExists = favoriteChatExists(favoriteChatRoom.getId());
         if(favoriteChatExists) {
-            entityManager.merge(chatRoom);
+            entityManager.merge(favoriteChatRoom);
         } else {
-            entityManager.persist(chatRoom);
+            entityManager.persist(favoriteChatRoom);
         }
-        final boolean chatUnset = chatRoom
+        final boolean chatUnset = favoriteChatRoom
             .getDomainEvents()
             .contains(new FavoriteUnsetEvent());
         if(chatUnset) {
-            entityManager.remove(chatRoom);
+            entityManager.remove(favoriteChatRoom);
         }
         entityManager.flush();
     }
