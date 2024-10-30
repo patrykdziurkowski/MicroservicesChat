@@ -10,7 +10,6 @@ public interface UserMessageRepository {
 
     List<UserMessage> getByAmount(UUID chatId, int lastMessageId, int messagesToRetrieve);
     Optional<UserMessage> getById(UUID messageId);
-    List<UserMessage> getByOwnerId(UUID messageOwnerId);
     void save(UserMessage message);
     
 }

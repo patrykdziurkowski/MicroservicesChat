@@ -38,14 +38,6 @@ public class UserMessageRepositoryImpl implements UserMessageRepository{
             .find(UserMessage.class, messageId));
     }
 
-    public List<UserMessage> getByOwnerId(UUID messageOwnerId) {
-        final String query = "SELECT m FROM UserMessage m WHERE m.ownerId = :ownerId";
-        return entityManager
-            .createQuery(query, UserMessage.class)
-            .setParameter("ownerId", messageOwnerId)
-            .getResultList();
-    }
-
     public void save(UserMessage message) {
         final boolean messageExists = messageExists(message.getId());
         if(messageExists) {

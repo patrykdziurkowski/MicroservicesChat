@@ -102,28 +102,6 @@ public class UserMessageRepositoryImplTests {
     }
 
     @Test
-    void getByOwnerId_shouldReturnMessage_whenExistsAndValidOwner() {
-        UUID msgOwnerId = UUID.randomUUID();
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", msgOwnerId);
-        userMessageRepository.save(msg);
-
-        UserMessage returnedMsg = userMessageRepository.getByOwnerId(msgOwnerId).get(0);
-
-        assertEquals(msg,returnedMsg);
-    }
-
-    @Test
-    void getByOwnerId_shouldntReturnMessage_whenExistsAndInvalidOwner() {
-        UUID msgOwnerId = UUID.randomUUID();
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", msgOwnerId);
-        userMessageRepository.save(msg);
-
-        List<UserMessage> returnedMsgs = userMessageRepository.getByOwnerId(UUID.randomUUID());
-
-        assertFalse(returnedMsgs.size() > 0);
-    }
-
-    @Test
     void getByAmount_shouldReturn3Messages_whenExists() {
         UUID chatRoomId = UUID.randomUUID();
         UserMessage msg;
