@@ -53,9 +53,9 @@ public class MessageRepositoryImplTests {
     @Test
     void save_shouldSaveMessage_whenMessageDoesntExists() {
         UUID chatId = UUID.randomUUID();
-        UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
+        UserMessage message = new UserMessage(chatId, "text", UUID.randomUUID());
 
-        messageRepository.save(msg);
+        messageRepository.save(message);
 
         List<UserMessage> userMessages = messageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
@@ -64,10 +64,10 @@ public class MessageRepositoryImplTests {
     @Test
     void save_shouldntSaveMessage_whenMessageExists() {
         UUID chatId = UUID.randomUUID();
-        UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
+        UserMessage message = new UserMessage(chatId, "text", UUID.randomUUID());
 
-        messageRepository.save(msg);
-        messageRepository.save(msg);
+        messageRepository.save(message);
+        messageRepository.save(message);
 
         List<UserMessage> userMessages = messageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
@@ -84,72 +84,72 @@ public class MessageRepositoryImplTests {
 
     @Test
     void getById_shouldReturnMessage_whenExistsAndValidId() {
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
-        UUID msgId = msg.getId();
-        messageRepository.save(msg);
+        UserMessage message = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
+        UUID messageId = message.getId();
+        messageRepository.save(message);
         
-        Optional<UserMessage> returnedMsg = messageRepository.getById(msgId);
+        Optional<UserMessage> returnedMsg = messageRepository.getById(messageId);
 
-        assertEquals(msg,returnedMsg.get());
+        assertEquals(message,returnedMsg.get());
     }
 
     @Test
     void getById_shouldEmpty_whenExistsAndInvalidId() {
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
-        messageRepository.save(msg);
+        UserMessage message = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
+        messageRepository.save(message);
         
-        Optional<UserMessage> returnedMsg = messageRepository.getById(UUID.randomUUID());
+        Optional<UserMessage> returnedMessage = messageRepository.getById(UUID.randomUUID());
 
-        assertFalse(returnedMsg.isPresent());
+        assertFalse(returnedMessage.isPresent());
     }
 
     @Test
     void getByAmount_shouldReturn3Messages_whenExists() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
         for(int i = 0; i < 3; i++) {
-            msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "test", UUID.randomUUID());
+            messageRepository.save(message);
         }
 
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 0, 3);
 
-        int numberOfReturnedMsgs = returnedMsgs.size();
+        int numberOfReturnedMsgs = returnedMessages.size();
         assertEquals(3, numberOfReturnedMsgs);
     }
 
     @Test
     void getByAmount_shouldReturn2Messages_when3Exists() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
         for(int i = 0; i < 3; i++) {
-            msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "test", UUID.randomUUID());
+            messageRepository.save(message);
         }
 
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 0, 2);
 
-        int numberOfReturnedMsgs = returnedMsgs.size();
+        int numberOfReturnedMsgs = returnedMessages.size();
         assertEquals(2, numberOfReturnedMsgs);
     }
 
     @Test
     void getByAmount_shouldReturn2Messages_when4ExistsAndStartedFromSecond() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
 
         for(int i = 1; i < 5; i++) {
-            msg = new UserMessage(chatRoomId, "msg" + i, UUID.randomUUID(), LocalDateTime.now().withHour(i));
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "msg" + i, UUID.randomUUID(), LocalDateTime.now().withHour(i));
+            messageRepository.save(message);
         }
         
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 2, 2);
 
-        int numberOfReturnedMsgs = returnedMsgs.size();
-        UserMessage lastMessage = returnedMsgs.get(1);
+        int numberOfReturnedMsgs = returnedMessages.size();
+        UserMessage lastMessage = returnedMessages.get(1);
         assertEquals("msg4", lastMessage.getText());
         assertEquals(2, numberOfReturnedMsgs);
     }
@@ -157,48 +157,48 @@ public class MessageRepositoryImplTests {
     @Test
     void getByAmount_shouldReturn3Messages_whenOnly3Exists() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
         for(int i = 0; i < 3; i++) {
-            msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "test", UUID.randomUUID());
+            messageRepository.save(message);
         }
 
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 0, 20);
 
-        int numberOfReturnedMsgs = returnedMsgs.size();
+        int numberOfReturnedMsgs = returnedMessages.size();
         assertEquals(3, numberOfReturnedMsgs);
     }
 
     @Test
     void getByAmount_shouldReturnOnly3Messages_whenMoreExists() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
         for(int i = 0; i < 5; i++) {
-            msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "test", UUID.randomUUID());
+            messageRepository.save(message);
         }
 
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 0, 3);
 
-        int numberOfReturnedMsgs = returnedMsgs.size();
+        int numberOfReturnedMsgs = returnedMessages.size();
         assertEquals(3, numberOfReturnedMsgs);
     }
 
     @Test
     void getByAmount_shouldReturnEmpty_whenOnlyStartedFromMessageThatDoesntExists() {
         UUID chatRoomId = UUID.randomUUID();
-        UserMessage msg;
+        UserMessage message;
         for(int i = 0; i < 5; i++) {
-            msg = new UserMessage(chatRoomId, "test", UUID.randomUUID());
-            messageRepository.save(msg);
+            message = new UserMessage(chatRoomId, "test", UUID.randomUUID());
+            messageRepository.save(message);
         }
 
-        List<UserMessage> returnedMsgs = messageRepository
+        List<UserMessage> returnedMessages = messageRepository
             .getByAmount(chatRoomId, 39, 20);
 
-        assertTrue(returnedMsgs.isEmpty());
+        assertTrue(returnedMessages.isEmpty());
     }
 
 }
