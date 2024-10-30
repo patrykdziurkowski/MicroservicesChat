@@ -180,10 +180,10 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
         assertTrue(chats.size() == 1);
-        assertTrue(msgs.size() == 1);
-        assertTrue(msgs.get(0).getText().equals("username joined!"));
+        assertTrue(messages.size() == 1);
+        assertTrue(messages.get(0).getText().equals("username joined!"));
     }
 
     @Test
@@ -195,10 +195,10 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
         assertTrue(chats.size() == 1);
-        assertTrue(msgs.size() == 1);
-        assertTrue(msgs.get(0).getText().equals("username joined through invite!"));
+        assertTrue(messages.size() == 1);
+        assertTrue(messages.get(0).getText().equals("username joined through invite!"));
     }
 
     @Test
@@ -211,10 +211,11 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
         assertTrue(chats.size() == 1);
-        assertTrue(msgs.size() == 2);
-        assertTrue((msgs.get(0).getText().equals("username got removed!") || msgs.get(1).getText().equals("username got removed!")));
+        assertTrue(messages.size() == 2);
+        assertTrue((messages.get(0).getText().equals("username got removed!") 
+            || messages.get(1).getText().equals("username got removed!")));
     }
 
     @Test
@@ -231,24 +232,25 @@ class ChatRepositoryImplTests {
         List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
         assertTrue(chats.size() == 1);
         assertTrue(msgs.size() == 2);
-        assertTrue((msgs.get(0).getText().equals("username left!") || msgs.get(1).getText().equals("username left!")));
+        assertTrue((msgs.get(0).getText().equals("username left!") 
+            || msgs.get(1).getText().equals("username left!")));
     }
 
     @Test
     void save_shouldDeleteChatAndMessages_whenChatDissolved() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        UserMessage userMsg = new UserMessage(chat.getId(), "test", UUID.randomUUID());
+        UserMessage userMessage = new UserMessage(chat.getId(), "test", UUID.randomUUID());
         chatRepository.save(chat);
-        messageRepository.save(userMsg);
+        messageRepository.save(userMessage);
 
         chat.dissolve(ownerId);
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0, 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.isEmpty());
-        assertTrue(msgs.isEmpty());
+        assertTrue(messages.isEmpty());
     }
 
     @Test
@@ -256,17 +258,17 @@ class ChatRepositoryImplTests {
         UUID ownerId = UUID.randomUUID();
         UUID anotherChatId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        UserMessage userMsg = new UserMessage(anotherChatId, "test", UUID.randomUUID());
+        UserMessage userMessage = new UserMessage(anotherChatId, "test", UUID.randomUUID());
         chatRepository.save(chat);
-        messageRepository.save(userMsg);
+        messageRepository.save(userMessage);
 
         chat.dissolve(ownerId);
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(anotherChatId, 0, 20);
+        List<UserMessage> messages = messageRepository.getByAmount(anotherChatId, 0, 20);
         assertTrue(chats.isEmpty());
-        assertFalse(msgs.isEmpty());
+        assertFalse(messages.isEmpty());
     }
 
     @Test
