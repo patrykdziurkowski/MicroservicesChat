@@ -52,28 +52,30 @@ public class UserMessageRepositoryImplTests {
 
     @Test
     void save_shouldSaveMessage_whenMessageDoesntExists() {
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
+        UUID chatId = UUID.randomUUID();
+        UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
 
         userMessageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.getByOwnerId(msg.getOwnerId());
+        List<UserMessage> userMessages = userMessageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
     }
 
     @Test
     void save_shouldntSaveMessage_whenMessageExists() {
-        UserMessage msg = new UserMessage(UUID.randomUUID(), "text", UUID.randomUUID());
+        UUID chatId = UUID.randomUUID();
+        UserMessage msg = new UserMessage(chatId, "text", UUID.randomUUID());
 
         userMessageRepository.save(msg);
         userMessageRepository.save(msg);
 
-        List<UserMessage> userMessages = userMessageRepository.getByOwnerId(msg.getOwnerId());
+        List<UserMessage> userMessages = userMessageRepository.getByAmount(chatId, 0, 20);
         assertEquals(1, userMessages.size());
     }
 
     @Test
     void getByOwnerId_shouldReturnEmpty_whenNoMessagesInDatabase() {
-        List<UserMessage> userMessages = userMessageRepository.getByOwnerId(UUID.randomUUID());
+        List<UserMessage> userMessages = userMessageRepository.getByAmount(UUID.randomUUID(), 0 , 20);
 
         assertTrue(userMessages.isEmpty());
     }

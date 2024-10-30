@@ -10,7 +10,9 @@ import com.patrykdziurkowski.microserviceschat.application.ChatRepository;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.Message;
-import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
+import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.*;
+import com.patrykdziurkowski.microserviceschat.domain.shared.DomainEvent;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -52,6 +54,8 @@ public class ChatRepositoryImpl implements ChatRepository{
             .contains(new ChatDissolvedEvent());
         if(chatDissolved) {
             removeChat(chatRoom);
+        } else {
+            addAnnouncements(chatRoom);
         }
         entityManager.flush();
     }
@@ -70,6 +74,35 @@ public class ChatRepositoryImpl implements ChatRepository{
             }
         }
         entityManager.remove(chatRoom);
+    }
+
+    private void addAnnouncements(ChatRoom chatRoom) {
+        if (chatRoom.getDomainEvents().isEmpty()) {
+            return;
+        }
+        List<DomainEvent> domainEvents = chatRoom.getDomainEvents();
+        for(DomainEvent event : domainEvents) {
+            String announcement = getAnnouncementString(event);
+            UserMessage message = new UserMessage(chatRoom.getId(), announcement, null);
+            entityManager.persist(message);
+        }
+        chatRoom.clearDomainEvents();
+    }
+
+    private String getAnnouncementString(DomainEvent event) {
+        if(event instanceof MemberInvitedEvent) {
+            return ((MemberInvitedEvent)event).memberUsername() + " joined through invite!";
+        }
+        if(event instanceof MemberJoinedEvent) {
+            return ((MemberJoinedEvent)event).memberUsername() + " joined!";
+        }
+        if(event instanceof MemberLeftEvent) {
+            return ((MemberLeftEvent)event).memberUsername() + " left!";
+        }
+        if(event instanceof MemberRemovedEvent) {
+            return ((MemberRemovedEvent)event).memberUsername() + " got removed!";
+        }
+        return "Error: ChatRepositoryImpl: unknown DomainEvent raised";
     }
 
     private List<Message> getMessagesInChat(UUID chatId) {

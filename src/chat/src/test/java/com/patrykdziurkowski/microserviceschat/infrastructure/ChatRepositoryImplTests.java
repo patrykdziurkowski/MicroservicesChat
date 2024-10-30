@@ -78,7 +78,7 @@ class ChatRepositoryImplTests {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", true);
         chatRepository.save(chat);
         UUID memberId = UUID.randomUUID();
-        chat.join(memberId);
+        chat.join(memberId, "username");
 
         chatRepository.save(chat);
         List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
@@ -115,7 +115,7 @@ class ChatRepositoryImplTests {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
         chatRepository.save(chat);
         UUID memberId = UUID.randomUUID();
-        chat.join(memberId);
+        chat.join(memberId, "username");
 
         chatRepository.save(chat);
         List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
@@ -147,7 +147,7 @@ class ChatRepositoryImplTests {
     }
 
     @Test
-    void save_shouldSaveChat_whenChatAdded2Times() {
+    void save_shouldSaveOnly1Chat_whenSameChatAdded2Times() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
 
         chatRepository.save(chat);
@@ -172,6 +172,69 @@ class ChatRepositoryImplTests {
     }
 
     @Test
+    void save_shouldMakeAnnouncement_whenMemberJoined() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", true);
+        chat.join(UUID.randomUUID(), "username");
+
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        assertTrue(chats.size() == 1);
+        assertTrue(msgs.size() == 1);
+        assertTrue(msgs.get(0).getText().equals("username joined!"));
+    }
+
+    @Test
+    void save_shouldMakeAnnouncement_whenMemberInvitedAndJoined() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", true);
+        chat.inviteMember(UUID.randomUUID(), "username", ownerId);
+
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        assertTrue(chats.size() == 1);
+        assertTrue(msgs.size() == 1);
+        assertTrue(msgs.get(0).getText().equals("username joined through invite!"));
+    }
+
+    @Test
+    void save_shouldMakeAnnouncement_whenMemberRemoved() {
+        UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", true);
+        chat.inviteMember(memberId, "username", ownerId);
+        chat.removeMember(memberId, "username", ownerId);
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        assertTrue(chats.size() == 1);
+        assertTrue(msgs.size() == 2);
+        assertTrue((msgs.get(0).getText().equals("username got removed!") || msgs.get(1).getText().equals("username got removed!")));
+    }
+
+    @Test
+    void save_shouldMakeAnnouncement_whenMemberLeft() {
+        UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "Chat", true);
+        chat.inviteMember(memberId, "username", ownerId);
+        chat.leave(memberId, "username");
+
+        chatRepository.save(chat);
+
+        List<ChatRoom> chats = chatRepository.get();
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        assertTrue(chats.size() == 1);
+        assertTrue(msgs.size() == 2);
+        assertTrue((msgs.get(0).getText().equals("username left!") || msgs.get(1).getText().equals("username left!")));
+    }
+
+    @Test
     void save_shouldDeleteChatAndMessages_whenChatDissolved() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
@@ -183,7 +246,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByOwnerId(userMsg.getOwnerId());
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.isEmpty());
         assertTrue(msgs.isEmpty());
     }
@@ -191,8 +254,9 @@ class ChatRepositoryImplTests {
     @Test
     void save_shouldDeleteChatAndNotMessages_whenChatDissolvedAndMessagesInAnotherChat() {
         UUID ownerId = UUID.randomUUID();
+        UUID anotherChatId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        UserMessage userMsg = new UserMessage(UUID.randomUUID(), "test", UUID.randomUUID());
+        UserMessage userMsg = new UserMessage(anotherChatId, "test", UUID.randomUUID());
         chatRepository.save(chat);
         messageRepository.save(userMsg);
 
@@ -200,7 +264,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByOwnerId(userMsg.getOwnerId());
+        List<UserMessage> msgs = messageRepository.getByAmount(anotherChatId, 0, 20);
         assertTrue(chats.isEmpty());
         assertFalse(msgs.isEmpty());
     }
