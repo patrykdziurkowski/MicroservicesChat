@@ -1,17 +1,16 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class HomeController {
     @GetMapping("/")
-    public String index() {
-        return "Placeholder text for the chat module.";
+    public String index(Model model) {
+        model.addAttribute("title", "Test title");
+        model.addAttribute("message", "Test message");
+        return "chats";
     }
 
-    @GetMapping("/Placeholder")
-    public String placeholder() {
-        return "Placeholder endpoint for the chat module.";
-    }
 }
