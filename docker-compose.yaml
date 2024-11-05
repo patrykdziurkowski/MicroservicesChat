@@ -20,18 +20,20 @@ services:
     build:
       context: ./src/chat
       dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
     depends_on:
-      db:
+      db-chat:
         condition: service_healthy
       auth:
         condition: service_healthy
     networks:
       - shared
       - chat
-  db:
-    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
+  db-chat:
+    image: ${REGISTRY_PATH:-localhost}/mc_db-chat:latest
     build:
-      context: ./src/db
+      context: ./src/db-chat
       dockerfile: Dockerfile
       args:
         password: ${MSSQL_SA_PASSWORD}
