@@ -18,12 +18,16 @@ public class LoginQuery {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean execute(String userName, String rawPassword) {
+    public Optional<User> execute(String userName, String rawPassword) {
         Optional<User> user = userRepository.getByUserName(userName);
         if (user.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
 
-        return passwordEncoder.matches(rawPassword, user.get().getPasswordHash());
+        if (passwordEncoder.matches(rawPassword,
+                user.get().getPasswordHash()) == false) {
+            return Optional.empty();
+        }
+        return user;
     }
 }

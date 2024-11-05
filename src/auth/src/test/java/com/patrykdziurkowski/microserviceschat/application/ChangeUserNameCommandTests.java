@@ -1,9 +1,10 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,13 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-class LoginQueryTests {
+class ChangeUserNameCommandTests {
     @Autowired
-    private LoginQuery loginQuery;
+    private ChangeUserNameCommand changeUserNameCommand;
     @Autowired
     private RegisterCommand registerCommand;
+    @Autowired
+    private UserRepository userRepository;
 
     @SuppressWarnings("resource")
     @Container
@@ -50,37 +53,42 @@ class LoginQueryTests {
             .withPassword("examplePassword123");
 
     @Test
-    void registerCommand_shouldLoad() {
-        assertNotNull(loginQuery);
+    void changeUserNameCommand_shouldLoad() {
+        assertNotNull(changeUserNameCommand);
     }
 
     @Test
-    void execute_givenNonExistentUser_returnsEmpty() {
-        Optional<User> user = loginQuery.execute("fakeUser", "password123");
+    void execute_shouldReturnFalse_whenNewUserNameIsAlreadyTaken() {
+        boolean isFirstRegisterSuccess = registerCommand.execute("takenUser", "P@ssword1!");
+        boolean isSecondRegisterSuccess = registerCommand.execute("otherUser", "P@ssword1!");
+        User user = userRepository.getByUserName("otherUser").orElseThrow();
 
-        assertTrue(user.isEmpty());
+        boolean isNameChangeSuccess = changeUserNameCommand.execute(user.getId(), "takenUser");
+
+        assertTrue(isFirstRegisterSuccess);
+        assertTrue(isSecondRegisterSuccess);
+        assertFalse(isNameChangeSuccess);
     }
 
     @Test
-    void execute_givenExistingUserWithWrongPassword_returnsFalse() {
-        boolean registrationIsSuccessful = registerCommand
-                .execute("existingUser", "differentPasswordHash");
+    void execute_shouldThrow_whenCurrentUserDoesntExist() {
+        User user = new User("differentUser", "P@ssword1!");
+        // Not registering the user.
 
-        Optional<User> user = loginQuery.execute("existingUser", "wrongPasswordHash");
-
-        assertTrue(registrationIsSuccessful);
-        assertTrue(user.isEmpty());
+        assertThrows(Exception.class,
+                () -> changeUserNameCommand.execute(user.getId(), "newUserName"));
     }
 
     @Test
-    void execute_givenExistingUserWithCorrectPassword_returnsTrue() {
-        boolean isRegisterSuccess = registerCommand
-                .execute("existingUser", "correctPasswordHash");
+    void execute_shouldReturnTrueAndChangeUserName_whenValidData() {
+        registerCommand.execute("oldUserName", "P@ssword1!");
+        User user = userRepository.getByUserName("oldUserName").orElseThrow();
 
-        Optional<User> user = loginQuery
-                .execute("existingUser", "correctPasswordHash");
+        boolean isNameChangeSuccess = changeUserNameCommand.execute(user.getId(), "newUserName");
 
-        assertTrue(isRegisterSuccess);
-        assertTrue(user.isPresent());
+        User updatedUser = userRepository.getByUserName("newUserName").orElseThrow();
+        assertTrue(isNameChangeSuccess);
+        assertEquals("newUserName", updatedUser.getUserName());
     }
+
 }

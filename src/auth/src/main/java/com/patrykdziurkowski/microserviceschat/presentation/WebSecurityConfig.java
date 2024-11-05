@@ -12,8 +12,10 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/register", "/login").permitAll());
+                .csrf(options -> options.disable()) // disable since no cookies
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/register", "/login", "/username").permitAll()
+                        .anyRequest().authenticated());
 
         return http.build();
     }
