@@ -3,33 +3,40 @@ package com.patrykdziurkowski.microserviceschat.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
+
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "userMessage")
 public class UserMessage extends Message {
+    @Nullable
     private UUID ownerId;
-    private boolean isDeleted;
 
     UserMessage() {}
-    public UserMessage(String text, UUID ownerId) {
-        super(text);
-        this.isDeleted = false;
+
+    public UserMessage(UUID chatRoomId, String text, UUID ownerId) {
+        super(chatRoomId, text);
         this.ownerId = ownerId;
+    }
+
+    public UserMessage(UUID chatRoomId, String text, UUID ownerId, LocalDateTime datePosted) {
+        super(chatRoomId, text, datePosted);
+        this.ownerId = ownerId;
+    }
+
+    public boolean delete(UUID currentUserId, UUID chatRoomOwnerId) {
+        boolean hasDeletePermissions = currentUserId == ownerId || currentUserId == chatRoomOwnerId;
+        if (hasDeletePermissions == false) {
+            return false;
+        }
+        raiseDomainEvent(new MessageDeletedEvent());
+        return true;
     }
     
-    public UserMessage(String text, UUID ownerId, LocalDateTime datePosted) {
-        super(text, datePosted);
-        this.isDeleted = false;
-        this.ownerId = ownerId;
-    }
-
-    public void setIsDeleted() {
-        isDeleted = true;
-    }
-
     public UUID getOwnerId() {
         return ownerId;
     }
-
-    public boolean getIsDeleted() {
-        return isDeleted;
-    }
-    
 }
