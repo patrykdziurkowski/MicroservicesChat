@@ -1,28 +1,4 @@
 services:
-  auth:
-    image: ${REGISTRY_PATH:-localhost}/mc_auth:latest # $REGISTRY_PATH or localhost if not set
-    build:
-      context: ./src/auth
-      dockerfile: Dockerfile
-  chat:
-    image: ${REGISTRY_PATH:-localhost}/mc_chat:latest
-    build:
-      context: ./src/chat
-      dockerfile: Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-      auth:
-        condition: service_healthy
-  db:
-    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
-    build:
-      context: ./src/db
-      dockerfile: Dockerfile
-      args:
-        password: ${MSSQL_SA_PASSWORD}
-    environment:
-      - ACCEPT_EULA=Y
   https-proxy:
     image: ${REGISTRY_PATH:-localhost}/mc_http-proxy:latest
     build:
@@ -37,6 +13,64 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - chat
+  chat:
+    image: ${REGISTRY_PATH:-localhost}/mc_chat:latest
+    build:
+      context: ./src/chat
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    networks:
+      - shared
+      - chat
+  db:
+    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
+    build:
+      context: ./src/db
+      dockerfile: Dockerfile
+      args:
+        password: ${MSSQL_SA_PASSWORD}
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - chat
+  auth:
+    image: ${REGISTRY_PATH:-localhost}/mc_auth:latest
+    build:
+      context: ./src/auth
+      dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      db-auth:
+        condition: service_healthy
+    networks:
+      - auth
+      - shared
+  db-auth:
+    image: ${REGISTRY_PATH:-localhost}/mc_db-auth:latest
+    build:
+      context: ./src/db-auth
+      dockerfile: Dockerfile
+      args:
+        password: ${MSSQL_SA_PASSWORD}
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - auth
 volumes:
   caddy_data:
   caddy_config:
+networks:
+  chat:
+    driver: bridge
+  auth:
+    driver: bridge
+  shared:
+    driver: bridge
