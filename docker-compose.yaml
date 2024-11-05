@@ -22,6 +22,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - IS_PRODUCTION=${IS_PRODUCTION:-false}
     depends_on:
       db-chat:
         condition: service_healthy
