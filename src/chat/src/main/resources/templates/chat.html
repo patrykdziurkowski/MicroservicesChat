@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat!</title>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
 </head>
 
 <body>
+    <div th:insert="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
     <section class="row vh-100">
-        <div class="col-3" th:insert="~{chatListFragment.html :: chatList}"></div>
+        <div class="col-3" th:insert="~{fragments/chatListFragment.html :: chatList}"></div>
         <div class="col-9">
-            <!-- Dashboard -->
             <div class="row h-100">
                 <section class="col-9 d-flex flex-column align-items-start">
                     <section class="w-100">
@@ -31,7 +31,8 @@
                             <input type="text" placeholder="Your message here...">
                             <input type="submit" class="btn btn-primary" value="Send">
                         </form>
-                        <button class="btn btn-primary">Dissolve</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#dissolveChat">Dissolve</button>
                         <button class="btn btn-primary">Invite</button>
                         <button class="btn btn-primary">Kick</button>
                         <button class="btn btn-primary">Leave</button>
@@ -48,7 +49,10 @@
             </div>
         </div>
     </section>
-    <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 </body>
 
 </html>
