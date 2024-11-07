@@ -34,7 +34,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class FavoriteSetCommandTests {
+public class FavoriteUnsetCommandTests {
+    @Autowired
+    private FavoriteUnsetCommand favoriteUnsetCommand;
     @Autowired
     private FavoriteSetCommand favoriteSetCommand;
     @Autowired
@@ -52,38 +54,36 @@ public class FavoriteSetCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void favoriteSetCommand_shouldLoad() {
-        assertNotNull(favoriteSetCommand);
+    void favoriteUnsetCommand_shouldLoad() {
+        assertNotNull(favoriteUnsetCommand);
     }
 
     @Test
-    void execute_whenValidData_returnsTrue() {
-        UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "text", false);
-        chat.join(memberId, "member");
+    void execute_whenGivenValidData_returnsTrue() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
+        favoriteSetCommand.execute(ownerId, chat.getId());
 
-        boolean didSucceed = favoriteSetCommand.execute(memberId, chat.getId());
+        boolean didSucceed = favoriteUnsetCommand.execute(ownerId, chat.getId());
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenMemberNotInChat_returnsFalse() {
-        UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "text", false);
-        chatRepository.save(chat);
-
-        boolean didSucceed = favoriteSetCommand.execute(memberId, chat.getId());
+    void execute_whenMemberNotInChat_reuturnsFalse() {
+        boolean didSucceed = favoriteUnsetCommand.execute(UUID.randomUUID(), UUID.randomUUID());
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenChatDoesntExists_returnsFalse() {
-        UUID memberId = UUID.randomUUID();
+    void execute_whenNotFavorite_returnsFalse() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
 
-        boolean didSucceed = favoriteSetCommand.execute(memberId, UUID.randomUUID());
+        boolean didSucceed = favoriteUnsetCommand.execute(ownerId, chat.getId());
 
         assertFalse(didSucceed);
     }
