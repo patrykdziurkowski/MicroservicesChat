@@ -72,7 +72,7 @@ public class MemberJoinCommandTests {
 
     @Test
     void execute_whenCorrectPasswordProvided_returnsTrue() {
-        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, "password1");
+        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password1"));
         ChatRoom chat = chatRepository.get().get(0);
 
         boolean didSucceed  = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", Optional.ofNullable("password1"));
@@ -82,7 +82,7 @@ public class MemberJoinCommandTests {
 
     @Test
     void execute_whenWrongPasswordProvided_returnsFalse() {
-        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, "password1");
+        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password1"));
         ChatRoom chat = chatRepository.get().get(0);
 
         boolean didSucceed  = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", Optional.ofNullable("password2"));
