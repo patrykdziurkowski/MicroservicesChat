@@ -116,7 +116,7 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean leave(UUID currentUserId, String currentUserUsername) {
-        if (!memberIds.contains(currentUserId)) {
+        if (memberIds.contains(currentUserId) == false) {
             return false;
         }
         memberIds.remove(memberIds.indexOf(currentUserId));
