@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ class ChatCreationCommandTests {
 
     @Test
     void execute_whenValidData_shouldAddChat() {
-        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, "password");
+        chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password"));
 
         List<ChatRoom> chats = chatRepository.get();
         ChatRoom chat = chats.get(0);
@@ -73,7 +74,7 @@ class ChatCreationCommandTests {
 
     @Test
     void execute_whenDiffrentValidData_shouldAddChat() {
-        chatCreationCommand.execute(UUID.randomUUID(), "chat", true, null);
+        chatCreationCommand.execute(UUID.randomUUID(), "chat", true, Optional.empty());
 
         List<ChatRoom> chats = chatRepository.get();
         ChatRoom chat = chats.get(0);

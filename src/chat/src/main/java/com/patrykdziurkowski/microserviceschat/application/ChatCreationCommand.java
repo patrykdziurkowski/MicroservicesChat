@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,11 +18,15 @@ public class ChatCreationCommand {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean execute(UUID currentUserId, String chatName, boolean isPublic, String chatPassword) {
-        if(chatPassword != null) {
-            chatPassword = passwordEncoder.encode(chatPassword);
+    public boolean execute(UUID currentUserId, String chatName, boolean isPublic, Optional<String> chatPassword) {
+        ChatRoom chat;
+        if(chatPassword.isPresent()) {
+            String encodedPassword = passwordEncoder.encode(chatPassword.get());
+            chat = new ChatRoom(currentUserId, chatName, isPublic, encodedPassword);
+        } else {
+            chat = new ChatRoom(currentUserId, chatName, isPublic);
         }
-        ChatRoom chat = new ChatRoom(currentUserId, chatName, isPublic, chatPassword);
+        
         chatRepository.save(chat);
         return true;
     }
