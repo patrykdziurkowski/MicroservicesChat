@@ -33,7 +33,7 @@ public class HomeController {
         return "chats";
     }
 
-    @GetMapping("/chat/{chatId}")
+    @GetMapping("/chats/{chatId}")
     public String chat(
             @PathVariable String chatId,
             Model model) {
