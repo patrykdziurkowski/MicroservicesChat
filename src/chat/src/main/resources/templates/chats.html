@@ -9,18 +9,8 @@
 </head>
 
 <body>
-    <section class="row">
-        <div class="col-3">
-            <!-- Chats -->
-            <section class="card">
-                <h5 class="card-title">Chat name</h5>
-                <p class="card-text">Member count and password icon</p>
-            </section>
-            <section class="card">
-                <h5 class="card-title">Chat name</h5>
-                <p class="card-text">Member count and password icon</p>
-            </section>
-        </div>
+    <section class="row vh-100">
+        <div class="col-3" th:insert="~{chatListFragment.html :: chatList}"></div>
         <div class="col-9">
             <!-- Dashboard -->
             <h2>👈 Select a channel to start chatting!</h2>
