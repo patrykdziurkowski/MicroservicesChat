@@ -1,0 +1,34 @@
+package com.patrykdziurkowski.microserviceschat.application;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
+
+@Service
+public class FavoriteSetCommand {
+    private final FavoriteChatRepository favoriteChatRepository;
+    private final ChatRepository chatRepository;
+
+    public FavoriteSetCommand(FavoriteChatRepository favoriteChatRepository, ChatRepository chatRepository) {
+        this.favoriteChatRepository = favoriteChatRepository;
+        this.chatRepository = chatRepository;
+    }
+
+    public boolean execute(UUID currentUserId, UUID chatId) {
+        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        if(retrievedChat.isEmpty()) {
+            return false;
+        }
+        if(retrievedChat.get()
+            .getMemberIds()
+            .contains(currentUserId) == false) {
+                return false;
+        }
+        favoriteChatRepository.save(new FavoriteChatRoom(chatId, currentUserId));
+        return true;
+    }
+}
