@@ -130,39 +130,13 @@ public class ChatRoomTests {
         String passwordHash = "password";
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true, passwordHash);
         UUID currentUserId = UUID.randomUUID();
-        String password = "password";
-
-        chatRoom.join(currentUserId, "username",  password);
-
-        assertTrue(chatRoom.getMemberIds().size() == 2);
-        assertTrue(chatRoom.getMemberIds().contains(currentUserId));
-    }
-
-    @Test
-    void join_givenInvalidDataWrongPassword_doesNotJoinChatRoom() {
-        UUID ownerId = UUID.randomUUID();
-        String passwordHash = "password";
-        ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true, passwordHash);
-        UUID currentUserId = UUID.randomUUID();
-        String password = "wrongPassword";
-
-        chatRoom.join(currentUserId, "username",  password);
-
-        assertTrue(chatRoom.getMemberIds().size() == 1);
-        assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
-    }
-
-    @Test
-    void join_givenValidDataNoPassword_joinsChatRoom() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
-        UUID currentUserId = UUID.randomUUID();
 
         chatRoom.join(currentUserId, "username");
 
         assertTrue(chatRoom.getMemberIds().size() == 2);
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
+
 
     @Test
     void join_givenInvalidDataMemberAlreadyInRoom_doesNotJoinChatRoom() {

@@ -107,17 +107,6 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean join(UUID currentUserId, String currentUserUsername) {
-        return join(currentUserId, currentUserUsername, null);
-    }
-
-    public boolean join(UUID currentUserId, String currentUserUsername, String givenPasswordHash) {
-        if (getPasswordHash().isPresent() && givenPasswordHash.isEmpty()) {
-            return false;
-        }
-        if (getPasswordHash().isPresent()
-                && getPasswordHash().get().equals(givenPasswordHash) == false) {
-            return false;
-        }
         if (memberIds.contains(currentUserId)) {
             return false;
         }
