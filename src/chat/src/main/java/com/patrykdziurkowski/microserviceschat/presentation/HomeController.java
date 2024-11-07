@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
     @GetMapping("/register")
     public String register(Model model) {
         model.addAttribute("title", "Test title changed");
