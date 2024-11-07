@@ -35,7 +35,7 @@ public class ChatRoomTests {
     }
 
     @Test
-    void invateMember_givenValidData_invatesMember() {
+    void inviteMember_givenValidData_invitesMember() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
@@ -48,7 +48,7 @@ public class ChatRoomTests {
     }
 
     @Test
-    void invateMember_givenInvalidData_doesNotInvateMember() {
+    void inviteMember_givenInvalidData_doesNotInvateMember() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
