@@ -9,23 +9,13 @@
 </head>
 
 <body>
-    <section class="row">
-        <div class="col-3">
-            <!-- Chats -->
-            <section class="card">
-                <h5 class="card-title">Chat name</h5>
-                <p class="card-text">Member count and password icon</p>
-            </section>
-            <section class="card">
-                <h5 class="card-title">Chat name</h5>
-                <p class="card-text">Member count and password icon</p>
-            </section>
-        </div>
+    <section class="row vh-100">
+        <div class="col-3" th:insert="~{chatListFragment.html :: chatList}"></div>
         <div class="col-9">
             <!-- Dashboard -->
-            <div class="row">
-                <section class="col-9">
-                    <section>
+            <div class="row h-100">
+                <section class="col-9 d-flex flex-column align-items-start">
+                    <section class="w-100">
                         <article class="card">
                             <p class="card-text">Announcement contents</p>
                             <p class="card-text">Date</p>
@@ -36,7 +26,7 @@
                             <p class="card-text">Date</p>
                         </article>
                     </section>
-                    <section>
+                    <section class="mt-auto w-100">
                         <form>
                             <input type="text" placeholder="Your message here...">
                             <input type="submit" class="btn btn-primary" value="Send">
