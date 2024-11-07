@@ -19,11 +19,11 @@ public class MessagePostCommand {
     }
 
     public boolean execute(UUID chatId, String text, UUID currentUserId) {
-        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }
-        ChatRoom chat = retrievedChat.get();
+        final ChatRoom chat = retrievedChat.get();
         if(chat.getMemberIds().contains(currentUserId) == false) {
             return false;
         }

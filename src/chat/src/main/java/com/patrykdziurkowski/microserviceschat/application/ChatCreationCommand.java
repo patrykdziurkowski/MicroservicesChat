@@ -21,7 +21,7 @@ public class ChatCreationCommand {
     public boolean execute(UUID currentUserId, String chatName, boolean isPublic, Optional<String> chatPassword) {
         ChatRoom chat;
         if(chatPassword.isPresent()) {
-            String encodedPassword = passwordEncoder.encode(chatPassword.get());
+            final String encodedPassword = passwordEncoder.encode(chatPassword.get());
             chat = new ChatRoom(currentUserId, chatName, isPublic, encodedPassword);
         } else {
             chat = new ChatRoom(currentUserId, chatName, isPublic);

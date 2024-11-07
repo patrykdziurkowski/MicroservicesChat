@@ -19,7 +19,7 @@ public class MemberJoinCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId, String currentUserUsername, Optional<String> givenChatPassword) {
-        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }

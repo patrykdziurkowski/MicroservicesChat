@@ -16,7 +16,7 @@ public class MemberLeaveCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId, String currentUserUserName) {
-        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }

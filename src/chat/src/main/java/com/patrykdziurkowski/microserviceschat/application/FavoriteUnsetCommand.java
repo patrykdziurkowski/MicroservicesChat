@@ -17,7 +17,7 @@ public class FavoriteUnsetCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId) {
-        List<FavoriteChatRoom> retrievedFavoriteChats = favoriteChatRepository.getByUserId(currentUserId);
+        final List<FavoriteChatRoom> retrievedFavoriteChats = favoriteChatRepository.getByUserId(currentUserId);
         if(retrievedFavoriteChats.isEmpty()) {
             return false;
         }

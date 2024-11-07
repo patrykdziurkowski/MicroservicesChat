@@ -17,7 +17,7 @@ public class ChatsQuery {
     }
 
     public Optional<List<ChatRoom>> execute(UUID currentUserId) {
-        List<ChatRoom> chats = chatRepository.getByMemberId(currentUserId);
+        final List<ChatRoom> chats = chatRepository.getByMemberId(currentUserId);
 
         if(chats.isEmpty() == false) {
             return Optional.ofNullable(chats);

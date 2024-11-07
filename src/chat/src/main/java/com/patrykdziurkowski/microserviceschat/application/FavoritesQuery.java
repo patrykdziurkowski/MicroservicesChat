@@ -17,7 +17,7 @@ public class FavoritesQuery {
     }
 
     public Optional<List<FavoriteChatRoom>> execute(UUID currentUserId) {
-        List<FavoriteChatRoom> favoriteChats = favoriteChatRepository.getByUserId(currentUserId);
+        final List<FavoriteChatRoom> favoriteChats = favoriteChatRepository.getByUserId(currentUserId);
 
         if(favoriteChats.isEmpty() == false) {
             return Optional.ofNullable(favoriteChats);

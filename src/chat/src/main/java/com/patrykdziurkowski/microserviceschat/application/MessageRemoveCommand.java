@@ -19,12 +19,12 @@ public class MessageRemoveCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID messageId) {
-        Optional<UserMessage> retrievedMessage = messageRepository.getById(messageId);
+        final Optional<UserMessage> retrievedMessage = messageRepository.getById(messageId);
         if(retrievedMessage.isEmpty()) {
             return false;
         }
         UserMessage message = retrievedMessage.get();
-        ChatRoom chat = chatRepository.getById(message.getChatRoomId()).get();
+        final ChatRoom chat = chatRepository.getById(message.getChatRoomId()).get();
         if(message.delete(currentUserId, chat.getOwnerId()) == false) {
             return false;
         }

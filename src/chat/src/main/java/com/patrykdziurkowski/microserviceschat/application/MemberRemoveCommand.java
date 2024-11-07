@@ -16,7 +16,7 @@ public class MemberRemoveCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId, UUID memberId, String memberUserName) {
-        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }

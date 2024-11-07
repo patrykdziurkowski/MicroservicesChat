@@ -16,7 +16,7 @@ public class MemberInvitationCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId, UUID invitedMemberId, String invitedMemberUsername) {
-        Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
+        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }

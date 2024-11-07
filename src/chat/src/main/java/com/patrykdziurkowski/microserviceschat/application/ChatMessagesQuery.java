@@ -17,7 +17,7 @@ public class ChatMessagesQuery {
     }
 
     public Optional<List<UserMessage>> execute(UUID chatId, int lastMessagePosition, int messagesToRetrive) {
-        List<UserMessage> retrivedMessages = messageRepository
+        final List<UserMessage> retrivedMessages = messageRepository
             .getByAmount(chatId, lastMessagePosition, messagesToRetrive);
         if(retrivedMessages.isEmpty()) {
             return Optional.empty();
