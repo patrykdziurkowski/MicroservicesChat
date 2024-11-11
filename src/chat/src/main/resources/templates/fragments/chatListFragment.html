@@ -1,4 +1,5 @@
 <div th:fragment="chatList" class="d-flex flex-column align-items-start h-100">
+    <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
     <div>
         <section class="card">
             <h5 class="card-title">Chat name</h5>
@@ -15,6 +16,6 @@
     </div>
     <section class="mt-auto">
         <h5>Username</h5>
-        <button class="btn btn-primary">Settings</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
     </section>
 </div>
