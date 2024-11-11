@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div th:insert="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
+    <div th:replace="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
     <section class="row vh-100">
         <div class="col-3" th:insert="~{fragments/chatListFragment.html :: chatList}"></div>
         <div class="col-9">
