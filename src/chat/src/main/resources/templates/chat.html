@@ -11,6 +11,8 @@
 <body>
     <div th:replace="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
     <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/kickMemberModal.html :: kickMemberModal}"></div>
+    <div th:replace="~{fragments/inviteMemberModal.html :: inviteMemberModal}"></div>
     <section class="row vh-100">
         <div class="col-3" th:insert="~{fragments/chatListFragment.html :: chatList}"></div>
         <div class="col-9">
@@ -34,8 +36,10 @@
                         </form>
                         <button class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#dissolveChat">Dissolve</button>
-                        <button class="btn btn-primary">Invite</button>
-                        <button class="btn btn-primary">Kick</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#inviteMember">Invite</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#kickMember">Kick</button>
                         <button class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#leaveChat">Leave</button>
                     </section>
