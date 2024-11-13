@@ -61,7 +61,7 @@ class FavoritesQueryTests {
 
     @Test
     void execute_whenUserDoesntHaveFavoriteChat_shouldReturnEmpty() {
-        Optional<List<FavoriteChatRoom>> returnedChats = favoritesQuery.execute(UUID.randomUUID());
+        List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(UUID.randomUUID());
 
         assertTrue(returnedChats.isEmpty());
     }
@@ -71,9 +71,9 @@ class FavoritesQueryTests {
         UUID userId = UUID.randomUUID();
         favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
 
-        Optional<List<FavoriteChatRoom>> returnedChats = favoritesQuery.execute(userId);
+        List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 
-        assertTrue(returnedChats.isPresent());
+        assertTrue(returnedChats.size() > 0);
     }
 
     @Test
@@ -82,9 +82,9 @@ class FavoritesQueryTests {
         favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
         favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
 
-        Optional<List<FavoriteChatRoom>> returnedChats = favoritesQuery.execute(userId);
+        List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 
-        assertTrue(returnedChats.isPresent());
-        assertEquals(2, returnedChats.get().size());
+        assertTrue(returnedChats.size() > 0);
+        assertEquals(2, returnedChats.size());
     }
 }

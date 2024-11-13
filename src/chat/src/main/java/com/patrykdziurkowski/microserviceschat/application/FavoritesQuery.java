@@ -1,7 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -16,13 +15,7 @@ public class FavoritesQuery {
         this.favoriteChatRepository = favoriteChatRepository;
     }
 
-    public Optional<List<FavoriteChatRoom>> execute(UUID currentUserId) {
-        final List<FavoriteChatRoom> favoriteChats = favoriteChatRepository.getByUserId(currentUserId);
-
-        if(favoriteChats.isEmpty() == false) {
-            return Optional.ofNullable(favoriteChats);
-        }
-
-        return Optional.empty();
+    public List<FavoriteChatRoom> execute(UUID currentUserId) {
+        return favoriteChatRepository.getByUserId(currentUserId);
     }
 }
