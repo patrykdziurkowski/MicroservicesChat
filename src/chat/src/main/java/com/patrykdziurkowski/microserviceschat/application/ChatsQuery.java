@@ -16,13 +16,7 @@ public class ChatsQuery {
         this.chatRepository = chatRepository;
     }
 
-    public Optional<List<ChatRoom>> execute(UUID currentUserId) {
-        final List<ChatRoom> chats = chatRepository.getByMemberId(currentUserId);
-
-        if(chats.isEmpty() == false) {
-            return Optional.ofNullable(chats);
-        }
-
-        return Optional.empty();
+    public List<ChatRoom> execute(UUID currentUserId) {
+        return chatRepository.getByMemberId(currentUserId);
     }
 }

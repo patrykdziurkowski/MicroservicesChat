@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ class ChatsQueryTests {
 
     @Test
     void execute_whenUserIsntMemberOfAnyChat_shouldReturnEmpty() {
-        Optional<List<ChatRoom>> returnedChats = chatsQuery.execute(UUID.randomUUID());
+        List<ChatRoom> returnedChats = chatsQuery.execute(UUID.randomUUID());
 
         assertTrue(returnedChats.isEmpty());
     }
@@ -71,9 +70,9 @@ class ChatsQueryTests {
         UUID userId = UUID.randomUUID();
         chatRepository.save(new ChatRoom(userId, "chat", false));
 
-        Optional<List<ChatRoom>> returnedChats = chatsQuery.execute(userId);
+        List<ChatRoom> returnedChats = chatsQuery.execute(userId);
 
-        assertTrue(returnedChats.isPresent());
+        assertTrue(returnedChats.size() > 0);
     }
 
     @Test
@@ -82,9 +81,9 @@ class ChatsQueryTests {
         chatRepository.save(new ChatRoom(userId, "chat", false));
         chatRepository.save(new ChatRoom(userId, "another chat", false));
 
-        Optional<List<ChatRoom>> returnedChats = chatsQuery.execute(userId);
+        List<ChatRoom> returnedChats = chatsQuery.execute(userId);
 
-        assertTrue(returnedChats.isPresent());
-        assertEquals(2, returnedChats.get().size());
+        assertTrue(returnedChats.size() > 0);
+        assertEquals(2, returnedChats.size());
     }
 }
