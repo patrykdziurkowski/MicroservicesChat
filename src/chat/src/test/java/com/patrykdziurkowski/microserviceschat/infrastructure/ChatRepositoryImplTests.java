@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -273,7 +274,7 @@ class ChatRepositoryImplTests {
     void save_shouldDeleteChatAndFavoriteChats_whenChatDissolved() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        FavoriteChatRoom favChat = new FavoriteChatRoom(chat.getId(),ownerId);
+        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
         chatRepository.save(chat);
         favoriteChatRepository.save(favChat);
 
@@ -290,8 +291,10 @@ class ChatRepositoryImplTests {
     void save_shouldDeleteChatAndNotFavoriteChats_whenChatDissolvedAndFavoritedAnotherChats() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        FavoriteChatRoom favChat = new FavoriteChatRoom(UUID.randomUUID(),ownerId);
+        ChatRoom anotherChat = new ChatRoom(ownerId, "Chat", false);
         chatRepository.save(chat);
+        chatRepository.save(anotherChat);
+        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(anotherChat)).get();
         favoriteChatRepository.save(favChat);
 
         chat.dissolve(ownerId);
@@ -299,7 +302,7 @@ class ChatRepositoryImplTests {
 
         List<ChatRoom> chats = chatRepository.get();
         List<FavoriteChatRoom> favChats = favoriteChatRepository.getByUserId(ownerId);
-        assertTrue(chats.isEmpty());
+        assertTrue(chats.size() == 1);
         assertFalse(favChats.isEmpty());
     }
 

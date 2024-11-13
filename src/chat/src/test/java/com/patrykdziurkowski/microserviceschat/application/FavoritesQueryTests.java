@@ -24,7 +24,9 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
+import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.infrastructure.FavoriteChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
@@ -42,6 +44,8 @@ class FavoritesQueryTests {
     private FavoritesQuery favoritesQuery;
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
+    @Autowired
+    private ChatRepositoryImpl chatRepository;
 
     @SuppressWarnings("resource")
     @Container
@@ -69,7 +73,9 @@ class FavoritesQueryTests {
     @Test
     void execute_whenUserHaveFavoriteChat_shouldReturnFavoriteChat() {
         UUID userId = UUID.randomUUID();
-        favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
+        ChatRoom chat = new ChatRoom(userId, "chat", false);
+        chatRepository.save(chat);
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(chat)).get());
 
         List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 
@@ -79,8 +85,11 @@ class FavoritesQueryTests {
     @Test
     void execute_whenUserHave2FavoriteChats_shouldReturnChats() {
         UUID userId = UUID.randomUUID();
-        favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
-        favoriteChatRepository.save(new FavoriteChatRoom(UUID.randomUUID(), userId));
+        ChatRoom chat = new ChatRoom(userId, "chat", false);
+        ChatRoom anotherChat = new ChatRoom(userId, "chat", false);
+        chatRepository.save(chat);
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(chat)).get());
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(anotherChat)).get());
 
         List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 

@@ -23,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
-import com.patrykdziurkowski.microserviceschat.infrastructure.MessageRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
 @SpringBootTest
@@ -38,8 +37,6 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 public class MessagePostCommandTests {
     @Autowired
     private MessagePostCommand messagePostCommand;
-    @Autowired
-    private MessageRepositoryImpl messageRepository;
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
