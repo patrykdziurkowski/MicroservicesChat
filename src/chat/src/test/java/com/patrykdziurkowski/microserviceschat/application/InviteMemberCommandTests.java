@@ -34,9 +34,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class MemberInvitationCommandTests {
+public class InviteMemberCommandTests {
     @Autowired
-    private MemberInvitationCommand memberInvitationCommand;
+    private InviteMemberCommand memberInvitationCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
 

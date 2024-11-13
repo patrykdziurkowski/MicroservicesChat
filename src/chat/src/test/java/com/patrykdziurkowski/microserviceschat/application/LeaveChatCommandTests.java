@@ -34,9 +34,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-class ChatDeletionCommandTests {
+public class LeaveChatCommandTests {
     @Autowired
-    private ChatDeletionCommand chatDeletionCommand;
+    private LeaveChatCommand memberLeaveCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
@@ -53,36 +53,36 @@ class ChatDeletionCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void chatMessagesQuery_shouldLoad() {
-        assertNotNull(chatDeletionCommand);
+    void memberLeaveCommand_shouldLoad() {
+        assertNotNull(memberLeaveCommand);
     }
 
     @Test
-    void execute_whenDeletingExistingChat_returnsTrue() {
-        UUID userId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(userId, "chat", false);
+    void execute_whenValidData_returnsTrue() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = chatDeletionCommand.execute(userId, chat.getId());
+        boolean didSucceed = memberLeaveCommand.execute(ownerId, chat.getId(), "member");
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenDeletingNonExistingChat_returnsFalse() {
-        boolean didSucceed = chatDeletionCommand.execute(UUID.randomUUID(), UUID.randomUUID());
+    void execute_whenMemberNotInChat_returnsFalse() {
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+        chatRepository.save(chat);
+
+        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), chat.getId(), "member");
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenUserIsntOwner_returnsFalse() {
-        UUID userId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
-        chatRepository.save(chat);
-
-        boolean didSucceed = chatDeletionCommand.execute(userId, chat.getId());
+    void execute_whenChatDoesntExists_returnsFalse() {
+        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID(), "member");
 
         assertFalse(didSucceed);
     }
+
 }

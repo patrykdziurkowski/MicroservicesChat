@@ -34,12 +34,11 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class MemberLeaveCommandTests {
+public class PostMessageCommandTests {
     @Autowired
-    private MemberLeaveCommand memberLeaveCommand;
+    private PostMessageCommand messagePostCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
 
     @SuppressWarnings("resource")
     @Container
@@ -53,34 +52,36 @@ public class MemberLeaveCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void memberLeaveCommand_shouldLoad() {
-        assertNotNull(memberLeaveCommand);
+    void messagePostCommand_shouldLoad() {
+        assertNotNull(messagePostCommand);
     }
 
     @Test
-    void execute_whenValidData_returnsTrue() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+    void execute_whenProvidedValidData_shouldReturnTrue() {
+        UUID userId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(userId, "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = memberLeaveCommand.execute(ownerId, chat.getId(), "member");
+        boolean didSucceed = messagePostCommand.execute(chat.getId(), "text", userId);
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenMemberNotInChat_returnsFalse() {
+    void execute_whenUserNotInChat_shouldReturnFalse() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), chat.getId(), "member");
+        boolean didSucceed = messagePostCommand.execute(chat.getId(), "text", UUID.randomUUID());
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenChatDoesntExists_returnsFalse() {
-        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID(), "member");
+    void execute_whenChatDoesntExists_shouldReturnFalse() {
+        UUID userId = UUID.randomUUID();
+
+        boolean didSucceed = messagePostCommand.execute(UUID.randomUUID(), "text", userId);
 
         assertFalse(didSucceed);
     }

@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 
 @Service
-public class FavoriteUnsetCommand {
+public class UnsetFavoriteCommand {
     private final FavoriteChatRepository favoriteChatRepository;
 
-    public FavoriteUnsetCommand(FavoriteChatRepository favoriteChatRepository) {
+    public UnsetFavoriteCommand(FavoriteChatRepository favoriteChatRepository) {
         this.favoriteChatRepository = favoriteChatRepository;
     }
 

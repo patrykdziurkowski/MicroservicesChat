@@ -37,9 +37,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-class ChatCreationCommandTests {
+class CreateChatCommandTests {
     @Autowired
-    private ChatCreationCommand chatCreationCommand;
+    private CreateChatCommand chatCreationCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
 

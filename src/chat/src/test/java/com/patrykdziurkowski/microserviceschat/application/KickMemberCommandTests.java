@@ -34,13 +34,14 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class FavoriteUnsetCommandTests {
+public class KickMemberCommandTests {
     @Autowired
-    private FavoriteUnsetCommand favoriteUnsetCommand;
+    private KickMemberCommand memberRemoveCommand;
     @Autowired
-    private FavoriteSetCommand favoriteSetCommand;
+    private InviteMemberCommand memberInvitationCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
+
 
     @SuppressWarnings("resource")
     @Container
@@ -54,36 +55,56 @@ public class FavoriteUnsetCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void favoriteUnsetCommand_shouldLoad() {
-        assertNotNull(favoriteUnsetCommand);
+    void memberRemoveCommand_shouldLoad() {
+        assertNotNull(memberRemoveCommand);
     }
 
     @Test
-    void execute_whenGivenValidData_returnsTrue() {
+    void execute_whenValidData_returnsTrue() {
         UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        favoriteSetCommand.execute(ownerId, chat.getId());
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
 
-        boolean didSucceed = favoriteUnsetCommand.execute(ownerId, chat.getId());
+        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), memberId, "member");
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenMemberNotInChat_reuturnsFalse() {
-        boolean didSucceed = favoriteUnsetCommand.execute(UUID.randomUUID(), UUID.randomUUID());
+    void execute_whenNonOwnerTriesToRemoveMember_returnsFalse() {
+        UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
+
+        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenNotFavorite_returnsFalse() {
+    void execute_whenOwnerTriesToRemoveThemselves_returnsFalse() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = favoriteUnsetCommand.execute(ownerId, chat.getId());
+        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), ownerId, "member");
+
+        assertFalse(didSucceed);
+    }
+
+    @Test
+    void execute_whenNonMemberTriesToRemoveMember_returnsFalse() {
+        UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
+
+        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
 
         assertFalse(didSucceed);
     }

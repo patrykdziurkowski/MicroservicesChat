@@ -9,25 +9,25 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
 @Service
-public class MessagePostCommand {
+public class RemoveMessageCommand {
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
 
-    public MessagePostCommand(MessageRepository messageRepository, ChatRepository chatRepository) {
+    public RemoveMessageCommand(MessageRepository messageRepository, ChatRepository chatRepository) {
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
     }
 
-    public boolean execute(UUID chatId, String text, UUID currentUserId) {
-        final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
-        if(retrievedChat.isEmpty()) {
+    public boolean execute(UUID currentUserId, UUID messageId) {
+        final Optional<UserMessage> retrievedMessage = messageRepository.getById(messageId);
+        if(retrievedMessage.isEmpty()) {
             return false;
         }
-        final ChatRoom chat = retrievedChat.get();
-        if(chat.getMemberIds().contains(currentUserId) == false) {
+        UserMessage message = retrievedMessage.get();
+        final ChatRoom chat = chatRepository.getById(message.getChatRoomId()).get();
+        if(message.delete(currentUserId, chat.getOwnerId()) == false) {
             return false;
         }
-        UserMessage message = new UserMessage(chatId, text, currentUserId);
         messageRepository.save(message);
         return true;
     }

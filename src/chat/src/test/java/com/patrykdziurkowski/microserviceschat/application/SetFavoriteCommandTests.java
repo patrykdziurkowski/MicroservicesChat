@@ -34,14 +34,11 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class MemberRemoveCommandTests {
+public class SetFavoriteCommandTests {
     @Autowired
-    private MemberRemoveCommand memberRemoveCommand;
-    @Autowired
-    private MemberInvitationCommand memberInvitationCommand;
+    private SetFavoriteCommand favoriteSetCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
 
     @SuppressWarnings("resource")
     @Container
@@ -55,56 +52,38 @@ public class MemberRemoveCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void memberRemoveCommand_shouldLoad() {
-        assertNotNull(memberRemoveCommand);
+    void favoriteSetCommand_shouldLoad() {
+        assertNotNull(favoriteSetCommand);
     }
 
     @Test
     void execute_whenValidData_returnsTrue() {
-        UUID ownerId = UUID.randomUUID();
         UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "text", false);
+        chat.join(memberId, "member");
         chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
 
-        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), memberId, "member");
+        boolean didSucceed = favoriteSetCommand.execute(memberId, chat.getId());
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenNonOwnerTriesToRemoveMember_returnsFalse() {
-        UUID ownerId = UUID.randomUUID();
+    void execute_whenMemberNotInChat_returnsFalse() {
         UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "text", false);
         chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
 
-        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
+        boolean didSucceed = favoriteSetCommand.execute(memberId, chat.getId());
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenOwnerTriesToRemoveThemselves_returnsFalse() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        chatRepository.save(chat);
-
-        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), ownerId, "member");
-
-        assertFalse(didSucceed);
-    }
-
-    @Test
-    void execute_whenNonMemberTriesToRemoveMember_returnsFalse() {
-        UUID ownerId = UUID.randomUUID();
+    void execute_whenChatDoesntExists_returnsFalse() {
         UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
 
-        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
+        boolean didSucceed = favoriteSetCommand.execute(memberId, UUID.randomUUID());
 
         assertFalse(didSucceed);
     }

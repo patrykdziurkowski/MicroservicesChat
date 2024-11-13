@@ -22,9 +22,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
-import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
-import com.patrykdziurkowski.microserviceschat.infrastructure.MessageRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
 @SpringBootTest
@@ -36,11 +34,9 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Testcontainers
-public class MessageRemoveCommandTests {
+class DeleteChatCommandTests {
     @Autowired
-    private MessageRemoveCommand messageRemoveCommand;
-    @Autowired
-    private MessageRepositoryImpl messageRepository;
+    private DeleteChatCommand chatDeletionCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
@@ -57,65 +53,36 @@ public class MessageRemoveCommandTests {
             .withPassword("examplePassword123");
 
     @Test
-    void messageRemoveCommand_shouldLoad() {
-        assertNotNull(messageRemoveCommand);
+    void chatMessagesQuery_shouldLoad() {
+        assertNotNull(chatDeletionCommand);
     }
 
     @Test
-    void execute_whenValidData_returnsTrue() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        UserMessage message = new UserMessage(chat.getId(), "text", ownerId);
+    void execute_whenDeletingExistingChat_returnsTrue() {
+        UUID userId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(userId, "chat", false);
         chatRepository.save(chat);
-        messageRepository.save(message);
 
-        boolean didSucceed = messageRemoveCommand.execute(ownerId, message.getId());
+        boolean didSucceed = chatDeletionCommand.execute(userId, chat.getId());
 
         assertTrue(didSucceed);
     }
 
     @Test
-    void execute_whenOwnerOfChatRemovesMembersMessage_returnsTrue() {
-        UUID ownerId = UUID.randomUUID();
-        UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        UserMessage message = new UserMessage(chat.getId(), "text", memberId);
-        chat.join(memberId, "member");
-        chatRepository.save(chat);
-        messageRepository.save(message);
-
-        boolean didSucceed = messageRemoveCommand.execute(ownerId, message.getId());
-
-        assertTrue(didSucceed);
-    }
-
-    @Test
-    void execute_whenMemberTriesToRemoveAnotherMembersMessage_returnsFalse() {
-        UUID ownerId = UUID.randomUUID();
-        UUID memberId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        UserMessage message = new UserMessage(chat.getId(), "text", ownerId);
-        chat.join(memberId, "member");
-        chatRepository.save(chat);
-        messageRepository.save(message);
-
-        boolean didSucceed = messageRemoveCommand.execute(memberId, message.getId());
+    void execute_whenDeletingNonExistingChat_returnsFalse() {
+        boolean didSucceed = chatDeletionCommand.execute(UUID.randomUUID(), UUID.randomUUID());
 
         assertFalse(didSucceed);
     }
 
     @Test
-    void execute_whenNonMemberTriesToRemoveMessage_returnsFalse() {
-        UUID ownerId = UUID.randomUUID();
-        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
-        UserMessage message = new UserMessage(chat.getId(), "text", ownerId);
+    void execute_whenUserIsntOwner_returnsFalse() {
+        UUID userId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
-        messageRepository.save(message);
 
-        boolean didSucceed = messageRemoveCommand.execute(UUID.randomUUID(), message.getId());
+        boolean didSucceed = chatDeletionCommand.execute(userId, chat.getId());
 
         assertFalse(didSucceed);
     }
-
-
 }

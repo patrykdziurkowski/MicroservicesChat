@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 
 @Service
-public class FavoriteSetCommand {
+public class SetFavoriteCommand {
     private final FavoriteChatRepository favoriteChatRepository;
     private final ChatRepository chatRepository;
 
-    public FavoriteSetCommand(FavoriteChatRepository favoriteChatRepository, ChatRepository chatRepository) {
+    public SetFavoriteCommand(FavoriteChatRepository favoriteChatRepository, ChatRepository chatRepository) {
         this.favoriteChatRepository = favoriteChatRepository;
         this.chatRepository = chatRepository;
     }

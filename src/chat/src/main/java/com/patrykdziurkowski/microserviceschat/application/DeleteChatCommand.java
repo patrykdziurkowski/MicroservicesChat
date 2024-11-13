@@ -8,20 +8,20 @@ import org.springframework.stereotype.Service;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @Service
-public class MemberInvitationCommand {
+public class DeleteChatCommand {
     private final ChatRepository chatRepository;
 
-    public MemberInvitationCommand(ChatRepository chatRepository) {
+    public DeleteChatCommand(ChatRepository chatRepository) {
         this.chatRepository = chatRepository;
     }
 
-    public boolean execute(UUID currentUserId, UUID chatId, UUID invitedMemberId, String invitedMemberUsername) {
+    public boolean execute(UUID currentUserId, UUID chatId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }
         ChatRoom chat = retrievedChat.get();
-        if(chat.inviteMember(invitedMemberId, invitedMemberUsername, currentUserId) == false) {
+        if(chat.dissolve(currentUserId) == false) {
             return false;
         }
         chatRepository.save(chat);

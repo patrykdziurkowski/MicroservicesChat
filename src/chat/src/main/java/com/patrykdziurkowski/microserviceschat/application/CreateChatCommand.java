@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @Service
-public class ChatCreationCommand {
+public class CreateChatCommand {
     private final ChatRepository chatRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ChatCreationCommand(ChatRepository chatRepository, PasswordEncoder passwordEncoder) {
+    public CreateChatCommand(ChatRepository chatRepository, PasswordEncoder passwordEncoder) {
         this.chatRepository = chatRepository;
         this.passwordEncoder = passwordEncoder;
     }

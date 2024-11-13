@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @Service
-public class MemberJoinCommand {
+public class JoinChatCommand {
     private final ChatRepository chatRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public MemberJoinCommand(ChatRepository chatRepository, PasswordEncoder passwordEncoder) {
+    public JoinChatCommand(ChatRepository chatRepository, PasswordEncoder passwordEncoder) {
         this.chatRepository = chatRepository;
         this.passwordEncoder = passwordEncoder;
     }
