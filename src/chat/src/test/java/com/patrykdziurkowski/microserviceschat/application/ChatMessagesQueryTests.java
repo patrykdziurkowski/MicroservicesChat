@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -64,7 +63,7 @@ class ChatMessagesQueryTests {
 
     @Test
     void execute_whenChatDoesntExists_shouldReturnEmpty() {
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(UUID.randomUUID(), 0, 20);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(UUID.randomUUID(), 0, 20);
 
         assertTrue(returnedMessages.isEmpty());
     }
@@ -75,10 +74,10 @@ class ChatMessagesQueryTests {
         chat.join(UUID.randomUUID(), "member");
         chatRepository.save(chat);
 
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
 
-        assertTrue(returnedMessages.isPresent());
-        assertEquals(1, returnedMessages.get().size());
+        assertTrue(returnedMessages.size() > 0);
+        assertEquals(1, returnedMessages.size());
     }
 
     @Test
@@ -88,10 +87,10 @@ class ChatMessagesQueryTests {
         chatRepository.save(chat);
         messageRepository.save(message);
 
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
 
-        assertTrue(returnedMessages.isPresent());
-        assertEquals(1, returnedMessages.get().size());
+        assertTrue(returnedMessages.size() > 0);
+        assertEquals(1, returnedMessages.size());
     }
 
     @Test
@@ -102,10 +101,10 @@ class ChatMessagesQueryTests {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 2);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 2);
 
-        assertTrue(returnedMessages.isPresent());
-        assertEquals(2, returnedMessages.get().size());
+        assertTrue(returnedMessages.size() > 0);
+        assertEquals(2, returnedMessages.size());
     }
 
     @Test
@@ -116,10 +115,10 @@ class ChatMessagesQueryTests {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(chat.getId(), 2, 20);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 2, 20);
 
-        assertTrue(returnedMessages.isPresent());
-        assertEquals(3, returnedMessages.get().size());
+        assertTrue(returnedMessages.size() > 0);
+        assertEquals(3, returnedMessages.size());
     }
 
     @Test
@@ -130,7 +129,7 @@ class ChatMessagesQueryTests {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
-        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(chat.getId(), 20, 20);
+        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 20, 20);
 
         assertTrue(returnedMessages.isEmpty());
     }
