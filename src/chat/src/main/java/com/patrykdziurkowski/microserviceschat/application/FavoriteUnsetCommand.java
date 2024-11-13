@@ -23,11 +23,12 @@ public class FavoriteUnsetCommand {
         }
         Optional<FavoriteChatRoom> foundFavoriteChat = findFavoriteChatById(chatId, retrievedFavoriteChats);
         boolean operationSucceeded = foundFavoriteChat.isPresent() && foundFavoriteChat.get().unsetFavorite(currentUserId);
-        if(operationSucceeded) {
-            favoriteChatRepository.save(foundFavoriteChat.get());
-            return true;
+        if(operationSucceeded == false) {
+            return false;
         }
-        return false;
+        favoriteChatRepository.save(foundFavoriteChat.get());
+        return true;
+        
     }
 
     private Optional<FavoriteChatRoom> findFavoriteChatById(UUID chatId, List<FavoriteChatRoom> listOfFavoriteChats) {
