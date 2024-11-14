@@ -25,13 +25,12 @@ public class SetFavoriteCommand {
         }
 
         Optional<FavoriteChatRoom> favoriteChatRoom = FavoriteChatRoom.set(currentUserId, chat.orElseThrow());
-
-        if (favoriteChatRoom.isPresent()) {
-            favoriteChatRepository.save(favoriteChatRoom.get());
-            return true;
+        if (favoriteChatRoom.isEmpty()) {
+            return false;
         }
 
-        return false;
+        favoriteChatRepository.save(favoriteChatRoom.get());
+        return true;
     }
 
 }
