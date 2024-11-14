@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 
 @Service
@@ -18,15 +19,19 @@ public class SetFavoriteCommand {
     }
 
     public boolean execute(UUID currentUserId, UUID chatId) {
-        Optional<FavoriteChatRoom> favoriteChatRoom = FavoriteChatRoom.set(currentUserId, chatRepository.getById(chatId));
+        Optional<ChatRoom> chat = chatRepository.getById(chatId);
+        if (chat.isEmpty()) {
+            return false;
+        }
+
+        Optional<FavoriteChatRoom> favoriteChatRoom = FavoriteChatRoom.set(currentUserId, chat.orElseThrow());
 
         if (favoriteChatRoom.isPresent()) {
             favoriteChatRepository.save(favoriteChatRoom.get());
             return true;
         }
-        
+
         return false;
     }
-    
-}
 
+}

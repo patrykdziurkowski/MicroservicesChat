@@ -10,13 +10,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace; 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;  
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
@@ -32,7 +32,6 @@ public class FavoriteChatRepositoryImplTests {
     private FavoriteChatRepositoryImpl favoriteChatRepository;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
 
     @SuppressWarnings("resource")
     @Container
@@ -62,12 +61,12 @@ public class FavoriteChatRepositoryImplTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
         favoriteChatRepository.save(favoriteChat);
 
         FavoriteChatRoom returnedChat = favoriteChatRepository
-            .getById(favoriteChat.getId())
-            .get();
+                .getById(favoriteChat.getId())
+                .get();
 
         assertTrue(favoriteChat.getId().equals(returnedChat.getId()));
     }
@@ -75,7 +74,7 @@ public class FavoriteChatRepositoryImplTests {
     @Test
     void getById_shouldReturnEmpty_whenGivenWrongId() {
         Optional<FavoriteChatRoom> returnedChat = favoriteChatRepository
-            .getById(UUID.randomUUID());
+                .getById(UUID.randomUUID());
 
         assertTrue(returnedChat.isEmpty());
     }
@@ -92,16 +91,16 @@ public class FavoriteChatRepositoryImplTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
         favoriteChatRepository.save(favoriteChat);
 
         List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(ownerId);
 
         assertTrue(returnedChats.isEmpty() == false);
         assertTrue(returnedChats
-            .get(0)
-            .getUserId()
-            .equals(favoriteChat.getUserId()));
+                .get(0)
+                .getUserId()
+                .equals(favoriteChat.getUserId()));
     }
 
     @Test
@@ -109,7 +108,7 @@ public class FavoriteChatRepositoryImplTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
         favoriteChatRepository.save(favoriteChat);
 
         favoriteChat.unsetFavorite(favoriteChat.getUserId());
@@ -124,7 +123,7 @@ public class FavoriteChatRepositoryImplTests {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
         favoriteChatRepository.save(favoriteChat);
 
         favoriteChatRepository.save(favoriteChat);

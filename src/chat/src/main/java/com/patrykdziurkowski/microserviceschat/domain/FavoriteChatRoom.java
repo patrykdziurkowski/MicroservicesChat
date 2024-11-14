@@ -16,7 +16,8 @@ public class FavoriteChatRoom extends AggreggateRoot {
     private UUID chatRoomId;
     private UUID userId;
 
-    private FavoriteChatRoom() {}
+    private FavoriteChatRoom() {
+    }
 
     public boolean unsetFavorite(UUID currentUserId) {
         if (currentUserId != userId) {
@@ -26,16 +27,16 @@ public class FavoriteChatRoom extends AggreggateRoot {
         return true;
     }
 
-    public static Optional<FavoriteChatRoom> set(UUID currentUserId, Optional<ChatRoom> retrievedChat) {
-        if (retrievedChat.isEmpty() || retrievedChat.get().getMemberIds().contains(currentUserId) == false) {
+    public static Optional<FavoriteChatRoom> set(UUID currentUserId, ChatRoom retrievedChat) {
+        if (retrievedChat.getMemberIds().contains(currentUserId) == false) {
             return Optional.empty();
         }
 
         FavoriteChatRoom favoriteChatRoom = new FavoriteChatRoom();
         favoriteChatRoom.setId(UUID.randomUUID());
-        favoriteChatRoom.setChatRoomId(retrievedChat.get().getId());
+        favoriteChatRoom.setChatRoomId(retrievedChat.getId());
         favoriteChatRoom.setUserId(currentUserId);
-        
+
         return Optional.of(favoriteChatRoom);
     }
 

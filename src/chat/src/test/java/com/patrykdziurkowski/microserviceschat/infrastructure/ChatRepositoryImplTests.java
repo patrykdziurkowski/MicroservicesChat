@@ -5,19 +5,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace; 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;  
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
@@ -179,7 +178,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.size() == 1);
         assertTrue(messages.size() == 1);
         assertTrue(messages.get(0).getText().equals("username joined!"));
@@ -194,7 +193,7 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.size() == 1);
         assertTrue(messages.size() == 1);
         assertTrue(messages.get(0).getText().equals("username joined through invite!"));
@@ -210,11 +209,11 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> messages = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.size() == 1);
         assertTrue(messages.size() == 2);
-        assertTrue((messages.get(0).getText().equals("username got removed!") 
-            || messages.get(1).getText().equals("username got removed!")));
+        assertTrue((messages.get(0).getText().equals("username got removed!")
+                || messages.get(1).getText().equals("username got removed!")));
     }
 
     @Test
@@ -228,11 +227,11 @@ class ChatRepositoryImplTests {
         chatRepository.save(chat);
 
         List<ChatRoom> chats = chatRepository.get();
-        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0 , 20);
+        List<UserMessage> msgs = messageRepository.getByAmount(chat.getId(), 0, 20);
         assertTrue(chats.size() == 1);
         assertTrue(msgs.size() == 2);
-        assertTrue((msgs.get(0).getText().equals("username left!") 
-            || msgs.get(1).getText().equals("username left!")));
+        assertTrue((msgs.get(0).getText().equals("username left!")
+                || msgs.get(1).getText().equals("username left!")));
     }
 
     @Test
@@ -274,7 +273,7 @@ class ChatRepositoryImplTests {
     void save_shouldDeleteChatAndFavoriteChats_whenChatDissolved() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
-        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(chat)).get();
+        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, chat).get();
         chatRepository.save(chat);
         favoriteChatRepository.save(favChat);
 
@@ -294,7 +293,7 @@ class ChatRepositoryImplTests {
         ChatRoom anotherChat = new ChatRoom(ownerId, "Chat", false);
         chatRepository.save(chat);
         chatRepository.save(anotherChat);
-        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, Optional.ofNullable(anotherChat)).get();
+        FavoriteChatRoom favChat = FavoriteChatRoom.set(ownerId, anotherChat).get();
         favoriteChatRepository.save(favChat);
 
         chat.dissolve(ownerId);
@@ -305,6 +304,5 @@ class ChatRepositoryImplTests {
         assertTrue(chats.size() == 1);
         assertFalse(favChats.isEmpty());
     }
-
 
 }

@@ -1,12 +1,10 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -75,7 +73,7 @@ class FavoritesQueryTests {
         UUID userId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(userId, "chat", false);
         chatRepository.save(chat);
-        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(chat)).get());
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, chat).get());
 
         List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 
@@ -88,8 +86,8 @@ class FavoritesQueryTests {
         ChatRoom chat = new ChatRoom(userId, "chat", false);
         ChatRoom anotherChat = new ChatRoom(userId, "chat", false);
         chatRepository.save(chat);
-        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(chat)).get());
-        favoriteChatRepository.save(FavoriteChatRoom.set(userId, Optional.ofNullable(anotherChat)).get());
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, chat).get());
+        favoriteChatRepository.save(FavoriteChatRoom.set(userId, anotherChat).get());
 
         List<FavoriteChatRoom> returnedChats = favoritesQuery.execute(userId);
 
