@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat!</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+</head>
+
+<body>
+    <div th:replace="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/kickMemberModal.html :: kickMemberModal}"></div>
+    <div th:replace="~{fragments/inviteMemberModal.html :: inviteMemberModal}"></div>
+    <section class="row vh-100">
+        <div class="col-3" th:insert="~{fragments/chatListFragment.html :: chatList}"></div>
+        <div class="col-9">
+            <div class="row h-100">
+                <section class="col-9 d-flex flex-column align-items-start">
+                    <section class="w-100">
+                        <article class="card">
+                            <p class="card-text">Announcement contents</p>
+                            <p class="card-text">Date</p>
+                        </article>
+                        <article class="card">
+                            <h5 class="card-title">Member name</h5>
+                            <p class="card-text">Message contents</p>
+                            <p class="card-text">Date</p>
+                        </article>
+                    </section>
+                    <section class="mt-auto w-100">
+                        <form>
+                            <input type="text" placeholder="Your message here...">
+                            <input type="submit" class="btn btn-primary" value="Send">
+                        </form>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#dissolveChat">Dissolve</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#inviteMember">Invite</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#kickMember">Kick</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#leaveChat">Leave</button>
+                    </section>
+                </section>
+                <section class="col-3">
+                    <div class="card">
+                        <p class="card-title">Member name</p>
+                    </div>
+                    <div class="card">
+                        <p class="card-title">Member name</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</body>
+
+</html>

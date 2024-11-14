@@ -8,8 +8,8 @@ services:
         CHAT_DOMAIN: ${CHAT_DOMAIN:-localhost}
         CHAT_MODULE_ADDRESS: ${CHAT_MODULE_ADDRESS:-chat:8080}
     ports:
-      - "80:80" # For HTTP
-      - "443:443" # For HTTPS
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -20,18 +20,23 @@ services:
     build:
       context: ./src/chat
       dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - IS_PRODUCTION=${IS_PRODUCTION:-false}
     depends_on:
-      db:
+      db-chat:
         condition: service_healthy
       auth:
         condition: service_healthy
     networks:
       - shared
       - chat
-  db:
-    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
+    volumes:
+      - ./src/chat/src/main/resources/templates:/app/src/main/resources/templates
+  db-chat:
+    image: ${REGISTRY_PATH:-localhost}/mc_db-chat:latest
     build:
-      context: ./src/db
+      context: ./src/db-chat
       dockerfile: Dockerfile
       args:
         password: ${MSSQL_SA_PASSWORD}
