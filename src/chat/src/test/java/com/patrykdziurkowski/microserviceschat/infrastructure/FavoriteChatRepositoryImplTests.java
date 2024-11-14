@@ -1,6 +1,5 @@
 package com.patrykdziurkowski.microserviceschat.infrastructure;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -8,19 +7,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace; 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;  
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
@@ -31,7 +30,8 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 public class FavoriteChatRepositoryImplTests {
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
-
+    @Autowired
+    private ChatRepositoryImpl chatRepository;
 
     @SuppressWarnings("resource")
     @Container
@@ -58,23 +58,23 @@ public class FavoriteChatRepositoryImplTests {
 
     @Test
     void getById_shouldReturnChat_whenFavoriteChatRoomInDatabase() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
-        favoriteChatRepository.save(chat);
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
+        favoriteChatRepository.save(favoriteChat);
 
         FavoriteChatRoom returnedChat = favoriteChatRepository
-            .getById(chat.getId())
-            .get();
+                .getById(favoriteChat.getId())
+                .get();
 
-        assertTrue(chat.getId().equals(returnedChat.getId()));
+        assertTrue(favoriteChat.getId().equals(returnedChat.getId()));
     }
 
     @Test
     void getById_shouldReturnEmpty_whenGivenWrongId() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
-        favoriteChatRepository.save(chat);
-
         Optional<FavoriteChatRoom> returnedChat = favoriteChatRepository
-            .getById(UUID.randomUUID());
+                .getById(UUID.randomUUID());
 
         assertTrue(returnedChat.isEmpty());
     }
@@ -88,38 +88,48 @@ public class FavoriteChatRepositoryImplTests {
 
     @Test
     void getByUserId_shouldReturnChat_whenUserDoesHaveFavorite() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
-        favoriteChatRepository.save(chat);
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
+        favoriteChatRepository.save(favoriteChat);
 
-        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(chat.getUserId());
+        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(ownerId);
 
         assertTrue(returnedChats.isEmpty() == false);
         assertTrue(returnedChats
-            .get(0)
-            .getUserId()
-            .equals(chat.getUserId()));
+                .get(0)
+                .getUserId()
+                .equals(favoriteChat.getUserId()));
     }
 
     @Test
     void save_shouldntReturnChat_whenFavoriteIsUnset() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
-        favoriteChatRepository.save(chat);
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
+        favoriteChatRepository.save(favoriteChat);
 
-        chat.unsetFavorite(chat.getUserId());
-        favoriteChatRepository.save(chat);
-        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(chat.getUserId());
+        favoriteChat.unsetFavorite(favoriteChat.getUserId());
+        favoriteChatRepository.save(favoriteChat);
+        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(favoriteChat.getUserId());
 
         assertTrue(returnedChats.isEmpty());
     }
 
     @Test
     void save_shouldReturn1Chat_whenTheSameIsSetAgain() {
-        FavoriteChatRoom chat = new FavoriteChatRoom(UUID.randomUUID(), UUID.randomUUID());
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        FavoriteChatRoom favoriteChat = FavoriteChatRoom.set(ownerId, chat).get();
+        favoriteChatRepository.save(favoriteChat);
 
-        favoriteChatRepository.save(chat);
-        favoriteChatRepository.save(chat);
+        favoriteChatRepository.save(favoriteChat);
+        favoriteChatRepository.save(favoriteChat);
 
-        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(chat.getUserId());
+        List<FavoriteChatRoom> returnedChats = favoriteChatRepository.getByUserId(favoriteChat.getUserId());
 
         assertTrue(returnedChats.isEmpty() == false);
         assertTrue(returnedChats.size() == 1);

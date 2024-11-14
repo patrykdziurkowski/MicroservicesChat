@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.FavoriteUnsetEvent;
@@ -15,13 +16,7 @@ public class FavoriteChatRoom extends AggreggateRoot {
     private UUID chatRoomId;
     private UUID userId;
 
-    FavoriteChatRoom() {
-    }
-
-    public FavoriteChatRoom(UUID chatRoomId, UUID currentUserId) {
-        this.id = UUID.randomUUID();
-        this.chatRoomId = chatRoomId;
-        this.userId = currentUserId;
+    private FavoriteChatRoom() {
     }
 
     public boolean unsetFavorite(UUID currentUserId) {
@@ -30,6 +25,19 @@ public class FavoriteChatRoom extends AggreggateRoot {
         }
         raiseDomainEvent(new FavoriteUnsetEvent());
         return true;
+    }
+
+    public static Optional<FavoriteChatRoom> set(UUID currentUserId, ChatRoom retrievedChat) {
+        if (retrievedChat.getMemberIds().contains(currentUserId) == false) {
+            return Optional.empty();
+        }
+
+        FavoriteChatRoom favoriteChatRoom = new FavoriteChatRoom();
+        favoriteChatRoom.setId(UUID.randomUUID());
+        favoriteChatRoom.setChatRoomId(retrievedChat.getId());
+        favoriteChatRoom.setUserId(currentUserId);
+
+        return Optional.of(favoriteChatRoom);
     }
 
     public UUID getId() {
@@ -42,6 +50,18 @@ public class FavoriteChatRoom extends AggreggateRoot {
 
     public UUID getUserId() {
         return userId;
+    }
+
+    private void setId(UUID id) {
+        this.id = id;
+    }
+
+    private void setChatRoomId(UUID chatRoomId) {
+        this.chatRoomId = chatRoomId;
+    }
+
+    private void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
 }
