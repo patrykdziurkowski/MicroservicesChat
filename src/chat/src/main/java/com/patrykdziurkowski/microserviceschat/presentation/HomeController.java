@@ -26,6 +26,11 @@ public class HomeController {
         return "login";
     }
 
+    @GetMapping("/logout")
+    public String logout() {
+        return "login";
+    }
+
     @GetMapping("/chats")
     public String chats(Model model) {
         model.addAttribute("title", "Test title changed");
