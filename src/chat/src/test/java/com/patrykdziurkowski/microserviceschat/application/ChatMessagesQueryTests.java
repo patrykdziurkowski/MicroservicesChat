@@ -97,7 +97,7 @@ class ChatMessagesQueryTests {
     void execute_whenChatExistsAndMessagesPosted_shouldReturnSpecifiedNumberOfMessages() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
@@ -111,7 +111,7 @@ class ChatMessagesQueryTests {
     void execute_whenChatExistsAndMessagesPosted_shouldReturnOnlyRemainingMessages() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
@@ -125,7 +125,7 @@ class ChatMessagesQueryTests {
     void execute_whenChatExistsAndMessagesPosted_shouldntReturnAnyMessages() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
         }
 
@@ -135,4 +135,3 @@ class ChatMessagesQueryTests {
     }
 
 }
-
