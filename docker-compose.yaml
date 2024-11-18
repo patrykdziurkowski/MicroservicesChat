@@ -23,6 +23,8 @@ services:
     environment:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - IS_PRODUCTION=${IS_PRODUCTION:-false}
+    ports:
+      - 5006:5006
     depends_on:
       db-chat:
         condition: service_healthy
@@ -52,6 +54,8 @@ services:
     environment:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - 5005:5005
     depends_on:
       db-auth:
         condition: service_healthy
