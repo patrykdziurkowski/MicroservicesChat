@@ -2,6 +2,7 @@ package com.patrykdziurkowski.microserviceschat.presentation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -143,6 +144,25 @@ class UserControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
+    }
+
+    @Test
+    void validateToken_shouldReturnBadRequest_whenNoTokenProvided() throws Exception {
+        mockMvc.perform(get("/authenticate")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void validateToken_shouldReturnOk_whenValidTokenProvided() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String userName = "oldUserName";
+        String token = jwtTokenManager.generateToken(userId, userName);
+
+        mockMvc.perform(get("/authenticate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
     }
 
     @ParameterizedTest

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,6 +56,16 @@ public class UserController {
         return ResponseEntity.ok()
                 .header("Content-Type", "application/json")
                 .body(token);
+    }
+
+    @GetMapping("/authenticate")
+    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
+        Optional<UserClaims> result = authenticate(authorizationHeader);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/username")
