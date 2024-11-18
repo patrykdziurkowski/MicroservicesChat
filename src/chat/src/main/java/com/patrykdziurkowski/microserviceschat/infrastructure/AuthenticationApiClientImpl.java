@@ -13,8 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
+
 @Component
-public class AuthenticationApiClientImpl {
+public class AuthenticationApiClientImpl implements AuthenticationApiClient {
     private final RestTemplate restTemplate;
     @Value("${auth.server.uri}")
     private String authServerUri;

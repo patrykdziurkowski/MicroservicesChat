@@ -14,9 +14,11 @@
             <p class="card-text">Member count and password icon</p>
         </section>
     </div>
-    <section class="mt-auto">
-        <h5>Username</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
-        <a th:href="@{/logout}" class="btn btn-primary">Logout</a>
+    <section class="mt-auto row">
+        <h5 class="col">Username</h5>
+        <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
+        <form class="col" th:action="@{/logout}" method="POST">
+            <input type="submit" class="btn btn-primary" value="Logout">
+        </form>
     </section>
 </div>

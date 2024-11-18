@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -35,6 +37,8 @@ class ChatRepositoryImplTests {
     private MessageRepositoryImpl messageRepository;
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
+    @MockBean
+    private RestTemplate restTemplate;
 
     @SuppressWarnings("resource")
     @Container

@@ -23,8 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 
-import jakarta.annotation.Nullable;
-
 @SpringBootTest(properties = {
         // disable the chat database for these tests to avoid loading them
         "spring.jpa.hibernate.ddl-auto=none"
@@ -47,9 +45,6 @@ class AuthenticationApiClientImplTests {
             .withEnv("MSSQL_SA_PASSWORD", "exampleP@ssword123")
             .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
             .withBuild(true);
-
-    @Nullable
-    private String token;
 
     @BeforeAll
     static void setup() {
@@ -101,7 +96,6 @@ class AuthenticationApiClientImplTests {
     @Order(6)
     void sendLoginRequest_shouldReturnToken_whenValidCredentials() {
         Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
-        token = result.orElseThrow();
 
         assertTrue(result.isPresent());
         assertNotNull(result.orElseThrow());
@@ -119,8 +113,12 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(8)
     void sendTokenValidationRequest_shouldReturnTrue_givenValidToken() {
+        Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        String token = result.orElseThrow();
+
         boolean isSuccess = apiClient.sendTokenValidationRequest(token);
 
+        assertNotNull(token);
         assertTrue(isSuccess);
     }
 }
