@@ -27,7 +27,7 @@ public class ChatMessageController {
     private final RemoveMessageCommand removeMessageCommand;
     private final ChatMessagesQuery chatMessagesQuery;
 
-    private static final int NUMBER_OF_MESSAGES_TO_RETRIVE = 20;
+    private static final int NUMBER_OF_MESSAGES_TO_RETRIEVE = 20;
 
     public ChatMessageController(PostMessageCommand addMessageCommand, 
                                 RemoveMessageCommand deleteMessageCommand,
@@ -62,7 +62,7 @@ public class ChatMessageController {
     @GetMapping("/chats/{chatId}/messages")
     public ResponseEntity<List<UserMessage>> getMessages(@PathVariable UUID chatId,
                                                         @RequestParam(defaultValue = "0") int offset) {
-        List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIVE);
+        List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIEVE);
         if(messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
