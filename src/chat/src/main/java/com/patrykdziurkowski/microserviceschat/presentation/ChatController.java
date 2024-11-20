@@ -19,8 +19,8 @@ import jakarta.validation.Valid;
 
 @RestController
 public class ChatController {
-    private CreateChatCommand createChatCommand;
-    private DeleteChatCommand deleteChatCommand;
+    private final CreateChatCommand createChatCommand;
+    private final DeleteChatCommand deleteChatCommand;
 
     public ChatController(CreateChatCommand createChatCommand,
             DeleteChatCommand deleteChatCommand) {

@@ -22,10 +22,10 @@ import jakarta.validation.Valid;
 
 @RestController
 public class ChatMemberController {
-    private InviteMemberCommand inviteMemberCommand;
-    private KickMemberCommand kickMemberCommand;
-    private JoinChatCommand joinChatCommand;
-    private LeaveChatCommand leaveChatCommand;
+    private final InviteMemberCommand inviteMemberCommand;
+    private final KickMemberCommand kickMemberCommand;
+    private final JoinChatCommand joinChatCommand;
+    private final LeaveChatCommand leaveChatCommand;
 
 
     public ChatMemberController(InviteMemberCommand inviteMemberCommand,
