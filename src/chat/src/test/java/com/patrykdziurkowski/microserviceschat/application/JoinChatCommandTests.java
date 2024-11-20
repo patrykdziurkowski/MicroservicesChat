@@ -12,16 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.patrykdziurkowski.microserviceschat.ChatDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
@@ -34,26 +30,13 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-public class JoinChatCommandTests {
+class JoinChatCommandTests extends ChatDbContainerBase {
     @Autowired
     private JoinChatCommand memberJoinCommand;
     @Autowired
     private CreateChatCommand chatCreationCommand;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("examplePassword123");
 
     @Test
     void memberInvitationCommand_shouldLoad() {
@@ -64,8 +47,8 @@ public class JoinChatCommandTests {
     void execute_givenValidData_returnsTrue() {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
         chatRepository.save(chat);
-        
-        boolean didSucceed  = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", null);
+
+        boolean didSucceed = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", null);
 
         assertTrue(didSucceed);
     }
@@ -75,7 +58,8 @@ public class JoinChatCommandTests {
         chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password1"));
         ChatRoom chat = chatRepository.get().get(0);
 
-        boolean didSucceed  = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", Optional.ofNullable("password1"));
+        boolean didSucceed = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member",
+                Optional.ofNullable("password1"));
 
         assertTrue(didSucceed);
     }
@@ -85,7 +69,8 @@ public class JoinChatCommandTests {
         chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password1"));
         ChatRoom chat = chatRepository.get().get(0);
 
-        boolean didSucceed  = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member", Optional.ofNullable("password2"));
+        boolean didSucceed = memberJoinCommand.execute(UUID.randomUUID(), chat.getId(), "member",
+                Optional.ofNullable("password2"));
 
         assertFalse(didSucceed);
     }

@@ -11,16 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.patrykdziurkowski.microserviceschat.ChatDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
@@ -35,26 +31,13 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-public class RemoveMessageCommandTests {
+class RemoveMessageCommandTests extends ChatDbContainerBase {
     @Autowired
     private RemoveMessageCommand messageRemoveCommand;
     @Autowired
     private MessageRepositoryImpl messageRepository;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("examplePassword123");
 
     @Test
     void messageRemoveCommand_shouldLoad() {
@@ -116,6 +99,5 @@ public class RemoveMessageCommandTests {
 
         assertFalse(didSucceed);
     }
-
 
 }
