@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -42,6 +42,7 @@ class AuthenticationApiClientImplTests {
             new File("../../docker-compose.yaml"))
             .waitingFor("auth", Wait.forHealthcheck())
             .withServices("db-auth", "auth")
+            .withExposedService("db-auth", 1433)
             .withExposedService("auth", 8081)
             .withEnv("MSSQL_SA_PASSWORD", "exampleP@ssword123")
             .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
@@ -71,7 +72,7 @@ class AuthenticationApiClientImplTests {
 
     @Test
     @Order(3)
-    void sendRegisterRequest_shouldReturnTrue_whenRegistered() throws Exception {
+    void sendRegisterRequest_shouldReturnTrue_whenRegistered() {
         boolean isSuccess = apiClient.sendRegisterRequest("validUser", "P@ssword1!");
 
         assertTrue(isSuccess);
@@ -106,9 +107,9 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(7)
     void sendTokenValidationRequest_shouldReturnFalse_givenInvalidToken() {
-        boolean isSuccess = apiClient.sendTokenValidationRequest("invalidToken123@");
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest("invalidToken123@");
 
-        assertFalse(isSuccess);
+        assertTrue(userIdResult.isEmpty());
     }
 
     @Test
@@ -117,9 +118,9 @@ class AuthenticationApiClientImplTests {
         Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
         String token = result.orElseThrow();
 
-        boolean isSuccess = apiClient.sendTokenValidationRequest(token);
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
 
         assertNotNull(token);
-        assertTrue(isSuccess);
+        assertTrue(userIdResult.isPresent());
     }
 }

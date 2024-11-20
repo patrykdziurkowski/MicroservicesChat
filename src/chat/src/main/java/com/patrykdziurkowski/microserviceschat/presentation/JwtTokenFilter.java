@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,13 +35,22 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         Optional<String> tokenResult = extractToken(request);
-        if (tokenResult.isPresent()
-                && apiClient.sendTokenValidationRequest(tokenResult.orElseThrow())) {
-            UserDetails principal = new User("user", "", new ArrayList<>());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
-                    Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (tokenResult.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(tokenResult.orElseThrow());
+        if (userIdResult.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        UUID userId = userIdResult.orElseThrow();
+        UserDetails principal = new User(userId.toString(), "", new ArrayList<>());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }

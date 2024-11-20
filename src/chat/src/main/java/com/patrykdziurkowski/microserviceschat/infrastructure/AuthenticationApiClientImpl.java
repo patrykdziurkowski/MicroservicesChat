@@ -3,6 +3,7 @@ package com.patrykdziurkowski.microserviceschat.infrastructure;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -60,7 +61,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
-    public boolean sendTokenValidationRequest(String token) {
+    public Optional<UUID> sendTokenValidationRequest(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -70,9 +71,13 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
                     HttpMethod.GET,
                     request,
                     String.class);
-            return response.getStatusCode().is2xxSuccessful();
+
+            if (response.getStatusCode().isError()) {
+                return Optional.empty();
+            }
+            return Optional.of(UUID.fromString(response.getBody()));
         } catch (HttpClientErrorException e) {
-            return false;
+            return Optional.empty();
         }
     }
 }

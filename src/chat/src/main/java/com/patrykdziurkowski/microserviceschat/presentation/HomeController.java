@@ -1,5 +1,8 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
+import java.util.UUID;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,8 +35,9 @@ public class HomeController {
     }
 
     @GetMapping("/chats")
-    public String chats(Model model) {
-        model.addAttribute("title", "Test title changed");
+    public String chats(Authentication authentication, Model model) {
+        UUID userId = UUID.fromString(authentication.getName());
+        model.addAttribute("title", userId);
         model.addAttribute("message", "Test message");
         return "chats";
     }
