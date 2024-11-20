@@ -10,7 +10,7 @@ public interface ChatRepository {
     
     List<ChatRoom> get();
     Optional<ChatRoom> getById(UUID chatId);
-    List<ChatRoom> getByMemberId(UUID memberId, int lastChatPosition, int chatsToRetireve);
+    List<ChatRoom> getByMemberId(UUID memberId, int lastChatPosition, int chatsToRetrieve);
     void save (ChatRoom chatRoom);
 
 }
