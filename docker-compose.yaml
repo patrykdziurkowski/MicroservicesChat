@@ -27,9 +27,9 @@ services:
       - 5006:5006
     depends_on:
       db-chat:
-        condition: service_healthy
+        condition: service_started
       auth:
-        condition: service_healthy
+        condition: service_started
     networks:
       - shared
       - chat
@@ -58,7 +58,7 @@ services:
       - 5005:5005
     depends_on:
       db-auth:
-        condition: service_healthy
+        condition: service_started
     networks:
       - auth
       - shared
