@@ -16,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -40,18 +42,17 @@ class AuthenticationApiClientImplTests {
             new File("../../docker-compose.yaml"))
             .waitingFor("auth", Wait.forHealthcheck())
             .withServices("db-auth", "auth")
-            .withExposedService("db-auth", 1433)
             .withExposedService("auth", 8081)
             .withEnv("MSSQL_SA_PASSWORD", "exampleP@ssword123")
             .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
             .withBuild(true);
 
-    @BeforeAll
-    static void setup() {
+    @DynamicPropertySource
+    static void setDynamicProperties(DynamicPropertyRegistry registry) {
         String hostname = containers.getServiceHost("auth", 8081);
         int port = containers.getServicePort("auth", 8081);
         String testUri = String.format("http://%s:%s", hostname, port);
-        System.setProperty("auth.server.uri", testUri);
+        registry.add("auth.server.uri", () -> testUri);
     }
 
     @Test
