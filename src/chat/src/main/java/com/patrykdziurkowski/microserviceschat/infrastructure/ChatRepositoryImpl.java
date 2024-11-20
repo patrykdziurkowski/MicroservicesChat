@@ -34,11 +34,13 @@ public class ChatRepositoryImpl implements ChatRepository{
         return Optional.ofNullable(entityManager.find(ChatRoom.class, chatId));
     }
 
-    public List<ChatRoom> getByMemberId(UUID memberId) {
+    public List<ChatRoom> getByMemberId(UUID memberId, int lastChatPosition, int chatsToRetireve) {
         final String query = "SELECT c FROM ChatRoom c JOIN c.memberIds m WHERE m = :memberId OR c.isPublic ";
         return entityManager
             .createQuery(query, ChatRoom.class)
             .setParameter("memberId", memberId)
+            .setFirstResult(lastChatPosition)
+            .setMaxResults(chatsToRetireve)
             .getResultList();
     }
 
