@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -128,6 +130,22 @@ class ChatMessageControllerTests {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void getMessages_shouldReturnOnlySecondMessage_whenOffsetIsOne() throws Exception {
+        UUID chatId = UUID.randomUUID();
+        UserMessage secondMessage = new UserMessage(chatId, "testUser2", UUID.randomUUID());
+        List<UserMessage> messages = List.of(secondMessage); 
+
+        when(chatMessagesQuery.execute(chatId, 1, 20)).thenReturn(messages);
+
+        mockMvc.perform(get("/chats/{chatId}/messages", chatId)
+                .param("offset", "1") 
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(messages)));
+    }
+
 
     @Test
     void getMessages_shouldReturnNoContent_whenNoMessagesExist() throws Exception {
