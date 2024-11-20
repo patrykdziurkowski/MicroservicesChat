@@ -62,6 +62,9 @@ public class ChatMessageController {
     @GetMapping("/chats/{chatId}/messages")
     public ResponseEntity<List<UserMessage>> getMessages(@PathVariable UUID chatId,
                                                         @RequestParam(defaultValue = "0") int offset) {
+        if(offset < 0) {
+            return ResponseEntity.badRequest().build();
+        }
         List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIEVE);
         if(messages.isEmpty()) {
             return ResponseEntity.noContent().build();

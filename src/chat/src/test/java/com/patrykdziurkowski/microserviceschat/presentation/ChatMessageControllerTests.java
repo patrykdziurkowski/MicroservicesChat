@@ -140,4 +140,16 @@ class ChatMessageControllerTests {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void getMessages_shouldReturnBadRequest_whenNoOffsetIsNegative() throws Exception {
+        UUID chatId = UUID.randomUUID();
+
+        when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/chats/{chatId}/messages", chatId)
+                .param("offset", "-1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
 }
