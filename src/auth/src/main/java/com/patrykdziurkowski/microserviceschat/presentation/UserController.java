@@ -65,7 +65,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(result.orElseThrow().getId().toString(), HttpStatus.OK);
     }
 
     @PutMapping("/username")

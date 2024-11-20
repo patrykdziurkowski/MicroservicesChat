@@ -154,7 +154,7 @@ class UserControllerTests {
     }
 
     @Test
-    void validateToken_shouldReturnOk_whenValidTokenProvided() throws Exception {
+    void validateToken_shouldReturnOkAndUserId_whenValidTokenProvided() throws Exception {
         UUID userId = UUID.randomUUID();
         String userName = "oldUserName";
         String token = jwtTokenManager.generateToken(userId, userName);
@@ -162,7 +162,8 @@ class UserControllerTests {
         mockMvc.perform(get("/authenticate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string(userId.toString()));
     }
 
     @ParameterizedTest
