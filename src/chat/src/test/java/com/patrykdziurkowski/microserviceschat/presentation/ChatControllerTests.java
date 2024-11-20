@@ -5,7 +5,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,8 +25,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.patrykdziurkowski.microserviceschat.application.ChatsQuery;
 import com.patrykdziurkowski.microserviceschat.application.CreateChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.DeleteChatCommand;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @WebMvcTest(ChatController.class)
 @TestPropertySource(properties = {
@@ -39,6 +45,8 @@ class ChatControllerTests {
     private CreateChatCommand createChatCommand;
     @MockBean
     private DeleteChatCommand deleteChatCommand;
+    @MockBean
+    private ChatsQuery chatsQuery;
 
     @Test
     void contextLoads() {
@@ -143,4 +151,45 @@ void createChat_shouldReturnForbidden_whenChatCreationFails() throws Exception {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void getChats_shouldReturnOk_whenChatsExist() throws Exception {
+        UUID currentUserId = UUID.randomUUID();
+        ChatRoom chatRoom = new ChatRoom(UUID.randomUUID(), "Test Chat", true);
+        List<ChatRoom> chats = List.of(chatRoom);
+
+        when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(chats);
+
+        mockMvc.perform(get("/chats")
+                .param("currentUserId", currentUserId.toString())
+                .param("offset", "0")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(chats)));
+    }
+
+    @Test
+    void getChats_shouldReturnNoContent_whenNoChatsExist() throws Exception {
+        UUID currentUserId = UUID.randomUUID();
+
+        when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/chats")
+                .param("currentUserId", currentUserId.toString())
+                .param("offset", "0")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getChats_shouldReturnBadRequest_whenOffsetIsInvalid() throws Exception {
+        UUID currentUserId = UUID.randomUUID();
+
+        mockMvc.perform(get("/chats")
+                .param("currentUserId", currentUserId.toString())
+                .param("offset", "-1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
 }

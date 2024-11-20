@@ -31,7 +31,7 @@ public class HomeController {
         return "login";
     }
 
-    @GetMapping("/chats")
+    @GetMapping("/chat")
     public String chats(Model model) {
         model.addAttribute("title", "Test title changed");
         model.addAttribute("message", "Test message");

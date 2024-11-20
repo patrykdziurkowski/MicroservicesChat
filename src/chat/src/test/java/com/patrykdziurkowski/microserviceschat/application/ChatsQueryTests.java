@@ -59,7 +59,7 @@ class ChatsQueryTests {
 
     @Test
     void execute_whenUserIsntMemberOfAnyChat_shouldReturnEmpty() {
-        List<ChatRoom> returnedChats = chatsQuery.execute(UUID.randomUUID());
+        List<ChatRoom> returnedChats = chatsQuery.execute(UUID.randomUUID(), 0 , 20);
 
         assertTrue(returnedChats.isEmpty());
     }
@@ -69,7 +69,7 @@ class ChatsQueryTests {
         UUID userId = UUID.randomUUID();
         chatRepository.save(new ChatRoom(userId, "chat", false));
 
-        List<ChatRoom> returnedChats = chatsQuery.execute(userId);
+        List<ChatRoom> returnedChats = chatsQuery.execute(userId, 0, 20);
 
         assertTrue(returnedChats.size() > 0);
     }
@@ -80,7 +80,7 @@ class ChatsQueryTests {
         chatRepository.save(new ChatRoom(userId, "chat", false));
         chatRepository.save(new ChatRoom(userId, "another chat", false));
 
-        List<ChatRoom> returnedChats = chatsQuery.execute(userId);
+        List<ChatRoom> returnedChats = chatsQuery.execute(userId, 0, 20);
 
         assertTrue(returnedChats.size() > 0);
         assertEquals(2, returnedChats.size());
