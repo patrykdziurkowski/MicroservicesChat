@@ -1,9 +1,12 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
 import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
+import com.patrykdziurkowski.microserviceschat.application.UserQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 
 import jakarta.validation.Valid;
@@ -21,15 +25,18 @@ import jakarta.validation.Valid;
 public class UserController {
     private RegisterCommand registerCommand;
     private LoginQuery loginQuery;
+    private UserQuery userQuery;
     private ChangeUserNameCommand changeUserNameCommand;
     private JwtTokenManager jwtTokenManager;
 
     public UserController(RegisterCommand registerCommand,
             LoginQuery loginQuery,
+            UserQuery userQuery,
             ChangeUserNameCommand changeUserNameCommand,
             JwtTokenManager jwtTokenManager) {
         this.registerCommand = registerCommand;
         this.loginQuery = loginQuery;
+        this.userQuery = userQuery;
         this.changeUserNameCommand = changeUserNameCommand;
         this.jwtTokenManager = jwtTokenManager;
     }
@@ -72,6 +79,16 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<GetUserModel> getUser(@PathVariable UUID userId) {
+        Optional<User> user = userQuery.execute(userId);
+        if(user.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        GetUserModel modelToReturn = new GetUserModel(user.get().getId(), user.get().getUserName());
+        return ResponseEntity.ok(modelToReturn);
     }
 
     private Optional<UserClaims> authenticate(String authorizationHeader) {
