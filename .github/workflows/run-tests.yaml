@@ -15,10 +15,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y maven
 
       - name: Running tests for auth module.
-        run: mvn -f src/auth/pom.xml --batch-mode --update-snapshots verify
+        run: |
+          cd src/auth/
+          mvn --batch-mode --update-snapshots verify
+          cd ../..
         env:
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
       - name: Running tests for chat module.
-        run: mvn -f src/chat/pom.xml --batch-mode --update-snapshots verify
+        run: |
+          cd src/chat/
+          mvn --batch-mode --update-snapshots verify
         env:
           MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}

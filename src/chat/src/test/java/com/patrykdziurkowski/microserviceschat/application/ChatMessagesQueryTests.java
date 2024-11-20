@@ -17,12 +17,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.patrykdziurkowski.microserviceschat.ChatDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.infrastructure.MessageRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
 
 @SpringBootTest
 @Rollback

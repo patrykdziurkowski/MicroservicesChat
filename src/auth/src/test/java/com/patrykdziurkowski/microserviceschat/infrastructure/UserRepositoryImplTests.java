@@ -17,9 +17,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.patrykdziurkowski.microserviceschat.AuthDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.AuthDbContainerBase;
 
 @DataJpaTest
 @ContextConfiguration(classes = AuthApplication.class)

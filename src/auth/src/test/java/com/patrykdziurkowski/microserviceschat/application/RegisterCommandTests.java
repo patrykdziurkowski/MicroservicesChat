@@ -19,10 +19,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.patrykdziurkowski.microserviceschat.AuthDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 import com.patrykdziurkowski.microserviceschat.infrastructure.UserRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.AuthDbContainerBase;
 
 @SpringBootTest
 @Rollback

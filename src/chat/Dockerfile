@@ -6,6 +6,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests
 
+# Stage 2 - deploy
 FROM amazoncorretto:17.0.12-al2023
 EXPOSE 8080
 EXPOSE 5006

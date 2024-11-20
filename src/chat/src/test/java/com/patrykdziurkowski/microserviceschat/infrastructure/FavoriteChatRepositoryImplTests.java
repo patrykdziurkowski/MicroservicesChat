@@ -16,10 +16,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
-import com.patrykdziurkowski.microserviceschat.ChatDbContainerBase;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
 
 @DataJpaTest
 @ContextConfiguration(classes = ChatApplication.class)

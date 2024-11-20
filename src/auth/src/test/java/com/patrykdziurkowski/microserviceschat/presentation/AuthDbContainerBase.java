@@ -1,4 +1,4 @@
-package com.patrykdziurkowski.microserviceschat;
+package com.patrykdziurkowski.microserviceschat.presentation;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MSSQLServerContainer;

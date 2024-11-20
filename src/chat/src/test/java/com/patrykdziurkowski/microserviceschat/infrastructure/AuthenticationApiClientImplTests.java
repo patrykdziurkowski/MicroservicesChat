@@ -1,10 +1,9 @@
 package com.patrykdziurkowski.microserviceschat.infrastructure;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,12 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ComposeContainersBase;
 
 @SpringBootTest(properties = {
         // disable the chat database for these tests to avoid loading them
@@ -31,22 +27,10 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 })
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
-class AuthenticationApiClientImplTests {
+class AuthenticationApiClientImplTests extends ComposeContainersBase {
     @Autowired
     private AuthenticationApiClientImpl apiClient;
-    @SuppressWarnings("resource")
-    @Container
-    private static DockerComposeContainer<?> containers = new DockerComposeContainer<>(
-            new File("../../docker-compose.yaml"))
-            .waitingFor("auth", Wait.forHealthcheck())
-            .withServices("db-auth", "auth")
-            .withExposedService("db-auth", 1433)
-            .withExposedService("auth", 8081)
-            .withEnv("MSSQL_SA_PASSWORD", "exampleP@ssword123")
-            .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
-            .withBuild(true);
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -54,6 +38,7 @@ class AuthenticationApiClientImplTests {
         int port = containers.getServicePort("auth", 8081);
         String testUri = String.format("http://%s:%s", hostname, port);
         registry.add("auth.server.uri", () -> testUri);
+        registry.add("spring.datasource.password", () -> TEST_DB_PASSWORD);
     }
 
     @Test
@@ -65,7 +50,8 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(2)
     void sendLoginRequest_shouldReturnEmpty_whenNonExistantUser() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "P@ssword1!");
 
         assertTrue(result.isEmpty());
     }
@@ -89,7 +75,8 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(5)
     void sendLoginRequest_shouldReturnEmpty_whenWrongPassword() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser", "Password1!");
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "Password1!");
 
         assertTrue(result.isEmpty());
     }
@@ -97,7 +84,8 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(6)
     void sendLoginRequest_shouldReturnToken_whenValidCredentials() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "P@ssword1!");
 
         assertTrue(result.isPresent());
         assertNotNull(result.orElseThrow());
@@ -115,7 +103,8 @@ class AuthenticationApiClientImplTests {
     @Test
     @Order(8)
     void sendTokenValidationRequest_shouldReturnTrue_givenValidToken() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "P@ssword1!");
         String token = result.orElseThrow();
 
         Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);

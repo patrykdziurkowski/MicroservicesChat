@@ -3,7 +3,6 @@ package com.patrykdziurkowski.microserviceschat.presentation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.time.Duration;
 
 import org.junit.jupiter.api.AfterAll;
@@ -21,10 +20,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.DockerComposeContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest(properties = {
         // disable the chat database run locally for these tests since we're running it
@@ -33,26 +30,27 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 })
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
-class AuthenticationTests {
+class AuthenticationTests extends ComposeContainersBase {
     private static WebDriver driver;
-    @SuppressWarnings("resource")
-    @Container
-    private static DockerComposeContainer<?> containers = new DockerComposeContainer<>(
-            new File("../../docker-compose.yaml"))
-            .waitingFor("chat", Wait.forHealthcheck())
-            .withEnv("MSSQL_SA_PASSWORD", "exampleP@ssword123")
-            .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
-            .withBuild(true);
 
     @BeforeAll
     static void setup() {
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
         options.addArguments("--ignore-certificate-errors");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         driver = new ChromeDriver(options);
+    }
+
+    @DynamicPropertySource
+    static void setDynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.password", () -> TEST_DB_PASSWORD);
     }
 
     @Test
