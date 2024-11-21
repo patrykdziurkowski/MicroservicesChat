@@ -10,23 +10,23 @@
 
 <body>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form>
+        <form method="POST" th:action="@{/register}">
             <div class="form-group">
                 <label for="usernameInput">Username</label>
-                <input type="text" class="form-control" id="usernameInput" aria-describedby="usernameHelp"
-                    placeholder="Enter username">
+                <input type="text" class="form-control" id="usernameInput" name="userName"
+                    aria-describedby="usernameHelp" placeholder="Enter username">
                 <small id="usernameHelp" class="form-text text-muted">How others will see you.</small>
             </div>
             <div class="form-group">
                 <label for="passwordInput">Password</label>
-                <input type="password" class="form-control" id="passwordInput" placeholder="Password">
+                <input type="password" class="form-control" id="passwordInput" name="password" placeholder="Password">
             </div>
 
             <div class="form-group">
                 <label for="confirmPasswordInput">Confirm password</label>
                 <input type="password" class="form-control" id="confirmPasswordInput" placeholder="Confirm password">
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button id="registerSubmit" type="submit" class="btn btn-primary">Submit</button>
             <a th:href="@{/}" class="btn btn-danger">Leave</a>
         </form>
     </div>

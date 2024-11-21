@@ -14,7 +14,7 @@ public class WebSecurityConfig {
         http
                 .csrf(options -> options.disable()) // disable since no cookies
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/register", "/login", "/username", "/users/{userId}").permitAll()
+                        .requestMatchers("/register", "/login", "/username", "/authenticate", "/users/{userId}").permitAll()
                         .anyRequest().authenticated());
 
         return http.build();

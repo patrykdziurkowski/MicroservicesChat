@@ -15,34 +15,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.User;
 import com.patrykdziurkowski.microserviceschat.presentation.AuthApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.AuthDbContainerBase;
 
 @DataJpaTest
 @ContextConfiguration(classes = AuthApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-class UserRepositoryImplTests {
+class UserRepositoryImplTests extends AuthDbContainerBase {
     @Autowired
     private UserRepositoryImpl userRepository;
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("examplePassword123");
 
     @Test
     void repository_shouldLoad() {

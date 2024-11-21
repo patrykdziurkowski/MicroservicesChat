@@ -17,11 +17,11 @@ public class DeleteChatCommand {
 
     public boolean execute(UUID currentUserId, UUID chatId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
-        if(retrievedChat.isEmpty()) {
+        if (retrievedChat.isEmpty()) {
             return false;
         }
         ChatRoom chat = retrievedChat.get();
-        if(chat.dissolve(currentUserId) == false) {
+        if (chat.dissolve(currentUserId) == false) {
             return false;
         }
         chatRepository.save(chat);

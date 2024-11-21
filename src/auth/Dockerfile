@@ -9,10 +9,11 @@ RUN mvn clean package -DskipTests
 # Stage 2 - deploy
 FROM amazoncorretto:17.0.12-al2023
 EXPOSE 8081
+EXPOSE 5005
 
 ARG JAR_FILE=app/target/*.jar
 COPY --from=build ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005", "-jar","/app.jar"]
 
 HEALTHCHECK --interval=5s --timeout=1s --start-period=10s --retries=10 \
     CMD curl -I http://localhost:8081

@@ -12,37 +12,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.web.client.RestTemplate;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
 
 @DataJpaTest
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-public class FavoriteChatRepositoryImplTests {
+public class FavoriteChatRepositoryImplTests extends ChatDbContainerBase {
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
     @Autowired
     private ChatRepositoryImpl chatRepository;
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("P@ssw0rd");
+    @MockBean
+    private RestTemplate restTemplate;
 
     @Test
     void repository_shouldLoad() {

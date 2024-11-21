@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -20,8 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.application.InviteMemberCommand;
-import com.patrykdziurkowski.microserviceschat.application.KickMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.JoinChatCommand;
+import com.patrykdziurkowski.microserviceschat.application.KickMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.LeaveChatCommand;
 
 @WebMvcTest(ChatMemberController.class)
@@ -29,23 +30,24 @@ import com.patrykdziurkowski.microserviceschat.application.LeaveChatCommand;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @ContextConfiguration(classes = { ChatMemberController.class })
+@Import(TestSecurityConfig.class)
 class ChatMemberControllerTests {
-    
+
     @Autowired
     private MockMvc mockMvc;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @MockBean
     private InviteMemberCommand inviteMemberCommand;
-    
+
     @MockBean
     private KickMemberCommand kickMemberCommand;
-    
+
     @MockBean
     private JoinChatCommand joinChatCommand;
-    
+
     @MockBean
     private LeaveChatCommand leaveChatCommand;
 
@@ -63,7 +65,7 @@ class ChatMemberControllerTests {
         String invitedUserData = objectMapper.writeValueAsString(invitedUserModel);
 
         when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId(), invitedUserUserName))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(post("/chats/{chatId}/members", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -81,7 +83,7 @@ class ChatMemberControllerTests {
         InvitedUserModel invitedUserModel = new InvitedUserModel(UUID.randomUUID());
 
         when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId(), invitedUserUserName))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(post("/chats/{chatId}/members", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -99,7 +101,7 @@ class ChatMemberControllerTests {
         String memberUserName = "testMember";
 
         when(kickMemberCommand.execute(currentUserId, chatId, memberId, memberUserName))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}/members/{memberId}", chatId, memberId)
                 .param("currentUserId", currentUserId.toString())
@@ -116,7 +118,7 @@ class ChatMemberControllerTests {
         String memberUserName = "testMember";
 
         when(kickMemberCommand.execute(currentUserId, chatId, memberId, memberUserName))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}/members/{memberId}", chatId, memberId)
                 .param("currentUserId", currentUserId.toString())
@@ -133,7 +135,7 @@ class ChatMemberControllerTests {
         JoinChatModel joinChatModel = new JoinChatModel("wrongPassword");
 
         when(joinChatCommand.execute(currentUserId, chatId, currentUserUserName, Optional.of("wrongPassword")))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(post("/chats/{chatId}/user", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -151,7 +153,7 @@ class ChatMemberControllerTests {
         JoinChatModel joinChatModel = new JoinChatModel("correctP@ssword1");
 
         when(joinChatCommand.execute(currentUserId, chatId, currentUserUserName, Optional.of("correctP@ssword1")))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(post("/chats/{chatId}/user", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -168,7 +170,7 @@ class ChatMemberControllerTests {
         String currentUserUserName = "currentUser";
 
         when(leaveChatCommand.execute(currentUserId, chatId, currentUserUserName))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -184,7 +186,7 @@ class ChatMemberControllerTests {
         String currentUserUserName = "currentUser";
 
         when(leaveChatCommand.execute(currentUserId, chatId, currentUserUserName))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .param("currentUserId", currentUserId.toString())

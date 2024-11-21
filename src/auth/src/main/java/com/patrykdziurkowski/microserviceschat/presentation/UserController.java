@@ -64,6 +64,16 @@ public class UserController {
                 .body(token);
     }
 
+    @GetMapping("/authenticate")
+    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
+        Optional<UserClaims> result = authenticate(authorizationHeader);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(result.orElseThrow().getId().toString(), HttpStatus.OK);
+    }
+
     @PutMapping("/username")
     public ResponseEntity<String> changeUserName(
             @RequestHeader("Authorization") String authorizationHeader,
