@@ -33,7 +33,7 @@ public class HomeController {
     public String logout() {
         return "login";
     }
-
+  
     @GetMapping("/chats")
     public String chats(Authentication authentication, Model model) {
         UUID userId = UUID.fromString(authentication.getName());

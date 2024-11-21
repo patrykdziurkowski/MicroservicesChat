@@ -67,7 +67,7 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
         chat.join(memberId, "username");
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
 
         assertTrue(chats.contains(chat));
     }
@@ -79,8 +79,7 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat));
     }
 
@@ -91,8 +90,7 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat) == false);
     }
 
@@ -104,9 +102,25 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
         chat.join(memberId, "username");
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat));
+    }
+
+    @Test
+    void getByMemberId_shouldReturnOnlySecondChat_whenExistsAndLastChatPositionIs1() {
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        ChatRoom secondChat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        chat.join(memberId, "username");
+        secondChat.join(memberId, "username");
+        chatRepository.save(chat);
+        chatRepository.save(secondChat);
+        
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 1, 20);
+
+        assertFalse(chats.contains(chat));
+        assertTrue(chats.contains(secondChat));
+
     }
 
     @Test
