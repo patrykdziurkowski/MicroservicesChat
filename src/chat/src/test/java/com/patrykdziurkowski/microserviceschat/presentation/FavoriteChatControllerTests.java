@@ -2,6 +2,8 @@ package com.patrykdziurkowski.microserviceschat.presentation;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -26,7 +27,6 @@ import com.patrykdziurkowski.microserviceschat.application.UnsetFavoriteCommand;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @ContextConfiguration(classes = { FavoriteChatController.class })
-@Import(TestSecurityConfig.class)
 class FavoriteChatControllerTests {
 
     @Autowired
@@ -34,9 +34,10 @@ class FavoriteChatControllerTests {
 
     @MockBean
     private SetFavoriteCommand setFavoriteCommand;
-
     @MockBean
     private UnsetFavoriteCommand unsetFavoriteCommand;
+
+    private UUID currentUserId = UUID.randomUUID();
 
     @Test
     void contextLoads() {
@@ -45,13 +46,13 @@ class FavoriteChatControllerTests {
 
     @Test
     void addFavorite_shouldReturnCreated_whenSuccessful() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(setFavoriteCommand.execute(currentUserId, chatId)).thenReturn(true);
 
         mockMvc.perform(post("/favorites")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("chatId", chatId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
@@ -59,13 +60,13 @@ class FavoriteChatControllerTests {
 
     @Test
     void addFavorite_shouldReturnBadRequest_whenFailed() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(setFavoriteCommand.execute(currentUserId, chatId)).thenReturn(false);
 
         mockMvc.perform(post("/favorites")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("chatId", chatId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -73,13 +74,13 @@ class FavoriteChatControllerTests {
 
     @Test
     void removeFavorite_shouldReturnNoContent_whenSuccessful() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(unsetFavoriteCommand.execute(currentUserId, chatId)).thenReturn(true);
 
         mockMvc.perform(delete("/favorites")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("chatId", chatId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -87,13 +88,13 @@ class FavoriteChatControllerTests {
 
     @Test
     void removeFavorite_shouldReturnBadRequest_whenFailed() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(unsetFavoriteCommand.execute(currentUserId, chatId)).thenReturn(false);
 
         mockMvc.perform(delete("/favorites")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("chatId", chatId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

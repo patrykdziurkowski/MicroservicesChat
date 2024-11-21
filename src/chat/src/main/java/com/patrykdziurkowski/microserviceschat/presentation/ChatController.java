@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,38 +38,42 @@ public class ChatController {
     }
 
     @PostMapping("/chats")
-    public ResponseEntity<String> createChat(@RequestParam UUID currentUserId,
-            @RequestBody @Valid ChatModel chatData) {
+    public ResponseEntity<String> createChat(Authentication authentication,
+                                             @RequestBody @Valid ChatModel chatData) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isChatCreated = createChatCommand.execute(currentUserId,
-                chatData.getChatName(),
-                chatData.getIsPublic(),
-                Optional.ofNullable(chatData.getChatPassword()));
-        if (isChatCreated == false) {
+            chatData.getChatName(),
+            chatData.getIsPublic(),
+            Optional.ofNullable(chatData.getChatPassword()));
+        if(isChatCreated == false) {
             return new ResponseEntity<>("Chat creation failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("Chat creation was successful.", HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}")
-    public ResponseEntity<String> deleteChat(@RequestParam UUID currentUserId, @PathVariable UUID chatId) {
+    public ResponseEntity<String> deleteChat(Authentication authentication,
+                                             @PathVariable UUID chatId) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isChatDeleted = deleteChatCommand.execute(currentUserId, chatId);
-        if (isChatDeleted == false) {
+        if(isChatDeleted == false) {
             return new ResponseEntity<>("Chat deletion failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/chats/load")
-    public ResponseEntity<List<ChatRoom>> getChats(@RequestParam UUID currentUserId,
-            @RequestParam(defaultValue = "0") int offset) {
-        if (offset < 0) {
+    public ResponseEntity<List<ChatRoom>> getChats(Authentication authentication,
+                                                   @RequestParam(defaultValue = "0") int offset) {
+        if(offset < 0) {
             return ResponseEntity.badRequest().build();
         }
+        UUID currentUserId = UUID.fromString(authentication.getName());
         List<ChatRoom> chats = chatsQuery.execute(currentUserId, offset, NUMBER_OF_CHATS_TO_RETRIEVE);
-
-        if (chats.isEmpty()) {
+        if(chats.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(chats);
     }
+
 }

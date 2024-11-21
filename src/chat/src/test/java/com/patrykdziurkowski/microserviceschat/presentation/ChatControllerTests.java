@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -36,19 +37,20 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @ContextConfiguration(classes = { ChatController.class })
-@Import(TestSecurityConfig.class)
 class ChatControllerTests {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
+    
     @MockBean
     private CreateChatCommand createChatCommand;
     @MockBean
     private DeleteChatCommand deleteChatCommand;
     @MockBean
     private ChatsQuery chatsQuery;
+
+    private UUID currentUserId = UUID.randomUUID();
 
     @Test
     void contextLoads() {
@@ -71,7 +73,6 @@ class ChatControllerTests {
             "chatName123,p@ssworddd#", // password not containing a number
     })
     void createChat_shouldReturnBadRequest_whenInputInvalid(String chatName, String password) throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         ChatModel chatModel = new ChatModel(chatName, false, password);
         String chatData = objectMapper.writeValueAsString(chatModel);
 
@@ -79,7 +80,8 @@ class ChatControllerTests {
                 .thenReturn(false);
 
         mockMvc.perform(post("/chats")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(chatData))
                 .andExpect(status().isBadRequest());
@@ -87,7 +89,6 @@ class ChatControllerTests {
 
     @Test
     void createChat_shouldReturnForbidden_whenChatCreationFails() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
         String chatData = objectMapper.writeValueAsString(chatModel);
 
@@ -95,7 +96,8 @@ class ChatControllerTests {
                 .thenReturn(false);
 
         mockMvc.perform(post("/chats")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(chatData))
                 .andExpect(status().isForbidden());
@@ -103,7 +105,6 @@ class ChatControllerTests {
 
     @Test
     void createChat_shouldReturnCreated_whenChatCreationSucceeds() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
         String chatData = objectMapper.writeValueAsString(chatModel);
 
@@ -111,57 +112,49 @@ class ChatControllerTests {
                 .thenReturn(true);
 
         mockMvc.perform(post("/chats")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(chatData))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    void deleteChat_shouldReturnBadRequest_whenCurrentUserIdMissing() throws Exception {
-        UUID chatId = UUID.randomUUID();
-
-        mockMvc.perform(delete("/chats/{chatId}", chatId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void deleteChat_shouldReturnNotFound_whenChatDeletionFails() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(deleteChatCommand.execute(currentUserId, chatId)).thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}", chatId)
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void deleteChat_shouldReturnNoContent_whenChatDeletionSucceeds() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
 
         when(deleteChatCommand.execute(currentUserId, chatId)).thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}", chatId)
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void getChats_shouldReturnOk_whenChatsExist() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(UUID.randomUUID(), "Test Chat", true);
         List<ChatRoom> chats = List.of(chatRoom);
 
         when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(chats);
 
         mockMvc.perform(get("/chats/load")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("offset", "0")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -170,12 +163,11 @@ class ChatControllerTests {
 
     @Test
     void getChats_shouldReturnNoContent_whenNoChatsExist() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
-
         when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/chats/load")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("offset", "0")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -183,10 +175,9 @@ class ChatControllerTests {
 
     @Test
     void getChats_shouldReturnBadRequest_whenOffsetIsInvalid() throws Exception {
-        UUID currentUserId = UUID.randomUUID();
-
         mockMvc.perform(get("/chats/load")
-                .param("currentUserId", currentUserId.toString())
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("offset", "-1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

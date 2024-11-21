@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +25,8 @@ public class FavoriteChatController {
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<String> addFavorite(@RequestParam UUID currentUserId, @RequestParam UUID chatId) {
+    public ResponseEntity<String> addFavorite(Authentication authentication, @RequestParam UUID chatId) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isSet = setFavoriteCommand.execute(currentUserId, chatId);
         if(isSet == false) {
             return new ResponseEntity<>("Failed to add chat to favorites.", HttpStatus.BAD_REQUEST);
@@ -33,7 +35,8 @@ public class FavoriteChatController {
     }
 
     @DeleteMapping("/favorites")
-    public ResponseEntity<String> removeFavorite(@RequestParam UUID currentUserId, @RequestParam UUID chatId) {
+    public ResponseEntity<String> removeFavorite(Authentication authentication, @RequestParam UUID chatId) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isUnset = unsetFavoriteCommand.execute(currentUserId, chatId);
         if(isUnset == false) {
             return new ResponseEntity<>("Failed to remove chat from favorites.", HttpStatus.BAD_REQUEST);

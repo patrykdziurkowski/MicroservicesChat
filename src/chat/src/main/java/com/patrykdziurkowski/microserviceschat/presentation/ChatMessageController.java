@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,10 +39,11 @@ public class ChatMessageController {
     }
 
     @PostMapping("/chats/{chatId}/messages")
-    public ResponseEntity<String> addMessage(@RequestParam UUID currentUserId,
-                                            @RequestParam String currentUserUserName,
-                                            @PathVariable UUID chatId,
-                                            @RequestBody @Valid NewMessageModel newMessage) {
+    public ResponseEntity<String> addMessage(Authentication authentication,
+                                             @RequestParam String currentUserUserName,
+                                             @PathVariable UUID chatId,
+                                             @RequestBody @Valid NewMessageModel newMessage) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageAdded = postMessageCommand.execute(chatId, newMessage.getContent(), currentUserId);
         if(isMessageAdded == false) {
             return new ResponseEntity<>("Message could not be added.", HttpStatus.BAD_REQUEST);
@@ -50,8 +52,9 @@ public class ChatMessageController {
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")
-    public ResponseEntity<String> deleteMessage(@RequestParam UUID currentUserId,
+    public ResponseEntity<String> deleteMessage(Authentication authentication,
                                                 @PathVariable UUID messageId) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageDeleted = removeMessageCommand.execute(currentUserId, messageId);
         if(isMessageDeleted == false) {
             return new ResponseEntity<>("Message could not be deleted.", HttpStatus.FORBIDDEN);
