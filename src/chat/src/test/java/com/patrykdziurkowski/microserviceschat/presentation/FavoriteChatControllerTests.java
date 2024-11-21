@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -25,6 +26,7 @@ import com.patrykdziurkowski.microserviceschat.application.UnsetFavoriteCommand;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @ContextConfiguration(classes = { FavoriteChatController.class })
+@Import(TestSecurityConfig.class)
 class FavoriteChatControllerTests {
 
     @Autowired

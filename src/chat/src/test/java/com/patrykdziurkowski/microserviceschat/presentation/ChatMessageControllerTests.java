@@ -5,9 +5,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -33,6 +33,7 @@ import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @ContextConfiguration(classes = { ChatMessageController.class })
+@Import(TestSecurityConfig.class)
 class ChatMessageControllerTests {
 
     @Autowired
@@ -62,7 +63,7 @@ class ChatMessageControllerTests {
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(post("/chats/{chatId}/messages", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -79,7 +80,7 @@ class ChatMessageControllerTests {
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(post("/chats/{chatId}/messages", chatId)
                 .param("currentUserId", currentUserId.toString())
@@ -95,7 +96,7 @@ class ChatMessageControllerTests {
         UUID messageId = UUID.randomUUID();
 
         when(removeMessageCommand.execute(currentUserId, messageId))
-            .thenReturn(true);
+                .thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}/messages/{messageId}", UUID.randomUUID(), messageId)
                 .param("currentUserId", currentUserId.toString())
@@ -109,7 +110,7 @@ class ChatMessageControllerTests {
         UUID messageId = UUID.randomUUID();
 
         when(removeMessageCommand.execute(currentUserId, messageId))
-            .thenReturn(false);
+                .thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}/messages/{messageId}", UUID.randomUUID(), messageId)
                 .param("currentUserId", currentUserId.toString())
@@ -135,17 +136,16 @@ class ChatMessageControllerTests {
     void getMessages_shouldReturnOnlySecondMessage_whenOffsetIsOne() throws Exception {
         UUID chatId = UUID.randomUUID();
         UserMessage secondMessage = new UserMessage(chatId, "testUser2", UUID.randomUUID());
-        List<UserMessage> messages = List.of(secondMessage); 
+        List<UserMessage> messages = List.of(secondMessage);
 
         when(chatMessagesQuery.execute(chatId, 1, 20)).thenReturn(messages);
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
-                .param("offset", "1") 
+                .param("offset", "1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(messages)));
     }
-
 
     @Test
     void getMessages_shouldReturnNoContent_whenNoMessagesExist() throws Exception {

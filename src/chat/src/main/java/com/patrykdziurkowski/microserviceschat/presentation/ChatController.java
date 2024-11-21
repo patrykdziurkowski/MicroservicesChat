@@ -29,8 +29,8 @@ public class ChatController {
     private static final int NUMBER_OF_CHATS_TO_RETRIEVE = 20;
 
     public ChatController(CreateChatCommand createChatCommand,
-                        DeleteChatCommand deleteChatCommand,
-                        ChatsQuery chatsQuery) {
+            DeleteChatCommand deleteChatCommand,
+            ChatsQuery chatsQuery) {
         this.createChatCommand = createChatCommand;
         this.deleteChatCommand = deleteChatCommand;
         this.chatsQuery = chatsQuery;
@@ -38,12 +38,12 @@ public class ChatController {
 
     @PostMapping("/chats")
     public ResponseEntity<String> createChat(@RequestParam UUID currentUserId,
-                                            @RequestBody @Valid ChatModel chatData) {
+            @RequestBody @Valid ChatModel chatData) {
         boolean isChatCreated = createChatCommand.execute(currentUserId,
-            chatData.getChatName(),
-            chatData.getIsPublic(),
-            Optional.ofNullable(chatData.getChatPassword()));
-        if(isChatCreated == false) {
+                chatData.getChatName(),
+                chatData.getIsPublic(),
+                Optional.ofNullable(chatData.getChatPassword()));
+        if (isChatCreated == false) {
             return new ResponseEntity<>("Chat creation failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("Chat creation was successful.", HttpStatus.CREATED);
@@ -52,21 +52,21 @@ public class ChatController {
     @DeleteMapping("/chats/{chatId}")
     public ResponseEntity<String> deleteChat(@RequestParam UUID currentUserId, @PathVariable UUID chatId) {
         boolean isChatDeleted = deleteChatCommand.execute(currentUserId, chatId);
-        if(isChatDeleted == false) {
+        if (isChatDeleted == false) {
             return new ResponseEntity<>("Chat deletion failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/chats")
+    @GetMapping("/chats/load")
     public ResponseEntity<List<ChatRoom>> getChats(@RequestParam UUID currentUserId,
-                                                    @RequestParam(defaultValue = "0") int offset) {
-        if(offset < 0) {
+            @RequestParam(defaultValue = "0") int offset) {
+        if (offset < 0) {
             return ResponseEntity.badRequest().build();
         }
         List<ChatRoom> chats = chatsQuery.execute(currentUserId, offset, NUMBER_OF_CHATS_TO_RETRIEVE);
-        
-        if(chats.isEmpty()) {
+
+        if (chats.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(chats);
