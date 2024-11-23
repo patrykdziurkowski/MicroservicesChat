@@ -6,6 +6,7 @@ Define in a `.env` file located in project's root:
 * `MSSQL_SA_PASSWORD` - used in Docker Compose to set the password of the database's admin account.
 * `JWT_SECRET` - a 256-bit secret key used to generate JWT keys.
 * `REGISTRY_PATH` - (optional) the url of your image registry. To store images locally do not set this variable or set it to `localhost`.
+* `DOCKER_SOCKET_PATH` - (optional) used in docker-compose file. Set to `//./pipe/docker_engine` if running on windows system.
 
 ### To run the project remotely on Azure Container Instances
 Additionally, GitHub Actions Secrets defines the following:
