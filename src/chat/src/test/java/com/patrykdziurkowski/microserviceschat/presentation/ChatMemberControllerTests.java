@@ -57,17 +57,15 @@ class ChatMemberControllerTests {
     @Test
     void inviteMember_shouldReturnForbidden_whenInvitationFails() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String invitedUserUserName = "testUser";
         InvitedUserModel invitedUserModel = new InvitedUserModel(UUID.randomUUID());
         String invitedUserData = objectMapper.writeValueAsString(invitedUserModel);
 
-        when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId(), invitedUserUserName))
+        when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId()))
                 .thenReturn(false);
 
         mockMvc.perform(post("/chats/{chatId}/members", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("invitedUserUserName", invitedUserUserName)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invitedUserData))
                 .andExpect(status().isForbidden());
@@ -76,16 +74,14 @@ class ChatMemberControllerTests {
     @Test
     void inviteMember_shouldReturnCreated_whenInvitationSucceeds() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String invitedUserUserName = "testUser";
         InvitedUserModel invitedUserModel = new InvitedUserModel(UUID.randomUUID());
 
-        when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId(), invitedUserUserName))
+        when(inviteMemberCommand.execute(currentUserId, chatId, invitedUserModel.getUserId()))
                 .thenReturn(true);
 
         mockMvc.perform(post("/chats/{chatId}/members", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("invitedUserUserName", invitedUserUserName)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invitedUserModel)))
                 .andExpect(status().isCreated());
@@ -95,15 +91,13 @@ class ChatMemberControllerTests {
     void kickMember_shouldReturnForbidden_whenKickFails() throws Exception {
         UUID chatId = UUID.randomUUID();
         UUID memberId = UUID.randomUUID();
-        String memberUserName = "testMember";
 
-        when(kickMemberCommand.execute(currentUserId, chatId, memberId, memberUserName))
+        when(kickMemberCommand.execute(currentUserId, chatId, memberId))
                 .thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}/members/{memberId}", chatId, memberId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("memberUserName", memberUserName)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
@@ -112,15 +106,13 @@ class ChatMemberControllerTests {
     void kickMember_shouldReturnNoContent_whenKickSucceeds() throws Exception {
         UUID chatId = UUID.randomUUID();
         UUID memberId = UUID.randomUUID();
-        String memberUserName = "testMember";
 
-        when(kickMemberCommand.execute(currentUserId, chatId, memberId, memberUserName))
+        when(kickMemberCommand.execute(currentUserId, chatId, memberId))
                 .thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}/members/{memberId}", chatId, memberId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("memberUserName", memberUserName)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
@@ -128,16 +120,14 @@ class ChatMemberControllerTests {
     @Test
     void joinChat_shouldReturnBadRequest_whenJoinFails() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String currentUserUserName = "currentUser";
         JoinChatModel joinChatModel = new JoinChatModel("wrongPassword");
 
-        when(joinChatCommand.execute(currentUserId, chatId, currentUserUserName, Optional.of("wrongPassword")))
+        when(joinChatCommand.execute(currentUserId, chatId, Optional.of("wrongPassword")))
                 .thenReturn(false);
 
         mockMvc.perform(post("/chats/{chatId}/user", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("currentUserUserName", currentUserUserName)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(joinChatModel)))
                 .andExpect(status().isBadRequest());
@@ -146,16 +136,14 @@ class ChatMemberControllerTests {
     @Test
     void joinChat_shouldReturnCreated_whenJoinSucceeds() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String currentUserUserName = "currentUser";
         JoinChatModel joinChatModel = new JoinChatModel("correctP@ssword1");
 
-        when(joinChatCommand.execute(currentUserId, chatId, currentUserUserName, Optional.of("correctP@ssword1")))
+        when(joinChatCommand.execute(currentUserId, chatId, Optional.of("correctP@ssword1")))
                 .thenReturn(true);
 
         mockMvc.perform(post("/chats/{chatId}/user", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("currentUserUserName", currentUserUserName)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(joinChatModel)))
                 .andExpect(status().isCreated());
@@ -164,15 +152,13 @@ class ChatMemberControllerTests {
     @Test
     void leaveChat_shouldReturnForbidden_whenLeaveFails() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String currentUserUserName = "currentUser";
 
-        when(leaveChatCommand.execute(currentUserId, chatId, currentUserUserName))
+        when(leaveChatCommand.execute(currentUserId, chatId))
                 .thenReturn(false);
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("currentUserUserName", currentUserUserName)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
@@ -180,15 +166,13 @@ class ChatMemberControllerTests {
     @Test
     void leaveChat_shouldReturnNoContent_whenLeaveSucceeds() throws Exception {
         UUID chatId = UUID.randomUUID();
-        String currentUserUserName = "currentUser";
 
-        when(leaveChatCommand.execute(currentUserId, chatId, currentUserUserName))
+        when(leaveChatCommand.execute(currentUserId, chatId))
                 .thenReturn(true);
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
-                .param("currentUserUserName", currentUserUserName)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }

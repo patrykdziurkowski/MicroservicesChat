@@ -40,7 +40,6 @@ public class ChatMessageController {
 
     @PostMapping("/chats/{chatId}/messages")
     public ResponseEntity<String> addMessage(Authentication authentication,
-                                             @RequestParam String currentUserUserName,
                                              @PathVariable UUID chatId,
                                              @RequestBody @Valid NewMessageModel newMessage) {
         UUID currentUserId = UUID.fromString(authentication.getName());

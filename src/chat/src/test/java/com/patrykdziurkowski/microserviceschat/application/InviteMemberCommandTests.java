@@ -1,9 +1,11 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -35,6 +38,9 @@ class InviteMemberCommandTests extends ChatDbContainerBase {
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
+    @MockBean
+    private AuthenticationApiClient apiClient;
+
     @Test
     void memberInvitationCommand_shouldLoad() {
         assertNotNull(memberInvitationCommand);
@@ -43,21 +49,24 @@ class InviteMemberCommandTests extends ChatDbContainerBase {
     @Test
     void execute_givenValidData_returnsTrue() {
         UUID ownerId = UUID.randomUUID();
+        UUID invitedId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "Chat", false);
         chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(invitedId)).thenReturn(Optional.of("invitedUser"));
 
-        boolean didSucceed = memberInvitationCommand.execute(ownerId, chat.getId(), UUID.randomUUID(), "member");
+        boolean didSucceed = memberInvitationCommand.execute(ownerId, chat.getId(), invitedId);
 
         assertTrue(didSucceed);
     }
 
     @Test
     void execute_whenNonMemberTriesToInvite_returnsFalse() {
+        UUID invitedId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(invitedId)).thenReturn(Optional.of("invitedUser"));
 
-        boolean didSucceed = memberInvitationCommand.execute(UUID.randomUUID(), chat.getId(), UUID.randomUUID(),
-                "member");
+        boolean didSucceed = memberInvitationCommand.execute(UUID.randomUUID(), chat.getId(), invitedId);
 
         assertFalse(didSucceed);
     }
@@ -67,8 +76,21 @@ class InviteMemberCommandTests extends ChatDbContainerBase {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.of("invitedUser"));
 
-        boolean didSucceed = memberInvitationCommand.execute(ownerId, chat.getId(), ownerId, "member");
+        boolean didSucceed = memberInvitationCommand.execute(ownerId, chat.getId(), ownerId);
+
+        assertFalse(didSucceed);
+    }
+
+    @Test
+    void execute_whenUserNameEmpty_returnsFalse() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.empty());
+
+        boolean didSucceed = memberInvitationCommand.execute(ownerId, chat.getId(), ownerId);
 
         assertFalse(didSucceed);
     }

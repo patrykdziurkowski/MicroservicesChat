@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.patrykdziurkowski.microserviceschat.application.InviteMemberCommand;
@@ -41,12 +40,11 @@ public class ChatMemberController {
 
     @PostMapping("/chats/{chatId}/members")
     public ResponseEntity<String> invite(Authentication authentication,
-                                         @RequestParam String invitedUserUserName,
                                          @PathVariable UUID chatId,
                                          @RequestBody @Valid InvitedUserModel invitedUserData) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMemberInvited = inviteMemberCommand.execute(currentUserId,
-            chatId, invitedUserData.getUserId(), invitedUserUserName);
+            chatId, invitedUserData.getUserId());
         if(isMemberInvited == false) {
             return new ResponseEntity<>("User invitation failed.", HttpStatus.FORBIDDEN);
         }
@@ -55,11 +53,10 @@ public class ChatMemberController {
 
     @DeleteMapping("/chats/{chatId}/members/{memberId}")
     public ResponseEntity<String> kick(Authentication authentication,
-                                       @RequestParam String memberUserName,
                                        @PathVariable UUID chatId,
                                        @PathVariable UUID memberId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean isMemberKicked = kickMemberCommand.execute(currentUserId, chatId, memberId, memberUserName);
+        boolean isMemberKicked = kickMemberCommand.execute(currentUserId, chatId, memberId);
         if(isMemberKicked == false) {
             return new ResponseEntity<>("Kicking member failed.", HttpStatus.FORBIDDEN);
         }
@@ -68,13 +65,11 @@ public class ChatMemberController {
 
     @PostMapping("/chats/{chatId}/user")
     public ResponseEntity<String> join(Authentication authentication,
-                                       @RequestParam String currentUserUserName,
                                        @PathVariable UUID chatId,
                                        @RequestBody JoinChatModel joinChatModel) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean didUserJoin = joinChatCommand.execute(currentUserId, 
-            chatId, 
-            currentUserUserName, 
+            chatId,
             Optional.ofNullable(joinChatModel.getPassword()));
         if(didUserJoin == false) {
             return new ResponseEntity<>("User did not join chat.", HttpStatus.BAD_REQUEST);
@@ -84,10 +79,9 @@ public class ChatMemberController {
 
     @DeleteMapping("/chats/{chatId}/user")
     public ResponseEntity<String> leave(Authentication authentication,
-                                        @RequestParam String currentUserUserName,
                                         @PathVariable UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean didMemberLeave = leaveChatCommand.execute(currentUserId, chatId, currentUserUserName);
+        boolean didMemberLeave = leaveChatCommand.execute(currentUserId, chatId);
         if(didMemberLeave == false) {
             return new ResponseEntity<>("Member did not leave chat.", HttpStatus.FORBIDDEN);
         }

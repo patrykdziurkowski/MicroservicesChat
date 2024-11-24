@@ -3,7 +3,9 @@ package com.patrykdziurkowski.microserviceschat.application;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -35,6 +38,9 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
+    @MockBean
+    private AuthenticationApiClient apiClient;
+
     @Test
     void memberLeaveCommand_shouldLoad() {
         assertNotNull(memberLeaveCommand);
@@ -45,25 +51,40 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.of("kickedMember"));
 
-        boolean didSucceed = memberLeaveCommand.execute(ownerId, chat.getId(), "member");
+        boolean didSucceed = memberLeaveCommand.execute(ownerId, chat.getId());
 
         assertTrue(didSucceed);
     }
 
     @Test
     void execute_whenMemberNotInChat_returnsFalse() {
+        UUID userId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.of("kickedMember"));
 
-        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), chat.getId(), "member");
+        boolean didSucceed = memberLeaveCommand.execute(userId, chat.getId());
 
         assertFalse(didSucceed);
     }
 
     @Test
     void execute_whenChatDoesntExists_returnsFalse() {
-        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID(), "member");
+        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID());
+
+        assertFalse(didSucceed);
+    }
+
+    @Test
+    void execute_whenUserNameEmpty_returnsFalse() {
+        UUID userId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+        chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.empty());
+
+        boolean didSucceed = memberLeaveCommand.execute(userId, chat.getId());
 
         assertFalse(didSucceed);
     }
