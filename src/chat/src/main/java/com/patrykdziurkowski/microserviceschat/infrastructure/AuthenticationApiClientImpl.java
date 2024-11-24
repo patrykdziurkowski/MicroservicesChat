@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
+import com.patrykdziurkowski.microserviceschat.presentation.GetUserModel;
 
 @Component
 public class AuthenticationApiClientImpl implements AuthenticationApiClient {
@@ -76,6 +77,25 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
                 return Optional.empty();
             }
             return Optional.of(UUID.fromString(response.getBody()));
+        } catch (HttpClientErrorException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> sendUserNameRequest(UUID userId) {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<GetUserModel> response = restTemplate.exchange(
+                    authServerUri + "/users/" + userId, 
+                    HttpMethod.GET,
+                    request,
+                    GetUserModel.class);
+    
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return Optional.of(response.getBody().getUserName());
+            }
+            return Optional.empty();
         } catch (HttpClientErrorException e) {
             return Optional.empty();
         }

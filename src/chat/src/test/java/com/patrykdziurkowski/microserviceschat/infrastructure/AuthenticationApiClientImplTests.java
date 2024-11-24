@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.infrastructure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,4 +113,33 @@ class AuthenticationApiClientImplTests extends ComposeContainersBase {
         assertNotNull(token);
         assertTrue(userIdResult.isPresent());
     }
+
+    @Test
+    @Order(9)
+    void sendUserNameRequest_shouldReturnUserName_whenValidUserId() {
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "P@ssword1!");
+        String token = result.orElseThrow();
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
+
+        Optional<String> userNameResult = apiClient.sendUserNameRequest(userIdResult.get());
+
+        assertTrue(userNameResult.isPresent());
+        assertEquals("validUser", userNameResult.get());
+    }
+
+    @Test
+    @Order(10)
+    void sendUserNameRequest_shouldReturnEmpty_whenInvalidUserId() {
+        Optional<String> result = apiClient.sendLoginRequest("validUser",
+                "P@ssword1!");
+        String token = result.orElseThrow();
+        apiClient.sendTokenValidationRequest(token);
+
+        Optional<String> userNameResult = apiClient.sendUserNameRequest(UUID.randomUUID());
+
+        assertTrue(userNameResult.isEmpty());
+    }
+
+    
 }

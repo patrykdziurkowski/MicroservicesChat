@@ -9,4 +9,6 @@ public interface AuthenticationApiClient {
     Optional<String> sendLoginRequest(String userName, String password);
 
     Optional<UUID> sendTokenValidationRequest(String token);
+
+    Optional<String> sendUserNameRequest(UUID userId);
 }
