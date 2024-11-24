@@ -10,18 +10,25 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 @Service
 public class InviteMemberCommand {
     private final ChatRepository chatRepository;
+    private final AuthenticationApiClient apiClient;
 
-    public InviteMemberCommand(ChatRepository chatRepository) {
+    public InviteMemberCommand(ChatRepository chatRepository,
+            AuthenticationApiClient apiClient) {
         this.chatRepository = chatRepository;
+        this.apiClient = apiClient;
     }
 
-    public boolean execute(UUID currentUserId, UUID chatId, UUID invitedMemberId, String invitedMemberUsername) {
+    public boolean execute(UUID currentUserId, UUID chatId, UUID invitedMemberId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
             return false;
         }
         ChatRoom chat = retrievedChat.get();
-        if(chat.inviteMember(invitedMemberId, invitedMemberUsername, currentUserId) == false) {
+        Optional<String> invitedUserName = apiClient.sendUserNameRequest(invitedMemberId);
+        if(invitedUserName.isEmpty()) {
+            return false;
+        }
+        if(chat.inviteMember(invitedMemberId, invitedUserName.orElseThrow(), currentUserId) == false) {
             return false;
         }
         chatRepository.save(chat);

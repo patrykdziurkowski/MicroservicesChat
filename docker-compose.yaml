@@ -23,16 +23,19 @@ services:
     environment:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - IS_PRODUCTION=${IS_PRODUCTION:-false}
+    ports:
+      - 5006:5006
     depends_on:
       db-chat:
         condition: service_healthy
       auth:
-        condition: service_healthy
+        condition: service_started
     networks:
       - shared
       - chat
     volumes:
       - ./src/chat/src/main/resources/templates:/app/src/main/resources/templates
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
   db-chat:
     image: ${REGISTRY_PATH:-localhost}/mc_db-chat:latest
     build:
@@ -52,6 +55,8 @@ services:
     environment:
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - 5005:5005
     depends_on:
       db-auth:
         condition: service_healthy

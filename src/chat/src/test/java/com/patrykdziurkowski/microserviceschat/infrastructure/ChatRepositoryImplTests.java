@@ -12,40 +12,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.web.client.RestTemplate;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
 
 @DataJpaTest
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-class ChatRepositoryImplTests {
+class ChatRepositoryImplTests extends ChatDbContainerBase {
     @Autowired
     private ChatRepositoryImpl chatRepository;
     @Autowired
     private MessageRepositoryImpl messageRepository;
     @Autowired
     private FavoriteChatRepositoryImpl favoriteChatRepository;
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("P@ssw0rd");
+    @MockBean
+    private RestTemplate restTemplate;
 
     @Test
     void repository_shouldLoad() {
@@ -79,7 +67,7 @@ class ChatRepositoryImplTests {
         chat.join(memberId, "username");
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
 
         assertTrue(chats.contains(chat));
     }
@@ -91,8 +79,7 @@ class ChatRepositoryImplTests {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat));
     }
 
@@ -103,8 +90,7 @@ class ChatRepositoryImplTests {
         UUID memberId = UUID.randomUUID();
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat) == false);
     }
 
@@ -116,9 +102,25 @@ class ChatRepositoryImplTests {
         chat.join(memberId, "username");
 
         chatRepository.save(chat);
-        List<ChatRoom> chats = chatRepository.getByMemberId(memberId);
-
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 0, 20);
         assertTrue(chats.contains(chat));
+    }
+
+    @Test
+    void getByMemberId_shouldReturnOnlySecondChat_whenExistsAndLastChatPositionIs1() {
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        ChatRoom secondChat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        chat.join(memberId, "username");
+        secondChat.join(memberId, "username");
+        chatRepository.save(chat);
+        chatRepository.save(secondChat);
+        
+        List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 1, 20);
+
+        assertFalse(chats.contains(chat));
+        assertTrue(chats.contains(secondChat));
+
     }
 
     @Test

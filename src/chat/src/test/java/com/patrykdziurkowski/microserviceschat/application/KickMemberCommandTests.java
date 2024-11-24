@@ -3,7 +3,9 @@ package com.patrykdziurkowski.microserviceschat.application;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -11,19 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
+import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
 
 @SpringBootTest
 @Rollback
@@ -33,8 +32,7 @@ import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
         "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Testcontainers
-public class KickMemberCommandTests {
+class KickMemberCommandTests extends ChatDbContainerBase {
     @Autowired
     private KickMemberCommand memberRemoveCommand;
     @Autowired
@@ -42,17 +40,8 @@ public class KickMemberCommandTests {
     @Autowired
     private ChatRepositoryImpl chatRepository;
 
-
-    @SuppressWarnings("resource")
-    @Container
-    @ServiceConnection
-    private static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
-            .withExposedPorts(1433)
-            .waitingFor(Wait.forSuccessfulCommand(
-                    "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))
-            .acceptLicense()
-            .withPassword("examplePassword123");
+    @MockBean
+    private AuthenticationApiClient apiClient;
 
     @Test
     void memberRemoveCommand_shouldLoad() {
@@ -65,9 +54,10 @@ public class KickMemberCommandTests {
         UUID memberId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
+        when(apiClient.sendUserNameRequest(memberId)).thenReturn(Optional.of("kickedMember"));
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId);
 
-        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), memberId, "member");
+        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), memberId);
 
         assertTrue(didSucceed);
     }
@@ -78,9 +68,10 @@ public class KickMemberCommandTests {
         UUID memberId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
+        when(apiClient.sendUserNameRequest(memberId)).thenReturn(Optional.of("kickedMember"));
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId);
 
-        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
+        boolean didSucceed = memberRemoveCommand.execute(memberId, chat.getId(), memberId);
 
         assertFalse(didSucceed);
     }
@@ -91,7 +82,7 @@ public class KickMemberCommandTests {
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), ownerId, "member");
+        boolean didSucceed = memberRemoveCommand.execute(ownerId, chat.getId(), ownerId);
 
         assertFalse(didSucceed);
     }
@@ -102,9 +93,24 @@ public class KickMemberCommandTests {
         UUID memberId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
-        memberInvitationCommand.execute(ownerId, chat.getId(), memberId, "member");
+        when(apiClient.sendUserNameRequest(memberId)).thenReturn(Optional.of("kickedMember"));
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId);
 
-        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId, "member");
+        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId);
+
+        assertFalse(didSucceed);
+    }
+
+    @Test
+    void execute_whenUserNameEmpty_returnsFalse() {
+        UUID ownerId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        chatRepository.save(chat);
+        when(apiClient.sendUserNameRequest(memberId)).thenReturn(Optional.empty());
+        memberInvitationCommand.execute(ownerId, chat.getId(), memberId);
+
+        boolean didSucceed = memberRemoveCommand.execute(UUID.randomUUID(), chat.getId(), memberId);
 
         assertFalse(didSucceed);
     }

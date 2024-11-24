@@ -2,6 +2,7 @@ package com.patrykdziurkowski.microserviceschat.presentation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
 import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
+import com.patrykdziurkowski.microserviceschat.application.UserQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 
 @WebMvcTest(UserController.class)
@@ -48,6 +50,8 @@ class UserControllerTests {
     private RegisterCommand registerCommand;
     @MockBean
     private LoginQuery loginQuery;
+    @MockBean
+    private UserQuery userQuery;
     @MockBean
     private ChangeUserNameCommand changeUserNameCommand;
 
@@ -145,6 +149,26 @@ class UserControllerTests {
                 .andDo(print());
     }
 
+    @Test
+    void validateToken_shouldReturnBadRequest_whenNoTokenProvided() throws Exception {
+        mockMvc.perform(get("/authenticate")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void validateToken_shouldReturnOkAndUserId_whenValidTokenProvided() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String userName = "oldUserName";
+        String token = jwtTokenManager.generateToken(userId, userName);
+
+        mockMvc.perform(get("/authenticate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(content().string(userId.toString()));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
             "tooLongUserName1", // username longer than 15 characters
@@ -208,6 +232,31 @@ class UserControllerTests {
                 .header("Authorization", "Bearer " + token)
                 .content(userData))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUser_shouldReturnUserDetails_whenUserExists() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User user = new User("testUser", "P@ssword1");
+        GetUserModel expectedModel = new GetUserModel(user.getId(), "testUser");
+
+        when(userQuery.execute(userId)).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedModel)));
+    }
+
+    @Test
+    void getUser_shouldReturnNoContent_whenUserDoesNotExist() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        when(userQuery.execute(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
     }
 
 }

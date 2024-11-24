@@ -15,7 +15,7 @@ public class ChatsQuery {
         this.chatRepository = chatRepository;
     }
 
-    public List<ChatRoom> execute(UUID currentUserId) {
-        return chatRepository.getByMemberId(currentUserId);
+    public List<ChatRoom> execute(UUID currentUserId, int lastChatPosition, int chatsToRetrieve) {
+        return chatRepository.getByMemberId(currentUserId, lastChatPosition, chatsToRetrieve);
     }
 }
