@@ -16,16 +16,12 @@ public class HomeController {
     }
 
     @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("title", "Test title changed");
-        model.addAttribute("message", "Test message");
+    public String register() {
         return "register";
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
-        model.addAttribute("title", "Test title changed");
-        model.addAttribute("message", "Test message");
+    public String login() {
         return "login";
     }
 
@@ -35,19 +31,12 @@ public class HomeController {
     }
   
     @GetMapping("/chats")
-    public String chats(Authentication authentication, Model model) {
-        UUID userId = UUID.fromString(authentication.getName());
-        model.addAttribute("title", userId);
-        model.addAttribute("message", "Test message");
+    public String chats() {
         return "chats";
     }
 
     @GetMapping("/chats/{chatId}")
-    public String chat(
-            @PathVariable String chatId,
-            Model model) {
-        model.addAttribute("title", "Chat " + chatId);
-        model.addAttribute("message", "Test message");
+    public String chat(@PathVariable String chatId) {
         return "chat";
     }
 
