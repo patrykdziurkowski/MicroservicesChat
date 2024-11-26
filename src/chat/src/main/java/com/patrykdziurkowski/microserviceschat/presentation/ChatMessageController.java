@@ -1,6 +1,7 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,9 @@ public class ChatMessageController {
 
     private static final int NUMBER_OF_MESSAGES_TO_RETRIEVE = 20;
 
-    public ChatMessageController(PostMessageCommand addMessageCommand, 
-                                RemoveMessageCommand deleteMessageCommand,
-                                ChatMessagesQuery chatMessagesQuery) {
+    public ChatMessageController(PostMessageCommand addMessageCommand,
+            RemoveMessageCommand deleteMessageCommand,
+            ChatMessagesQuery chatMessagesQuery) {
         this.postMessageCommand = addMessageCommand;
         this.removeMessageCommand = deleteMessageCommand;
         this.chatMessagesQuery = chatMessagesQuery;
@@ -40,11 +41,11 @@ public class ChatMessageController {
 
     @PostMapping("/chats/{chatId}/messages")
     public ResponseEntity<String> addMessage(Authentication authentication,
-                                             @PathVariable UUID chatId,
-                                             @RequestBody @Valid NewMessageModel newMessage) {
+            @PathVariable UUID chatId,
+            @RequestBody @Valid NewMessageModel newMessage) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageAdded = postMessageCommand.execute(chatId, newMessage.getContent(), currentUserId);
-        if(isMessageAdded == false) {
+        if (isMessageAdded == false) {
             return new ResponseEntity<>("Message could not be added.", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("Message added successfully.", HttpStatus.CREATED);
@@ -52,25 +53,34 @@ public class ChatMessageController {
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")
     public ResponseEntity<String> deleteMessage(Authentication authentication,
-                                                @PathVariable UUID messageId) {
+            @PathVariable UUID messageId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageDeleted = removeMessageCommand.execute(currentUserId, messageId);
-        if(isMessageDeleted == false) {
+        if (isMessageDeleted == false) {
             return new ResponseEntity<>("Message could not be deleted.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("Message deleted successfully.", HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/chats/{chatId}/messages")
-    public ResponseEntity<List<UserMessage>> getMessages(@PathVariable UUID chatId,
-                                                        @RequestParam(defaultValue = "0") int offset) {
-        if(offset < 0) {
+    public ResponseEntity<List<UserMessage>> getMessages(
+            Authentication authentication,
+            @PathVariable UUID chatId,
+            @RequestParam(defaultValue = "0") int offset) {
+        if (offset < 0) {
             return ResponseEntity.badRequest().build();
         }
-        List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIEVE);
-        if(messages.isEmpty()) {
-            return ResponseEntity.noContent().build();
+
+        UUID currentUserId = UUID.fromString(authentication.getName());
+        Optional<List<UserMessage>> messagesResult = chatMessagesQuery.execute(
+                currentUserId,
+                chatId,
+                offset,
+                NUMBER_OF_MESSAGES_TO_RETRIEVE);
+
+        if (messagesResult.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return ResponseEntity.ok(messages);
+        return new ResponseEntity<>(messagesResult.orElseThrow(), HttpStatus.OK);
     }
 }
