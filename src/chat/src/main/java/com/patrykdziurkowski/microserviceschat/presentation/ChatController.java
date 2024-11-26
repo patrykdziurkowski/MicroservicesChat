@@ -63,7 +63,7 @@ public class ChatController {
     }
 
     @GetMapping("/chats/load")
-    public ResponseEntity<List<ChatRoom>> getChats(Authentication authentication,
+    public ResponseEntity<List<ChatRoomDto>> getChats(Authentication authentication,
                                                    @RequestParam(defaultValue = "0") int offset) {
         if(offset < 0) {
             return ResponseEntity.badRequest().build();
@@ -73,7 +73,8 @@ public class ChatController {
         if(chats.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(chats);
+        List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, currentUserId);
+        return ResponseEntity.ok(chatsDto);
     }
 
 }

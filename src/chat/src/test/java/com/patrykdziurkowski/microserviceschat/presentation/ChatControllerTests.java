@@ -149,6 +149,7 @@ class ChatControllerTests {
     void getChats_shouldReturnOk_whenChatsExist() throws Exception {
         ChatRoom chatRoom = new ChatRoom(UUID.randomUUID(), "Test Chat", true);
         List<ChatRoom> chats = List.of(chatRoom);
+        List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, currentUserId);
 
         when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(chats);
 
@@ -158,7 +159,7 @@ class ChatControllerTests {
                 .param("offset", "0")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(chats)));
+                .andExpect(content().json(objectMapper.writeValueAsString(chatsDto)));
     }
 
     @Test
