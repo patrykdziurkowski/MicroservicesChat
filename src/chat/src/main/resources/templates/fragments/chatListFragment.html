@@ -22,10 +22,6 @@
             .then(response => {
                 if (response.status === 204) {
                     console.log("No content received");
-                    const serverContainer = document.getElementById('serverContainer');
-                    if (offset === 0) {
-                        serverContainer.innerHTML = '<p>You are not a member of any chat</p>';
-                    }
                     return [];
                 }
 
@@ -69,44 +65,26 @@
             serverContainer.appendChild(button);
         }
 
-        function createChatCard(chat) {
-            const section = document.createElement('section');
-            section.classList.add('card', 'p-3');
-
-            const flexContainer = document.createElement('div');
-            flexContainer.classList.add('d-flex', 'justify-content-between', 'align-items-center');
-
-            const leftContent = document.createElement('div');
-            const title = document.createElement('h5');
-            title.classList.add('card-title', 'truncate-text');
-            title.textContent = chat.name;
-
-            const details = document.createElement('p');
-            details.classList.add('card-text');
-            details.textContent = `${chat.memberCount} members`;
-
-            leftContent.appendChild(title);
-            leftContent.appendChild(details);
-
-            const form = document.createElement('form');
-            form.method = chat.isMember ? 'DELETE' : 'POST';
-            form.action = `/chats/${chat.id}/user`;
-
-            const button = document.createElement('input');
-            button.type = 'submit';
-            button.value = chat.isMember ? 'Leave' : 'Join';
-            button.classList.add('btn', 'btn-primary', 'btn-sm');
-
-            form.appendChild(button);
-
-            flexContainer.appendChild(leftContent);
-            flexContainer.appendChild(form);
-
-            section.appendChild(flexContainer);
-            return section;
-        }
-
         loadChats();
     });
+
+    function createChatCard(chat) {
+        const section = document.createElement('section');
+        section.classList.add('card', 'p-3');
+    
+        section.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title truncate-text">${chat.name}</h5>
+                    <p class="card-text">${chat.memberCount} members</p>
+                </div>
+                <form method="${chat.isMember ? 'DELETE' : 'POST'}" action="/chats/${chat.id}/user">
+                    <input type="submit" value="${chat.isMember ? 'Leave' : 'Join'}" class="btn btn-primary btn-sm">
+                </form>
+            </div>
+        `;
+    
+        return section;
+    }
 </script>
 </div>
