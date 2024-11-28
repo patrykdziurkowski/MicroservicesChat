@@ -74,10 +74,11 @@ class ChatControllerTests {
     })
     void createChat_shouldReturnBadRequest_whenInputInvalid(String chatName, String password) throws Exception {
         ChatModel chatModel = new ChatModel(chatName, false, password);
+        ChatRoom chatRoom = new ChatRoom(currentUserId, chatName, false);
         String chatData = objectMapper.writeValueAsString(chatModel);
 
         when(createChatCommand.execute(currentUserId, chatName, true, Optional.of(password)))
-                .thenReturn(false);
+                .thenReturn(chatRoom);
 
         mockMvc.perform(post("/chats")
                 .with(csrf())
@@ -88,28 +89,13 @@ class ChatControllerTests {
     }
 
     @Test
-    void createChat_shouldReturnForbidden_whenChatCreationFails() throws Exception {
-        ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
-        String chatData = objectMapper.writeValueAsString(chatModel);
-
-        when(createChatCommand.execute(currentUserId, "ValidChatName", true, Optional.of("!password123")))
-                .thenReturn(false);
-
-        mockMvc.perform(post("/chats")
-                .with(csrf())
-                .with(user(currentUserId.toString()).password("").roles("USER"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(chatData))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     void createChat_shouldReturnCreated_whenChatCreationSucceeds() throws Exception {
         ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
+        ChatRoom chatRoom = new ChatRoom(currentUserId, "ValidChatName", false);
         String chatData = objectMapper.writeValueAsString(chatModel);
 
         when(createChatCommand.execute(currentUserId, "ValidChatName", true, Optional.of("!password123")))
-                .thenReturn(true);
+                .thenReturn(chatRoom);
 
         mockMvc.perform(post("/chats")
                 .with(csrf())

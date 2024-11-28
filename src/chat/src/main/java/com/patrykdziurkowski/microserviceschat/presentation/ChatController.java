@@ -1,6 +1,8 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,17 +40,17 @@ public class ChatController {
     }
 
     @PostMapping("/chats")
-    public ResponseEntity<String> createChat(Authentication authentication,
+    public ResponseEntity<ChatRoomDto> createChat(Authentication authentication,
                                              @RequestBody @Valid ChatModel chatData) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean isChatCreated = createChatCommand.execute(currentUserId,
+        ChatRoom createdChat = createChatCommand.execute(currentUserId,
             chatData.getChatName(),
             chatData.getIsPublic(),
             Optional.ofNullable(chatData.getChatPassword()));
-        if(isChatCreated == false) {
-            return new ResponseEntity<>("Chat creation failed.", HttpStatus.FORBIDDEN);
-        }
-        return new ResponseEntity<>("Chat creation was successful.", HttpStatus.CREATED);
+        
+        return new ResponseEntity<>(
+            ChatRoomDto.from(createdChat, currentUserId),
+            HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}")

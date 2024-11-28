@@ -19,6 +19,7 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(c -> c.disable())
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/register", "/login", "/").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
@@ -28,7 +29,7 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint((request, response, exception) -> response.sendRedirect("/login")))
                 .logout(options -> options.disable())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
+        
         return http.build();
     }
 }

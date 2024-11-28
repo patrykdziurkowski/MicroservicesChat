@@ -1,7 +1,9 @@
 <div th:fragment="chatList" class="d-flex flex-column align-items-start h-100">
     <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
+    <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
+    <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#createChat">+</button>
     <section class="mt-auto row">
         <h5 class="col">Username</h5>
         <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>

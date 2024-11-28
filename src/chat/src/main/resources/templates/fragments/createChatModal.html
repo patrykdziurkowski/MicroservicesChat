@@ -1,0 +1,84 @@
+<div th:fragment="createChatModal" class="modal fade" id="createChat" tabindex="-1"
+    aria-labelledby="createChatLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createChatLabel">Create chat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" th:action="@{/chats}">
+                    <div class="form-group"> 
+                        <input name="chatName" type="text" id="chatName" class="form-control" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="chatPassword">Chat password (optional):</label>
+                        <input name="chatPassword" type="password" id="chatPassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input name="isPrivate" class="form-check-input" type="checkbox" value="">
+                            <label class="form-check-label" for="flexCheckDefault">
+                                Private
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onClick="postChat()" class="btn btn-primary" data-bs-dismiss="modal">Create</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function postChat() {
+            const chatName = document.getElementById('chatName').value;
+            const chatPassword = document.getElementById('chatPassword').value;
+            const isPrivate = document.querySelector('input[name="isPrivate"]').checked;
+
+            const payload = {
+                chatName: chatName,
+                chatPassword: chatPassword,
+                isPublic: !isPrivate,
+            };
+
+            console.log(JSON.stringify(payload));
+
+            fetch(`/chats`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+    
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('Content-Type') || '';
+                if (contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Unexpected content type: ' + contentType);
+                }
+            })
+            .then(data => {
+                console.log('Chat created:', data);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createChat'));
+                modal.hide();
+
+                const section = createChatCard(data);
+                document.getElementById('serverContainer').appendChild(section);
+            })
+            .catch(error => {
+                console.error('Error creating chat:', error);
+                alert('Failed to create chat. Please try again.');
+            });
+        }
+    </script>
+</div>
