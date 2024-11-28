@@ -1,6 +1,5 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,10 +26,9 @@ public class ChatMemberController {
     private final JoinChatCommand joinChatCommand;
     private final LeaveChatCommand leaveChatCommand;
 
-
     public ChatMemberController(InviteMemberCommand inviteMemberCommand,
-            KickMemberCommand kickMemberCommand, 
-            JoinChatCommand joinChatCommand, 
+            KickMemberCommand kickMemberCommand,
+            JoinChatCommand joinChatCommand,
             LeaveChatCommand leaveChatCommand) {
         this.inviteMemberCommand = inviteMemberCommand;
         this.kickMemberCommand = kickMemberCommand;
@@ -40,12 +38,12 @@ public class ChatMemberController {
 
     @PostMapping("/chats/{chatId}/members")
     public ResponseEntity<String> invite(Authentication authentication,
-                                         @PathVariable UUID chatId,
-                                         @RequestBody @Valid InvitedUserModel invitedUserData) {
+            @PathVariable UUID chatId,
+            @RequestBody @Valid InvitedUserModel invitedUserData) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMemberInvited = inviteMemberCommand.execute(currentUserId,
-            chatId, invitedUserData.getUserId());
-        if(isMemberInvited == false) {
+                chatId, invitedUserData.getUserId());
+        if (isMemberInvited == false) {
             return new ResponseEntity<>("User invitation failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("User invitation was successful.", HttpStatus.CREATED);
@@ -53,11 +51,11 @@ public class ChatMemberController {
 
     @DeleteMapping("/chats/{chatId}/members/{memberId}")
     public ResponseEntity<String> kick(Authentication authentication,
-                                       @PathVariable UUID chatId,
-                                       @PathVariable UUID memberId) {
+            @PathVariable UUID chatId,
+            @PathVariable UUID memberId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMemberKicked = kickMemberCommand.execute(currentUserId, chatId, memberId);
-        if(isMemberKicked == false) {
+        if (isMemberKicked == false) {
             return new ResponseEntity<>("Kicking member failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("Member was kicked successfully.", HttpStatus.NO_CONTENT);
@@ -65,27 +63,31 @@ public class ChatMemberController {
 
     @PostMapping("/chats/{chatId}/user")
     public ResponseEntity<String> join(Authentication authentication,
-                                       @PathVariable UUID chatId,
-                                       @RequestBody JoinChatModel joinChatModel) {
+            @PathVariable UUID chatId,
+            @RequestBody JoinChatModel joinChatModel) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean didUserJoin = joinChatCommand.execute(currentUserId, 
-            chatId,
-            Optional.ofNullable(joinChatModel.getPassword()));
-        if(didUserJoin == false) {
+        boolean didUserJoin = joinChatCommand.execute(currentUserId,
+                chatId,
+                Optional.ofNullable(joinChatModel.getPassword()));
+        if (didUserJoin == false) {
             return new ResponseEntity<>("User did not join chat.", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("User joined successfully.", HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/user")
-    public ResponseEntity<String> leave(Authentication authentication,
-                                        @PathVariable UUID chatId) {
+    public ResponseEntity<MessageResponse> leave(Authentication authentication,
+            @PathVariable UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean didMemberLeave = leaveChatCommand.execute(currentUserId, chatId);
-        if(didMemberLeave == false) {
-            return new ResponseEntity<>("Member did not leave chat.", HttpStatus.FORBIDDEN);
+        if (didMemberLeave == false) {
+            return new ResponseEntity<>(
+                    new MessageResponse("Member did not leave chat."),
+                    HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>("Member left chat successfully.", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(
+                new MessageResponse("Member left chat successfully."),
+                HttpStatus.NO_CONTENT);
     }
 
 }

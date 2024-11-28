@@ -1,9 +1,11 @@
 <div th:fragment="chatList" class="d-flex flex-column align-items-start h-100">
     <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
     <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
-    <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal" data-bs-target="#createChat">+</button>
+    <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
+        data-bs-target="#createChat">+</button>
     <section class="mt-auto row">
         <h5 class="col">Username</h5>
         <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
@@ -12,81 +14,80 @@
         </form>
     </section>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        let offset = 0;
+    <script>
+        let chatToLeaveId = null;
+        document.addEventListener("DOMContentLoaded", () => {
+            let offset = 0;
 
-        function loadChats() {
-            fetch(`/chats/load?offset=${offset}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.status === 204) {
-                    console.log("No content received");
-                    return [];
-                }
+            function loadChats() {
+                fetch(`/chats/load?offset=${offset}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => {
+                        if (response.status === 204) {
+                            console.log("No content received");
+                            return [];
+                        }
 
-                if (response.ok === false) {
-                    throw new Error(`Failed to load chats: HTTP ${response.status}`);
-                }
+                        if (response.ok === false) {
+                            throw new Error(`Failed to load chats: HTTP ${response.status}`);
+                        }
 
-                return response.json();
-            })
-            .then(data => {
-                if (!data || data.length === 0) return;
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data || data.length === 0) return;
 
-                console.log("Data received:", data);
+                        console.log("Data received:", data);
 
+                        const serverContainer = document.getElementById('serverContainer');
+
+                        data.forEach(chat => {
+                            const section = createChatCard(chat);
+                            serverContainer.appendChild(section);
+                        });
+                        const loadMoreButton = document.getElementById('loadMoreButton');
+                        if (data.length === 20) {
+                            offset += 20;
+                            if (!loadMoreButton) {
+                                createLoadMoreButton();
+                            }
+                        } else if (loadMoreButton) {
+                            loadMoreButton.remove();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function createLoadMoreButton() {
                 const serverContainer = document.getElementById('serverContainer');
+                const button = document.createElement('button');
+                button.id = 'loadMoreButton';
+                button.classList.add('btn', 'btn-secondary', 'mt-3', 'w-100');
+                button.textContent = 'Load More';
+                button.addEventListener('click', () => loadChats());
+                serverContainer.appendChild(button);
+            }
 
-                data.forEach(chat => {
-                    const section = createChatCard(chat);
-                    serverContainer.appendChild(section);
-                });
-                const loadMoreButton = document.getElementById('loadMoreButton');
-                if (data.length === 20) {
-                    offset += 20;
-                    if (!loadMoreButton) {
-                        createLoadMoreButton();
-                    }
-                } else if (loadMoreButton) {
-                    loadMoreButton.remove();
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
+            loadChats();
+        });
 
-        function createLoadMoreButton() {
-            const serverContainer = document.getElementById('serverContainer');
-            const button = document.createElement('button');
-            button.id = 'loadMoreButton';
-            button.classList.add('btn', 'btn-secondary', 'mt-3', 'w-100');
-            button.textContent = 'Load More';
-            button.addEventListener('click', () => loadChats());
-            serverContainer.appendChild(button);
-        }
+        function createChatCard(chat) {
+            const section = document.createElement('section');
+            section.classList.add('card', 'p-3');
+            section.setAttribute('data-chat-id', chat.id);
 
-        loadChats();
-    });
-
-    function createChatCard(chat) {
-        const section = document.createElement('section');
-        section.classList.add('card', 'p-3');
-    
-        section.innerHTML = `
+            section.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
                 </div>
-                <form method="${chat.isMember ? 'DELETE' : 'POST'}" action="/chats/${chat.id}/user">
-                    <input type="submit" value="${chat.isMember ? 'Leave' : 'Join'}" class="btn btn-primary btn-sm">
-                </form>
-            </div>
-        `;
-    
-        return section;
-    }
-</script>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}" onclick="chatToLeaveId='${chat.id}'">${chat.isMember ? 'Leave' : 'Join'}</button>
+            </div>`;
+
+            return section;
+        }
+    </script>
 </div>
