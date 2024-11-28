@@ -33,13 +33,13 @@ import org.springframework.test.context.DynamicPropertySource;
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
-class FetchChatsTests extends ComposeContainersBase {
+class CreateChatTests extends ComposeContainersBase {
     private static WebDriver driver;
 
     @BeforeAll
     static void setup() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
+        //options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -67,7 +67,7 @@ class FetchChatsTests extends ComposeContainersBase {
     @Order(2)
     void registeringUser_shouldRedirect_toLogin() {
         driver.navigate().to("https://localhost/register");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser2");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser3");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("confirmPasswordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("registerSubmit")).click();
@@ -81,7 +81,7 @@ class FetchChatsTests extends ComposeContainersBase {
     @Order(3)
     void loggingIn_shouldRedirect_toChats() {
         driver.navigate().to("https://localhost/login");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser2");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser3");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("loginSubmit")).click();
 
@@ -92,20 +92,45 @@ class FetchChatsTests extends ComposeContainersBase {
 
     @Test
     @Order(4)
-    void loadingChats_shouldntLoadChats_whenNotMemberOfAny() {
+    void createChat_shouldCreateNewChat() {
         driver.navigate().to("https://localhost/chats");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
 
-        WebElement serverContainer = driver.findElement(By.id("serverContainer"));
-        List<WebElement> children = serverContainer.findElements(By.xpath("./*"));
-        for(WebElement child : children) {
-            assertEquals("p", child.getTagName());
-        }
+        driver.findElement(By.id("showCreateChatModal")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("createChat")));
+        driver.findElement(By.id("createChatName")).sendKeys("ChatRoom");
+        driver.findElement(By.id("createChatIsPrivate")).click();
+        driver.findElement(By.id("createChatButton")).click();
+        assertTrue(waitForChildren(1));
+    }
+
+    @Test
+    @Order(5)
+    void loadingChats_shouldLoadBothChats() {
+        driver.navigate().to("https://localhost/chats");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
+
+        driver.findElement(By.id("showCreateChatModal")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("createChat")));
+        driver.findElement(By.id("createChatName")).sendKeys("ChatRoom");
+        driver.findElement(By.id("createChatIsPrivate")).click();
+        driver.findElement(By.id("createChatButton")).click();
+        assertTrue(waitForChildren(2));
     }
 
     @AfterAll
     static void teardown() {
         driver.quit();
+    }
+
+    private boolean waitForChildren(int numberOfChildren) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(d -> {
+            WebElement serverContainer = driver.findElement(By.id("serverContainer"));
+            return serverContainer.findElements(By.xpath("./*")).size() == numberOfChildren;
+        });
+        return true;
     }
 }
