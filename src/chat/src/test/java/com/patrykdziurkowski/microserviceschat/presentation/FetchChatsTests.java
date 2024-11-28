@@ -67,7 +67,7 @@ class FetchChatsTests extends ComposeContainersBase {
     @Order(2)
     void registeringUser_shouldRedirect_toLogin() {
         driver.navigate().to("https://localhost/register");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser1");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser2");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("confirmPasswordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("registerSubmit")).click();
@@ -81,7 +81,7 @@ class FetchChatsTests extends ComposeContainersBase {
     @Order(3)
     void loggingIn_shouldRedirect_toChats() {
         driver.navigate().to("https://localhost/login");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser1");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser2");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("loginSubmit")).click();
 
