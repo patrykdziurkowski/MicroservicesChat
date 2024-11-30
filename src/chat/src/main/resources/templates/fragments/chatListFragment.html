@@ -3,7 +3,9 @@
     <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
-    <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal" data-bs-target="#createChat">+</button>
+    <div class="d-flex justify-content-center mt-3 button-container" style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
+        <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal" data-bs-target="#createChat">Create Chat</button>
+    </div>
     <section class="mt-auto row">
         <h5 class="col">Username</h5>
         <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
@@ -44,14 +46,17 @@
                     const section = createChatCard(chat);
                     serverContainer.appendChild(section);
                 });
-                const loadMoreButton = document.getElementById('loadMoreButton');
+                let loadMoreButton = document.getElementById('loadMoreButton');
+                if (loadMoreButton) {
+                    loadMoreButton.remove();
+                    loadMoreButton = null;
+                }
+                console.log("data.l:" + data.length);
                 if (data.length === 20) {
                     offset += 20;
                     if (!loadMoreButton) {
                         createLoadMoreButton();
                     }
-                } else if (loadMoreButton) {
-                    loadMoreButton.remove();
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -72,21 +77,32 @@
 
     function createChatCard(chat) {
         const section = document.createElement('section');
-        section.classList.add('card', 'p-3');
+        section.classList.add('chat-card', 'p-3');
+        section.style.cursor = 'pointer';
     
+        if (chat.isMember) {
+            section.addEventListener('click', () => {
+                window.location.href = `/chats/${chat.id}`;
+            });
+        }
+
         section.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
                 </div>
-                <form method="${chat.isMember ? 'DELETE' : 'POST'}" action="/chats/${chat.id}/user">
-                    <input type="submit" value="${chat.isMember ? 'Leave' : 'Join'}" class="btn btn-primary btn-sm">
-                </form>
+                ${chat.isMember ? 
+                    '' : 
+                    `<form method="POST" action="/chats/${chat.id}/user" onclick="event.stopPropagation();">
+                        <input type="submit" value="Join" class="btn btn-primary btn-sm">
+                    </form>`
+                }
             </div>
         `;
     
         return section;
     }
+    
 </script>
 </div>

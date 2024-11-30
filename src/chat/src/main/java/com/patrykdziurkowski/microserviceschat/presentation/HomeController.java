@@ -32,11 +32,17 @@ public class HomeController {
   
     @GetMapping("/chats")
     public String chats() {
+        
         return "chats";
     }
 
     @GetMapping("/chats/{chatId}")
-    public String chat(@PathVariable String chatId) {
+    public String chat(
+            @PathVariable String chatId,
+            Authentication authentication,
+            Model model) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
+        model.addAttribute("currentUserId", currentUserId);
         return "chat";
     }
 
