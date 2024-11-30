@@ -31,8 +31,9 @@ import org.springframework.test.context.DynamicPropertySource;
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
-class LeaveChatTests extends ComposeContainersBase {
+class JoinChatTests extends ComposeContainersBase {
     private static WebDriver driver;
+    private static WebDriverWait wait;
 
     @BeforeAll
     static void setup() {
@@ -46,6 +47,7 @@ class LeaveChatTests extends ComposeContainersBase {
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @DynamicPropertySource
@@ -56,17 +58,16 @@ class LeaveChatTests extends ComposeContainersBase {
     @Test
     @Order(1)
     void authentication_shouldSucceed() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         driver.navigate().to("https://localhost/register");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser50");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser51");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("confirmPasswordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("registerSubmit")).click();
         wait.until(ExpectedConditions.urlToBe("https://localhost/login"));
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser50");
+
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser51");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("loginSubmit")).click();
-
         wait.until(ExpectedConditions.urlToBe("https://localhost/chats"));
 
         assertEquals("https://localhost/chats", driver.getCurrentUrl());
@@ -76,36 +77,86 @@ class LeaveChatTests extends ComposeContainersBase {
     @Order(2)
     void creatingAChat_shouldWork_whenGivenValidData() {
         driver.navigate().to("https://localhost/chats");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
 
         driver.findElement(By.id("showCreateChatModal")).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("createChat")));
         driver.findElement(By.id("createChatName")).sendKeys("ChatRoom");
-        driver.findElement(By.id("createChatIsPrivate")).click();
         driver.findElement(By.id("createChatButton")).click();
         assertTrue(serverCardCount(1));
     }
 
     @Test
     @Order(3)
-    void leavingChat_shouldRemoveTheChat_whenPressed() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
+    void logging_toADifferentUser_shouldWork() {
+        driver.findElement(By.id("logoutSubmit")).click();
+        driver.navigate().to("https://localhost/register");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser51x1");
+        driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
+        driver.findElement(By.id("confirmPasswordInput")).sendKeys("P@ssword1!");
+        driver.findElement(By.id("registerSubmit")).click();
+        wait.until(ExpectedConditions.urlToBe("https://localhost/login"));
 
-        leaveButton.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));
-        driver.findElement(By.id("leaveChatConfirm")).click();
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser51x1");
+        driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
+        driver.findElement(By.id("loginSubmit")).click();
+        wait.until(ExpectedConditions.urlToBe("https://localhost/chats"));
 
+        assertEquals("https://localhost/chats", driver.getCurrentUrl());
+    }
+
+    @Test
+    @Order(4)
+    void joiningChat_shouldIncreaseMemberCount() {
+        WebElement serverContainer = wait.until(
+                ExpectedConditions.presenceOfElementLocated(By.id("serverContainer")));
+        WebElement joinButton = wait.until(
+                ExpectedConditions.presenceOfNestedElementLocatedBy(serverContainer, By.xpath(".//button")));
+
+        joinButton.click();
+        WebElement joinConfirmButton = wait
+                .until(ExpectedConditions.presenceOfElementLocated(By.id("joinChatConfirm")));
+        wait.until(ExpectedConditions.visibilityOf(joinConfirmButton));
+        joinConfirmButton.click();
+
+        boolean memberCountUpdated = wait.until(d -> {
+            WebElement memberCount = serverContainer.findElement(
+                    By.xpath(".//section//p[contains(text(),'members')]"));
+            return memberCount.getText().startsWith("2 members");
+        });
+        assertTrue(memberCountUpdated);
+    }
+
+    @Test
+    @Order(5)
+    void cleanUp_shouldWork() {
+        leaveFirstChat();
+        driver.findElement(By.id("logoutSubmit"));
+
+        driver.navigate().to("https://localhost/login");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser51");
+        driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
+        driver.findElement(By.id("loginSubmit")).click();
+
+        wait.until(ExpectedConditions.urlToBe("https://localhost/chats"));
+
+        leaveFirstChat();
         assertTrue(serverCardCount(0));
     }
 
     private boolean serverCardCount(int expectedNumberOfCards) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(d -> {
             WebElement serverContainer = driver.findElement(By.id("serverContainer"));
             return serverContainer.findElements(By.xpath("./*")).size() == expectedNumberOfCards;
         });
         return true;
+    }
+
+    private void leaveFirstChat() {
+        WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
+
+        leaveButton.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));
+        driver.findElement(By.id("leaveChatConfirm")).click();
     }
 }

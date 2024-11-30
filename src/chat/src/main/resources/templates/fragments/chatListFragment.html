@@ -2,6 +2,7 @@
     <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
     <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
     <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/joinChatModal.html :: joinChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
     <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
@@ -15,7 +16,7 @@
     </section>
 
     <script>
-        let chatToLeaveId = null;
+        let selectedChatId = null;
         document.addEventListener("DOMContentLoaded", () => {
             let offset = 0;
 
@@ -84,7 +85,7 @@
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
                 </div>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}" onclick="chatToLeaveId='${chat.id}'">${chat.isMember ? 'Leave' : 'Join'}</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}" onclick="selectedChatId='${chat.id}'">${chat.isMember ? 'Leave' : 'Join'}</button>
             </div>`;
 
             return section;

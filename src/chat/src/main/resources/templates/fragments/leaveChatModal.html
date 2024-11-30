@@ -18,8 +18,8 @@
     </div>
     <script>
         function leaveChat() {
-            console.log(`Attemtping to leave chat: ${chatToLeaveId}`);
-            fetch(`/chats/${chatToLeaveId}/user`, {
+            console.log(`Attemtping to leave chat: ${selectedChatId}`);
+            fetch(`/chats/${selectedChatId}/user`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             })
@@ -32,7 +32,7 @@
                     const serverContainer = document.querySelector('#serverContainer');
                     const serverCards = serverContainer.children;
                     for (const serverCard of serverCards) {
-                        if (serverCard.getAttribute('data-chat-id') === chatToLeaveId) {
+                        if (serverCard.getAttribute('data-chat-id') === selectedChatId) {
                             serverCard.remove();
                         }
                     }

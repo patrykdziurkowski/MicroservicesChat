@@ -16,6 +16,7 @@ import com.patrykdziurkowski.microserviceschat.application.InviteMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.JoinChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.KickMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.LeaveChatCommand;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 import jakarta.validation.Valid;
 
@@ -62,17 +63,19 @@ public class ChatMemberController {
     }
 
     @PostMapping("/chats/{chatId}/user")
-    public ResponseEntity<String> join(Authentication authentication,
+    public ResponseEntity<ChatRoomDto> join(Authentication authentication,
             @PathVariable UUID chatId,
             @RequestBody JoinChatModel joinChatModel) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean didUserJoin = joinChatCommand.execute(currentUserId,
+        Optional<ChatRoom> joinedChatResult = joinChatCommand.execute(currentUserId,
                 chatId,
                 Optional.ofNullable(joinChatModel.getPassword()));
-        if (didUserJoin == false) {
-            return new ResponseEntity<>("User did not join chat.", HttpStatus.BAD_REQUEST);
+        if (joinedChatResult.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("User joined successfully.", HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                ChatRoomDto.from(joinedChatResult.orElseThrow(), currentUserId),
+                HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/user")

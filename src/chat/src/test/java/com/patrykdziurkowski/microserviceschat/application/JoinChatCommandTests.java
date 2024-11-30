@@ -1,9 +1,9 @@
 package com.patrykdziurkowski.microserviceschat.application;
 
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -55,9 +55,9 @@ class JoinChatCommandTests extends ChatDbContainerBase {
         UUID userId = UUID.randomUUID();
         when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.of("userName"));
 
-        boolean didSucceed = memberJoinCommand.execute(userId, chat.getId(), null);
+        Optional<ChatRoom> joinedChatResult = memberJoinCommand.execute(userId, chat.getId(), null);
 
-        assertTrue(didSucceed);
+        assertTrue(joinedChatResult.isPresent());
     }
 
     @Test
@@ -67,10 +67,10 @@ class JoinChatCommandTests extends ChatDbContainerBase {
         UUID userId = UUID.randomUUID();
         when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.of("userName"));
 
-        boolean didSucceed = memberJoinCommand.execute(userId, chat.getId(),
+        Optional<ChatRoom> joinedChatResult = memberJoinCommand.execute(userId, chat.getId(),
                 Optional.ofNullable("password1"));
 
-        assertTrue(didSucceed);
+        assertTrue(joinedChatResult.isPresent());
     }
 
     @Test
@@ -80,10 +80,10 @@ class JoinChatCommandTests extends ChatDbContainerBase {
         UUID userId = UUID.randomUUID();
         when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.of("userName"));
 
-        boolean didSucceed = memberJoinCommand.execute(userId, chat.getId(),
+        Optional<ChatRoom> joinedChatResult = memberJoinCommand.execute(userId, chat.getId(),
                 Optional.ofNullable("password2"));
 
-        assertFalse(didSucceed);
+        assertFalse(joinedChatResult.isPresent());
     }
 
     @Test
@@ -93,9 +93,9 @@ class JoinChatCommandTests extends ChatDbContainerBase {
         chatRepository.save(chat);
         when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.of("userName"));
 
-        boolean didSucceed = memberJoinCommand.execute(ownerId, chat.getId(), null);
+        Optional<ChatRoom> joinedChatResult = memberJoinCommand.execute(ownerId, chat.getId(), null);
 
-        assertFalse(didSucceed);
+        assertFalse(joinedChatResult.isPresent());
     }
 
     @Test
@@ -105,8 +105,8 @@ class JoinChatCommandTests extends ChatDbContainerBase {
         chatRepository.save(chat);
         when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.empty());
 
-        boolean didSucceed = memberJoinCommand.execute(ownerId, chat.getId(), null);
+        Optional<ChatRoom> joinedChatResult = memberJoinCommand.execute(ownerId, chat.getId(), null);
 
-        assertFalse(didSucceed);
+        assertFalse(joinedChatResult.isPresent());
     }
 }
