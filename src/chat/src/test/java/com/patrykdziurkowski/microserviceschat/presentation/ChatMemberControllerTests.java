@@ -155,7 +155,7 @@ class ChatMemberControllerTests {
         UUID chatId = UUID.randomUUID();
 
         when(leaveChatCommand.execute(currentUserId, chatId))
-                .thenReturn(false);
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .with(csrf())
@@ -166,15 +166,15 @@ class ChatMemberControllerTests {
 
     @Test
     void leaveChat_shouldReturnNoContent_whenLeaveSucceeds() throws Exception {
-        UUID chatId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(currentUserId, "name", true);
 
-        when(leaveChatCommand.execute(currentUserId, chatId))
-                .thenReturn(true);
+        when(leaveChatCommand.execute(currentUserId, chat.getId()))
+                .thenReturn(Optional.of(chat));
 
-        mockMvc.perform(delete("/chats/{chatId}/user", chatId)
+        mockMvc.perform(delete("/chats/{chatId}/user", chat.getId())
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 }

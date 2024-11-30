@@ -53,9 +53,9 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
         chatRepository.save(chat);
         when(apiClient.sendUserNameRequest(ownerId)).thenReturn(Optional.of("kickedMember"));
 
-        boolean didSucceed = memberLeaveCommand.execute(ownerId, chat.getId());
+        Optional<ChatRoom> didSucceed = memberLeaveCommand.execute(ownerId, chat.getId());
 
-        assertTrue(didSucceed);
+        assertTrue(didSucceed.isPresent());
     }
 
     @Test
@@ -65,16 +65,16 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
         chatRepository.save(chat);
         when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.of("kickedMember"));
 
-        boolean didSucceed = memberLeaveCommand.execute(userId, chat.getId());
+        Optional<ChatRoom> didSucceed = memberLeaveCommand.execute(userId, chat.getId());
 
-        assertFalse(didSucceed);
+        assertFalse(didSucceed.isPresent());
     }
 
     @Test
-    void execute_whenChatDoesntExists_returnsFalse() {
-        boolean didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID());
+    void execute_whenChatDoesntExist_returnsFalse() {
+        Optional<ChatRoom> didSucceed = memberLeaveCommand.execute(UUID.randomUUID(), UUID.randomUUID());
 
-        assertFalse(didSucceed);
+        assertFalse(didSucceed.isPresent());
     }
 
     @Test
@@ -84,9 +84,9 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
         chatRepository.save(chat);
         when(apiClient.sendUserNameRequest(userId)).thenReturn(Optional.empty());
 
-        boolean didSucceed = memberLeaveCommand.execute(userId, chat.getId());
+        Optional<ChatRoom> didSucceed = memberLeaveCommand.execute(userId, chat.getId());
 
-        assertFalse(didSucceed);
+        assertFalse(didSucceed.isPresent());
     }
 
 }

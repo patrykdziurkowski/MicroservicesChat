@@ -79,18 +79,16 @@ public class ChatMemberController {
     }
 
     @DeleteMapping("/chats/{chatId}/user")
-    public ResponseEntity<MessageResponse> leave(Authentication authentication,
+    public ResponseEntity<ChatRoomDto> leave(Authentication authentication,
             @PathVariable UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean didMemberLeave = leaveChatCommand.execute(currentUserId, chatId);
-        if (didMemberLeave == false) {
-            return new ResponseEntity<>(
-                    new MessageResponse("Member did not leave chat."),
-                    HttpStatus.FORBIDDEN);
+        Optional<ChatRoom> chatLeftResult = leaveChatCommand.execute(currentUserId, chatId);
+        if (chatLeftResult.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(
-                new MessageResponse("Member left chat successfully."),
-                HttpStatus.NO_CONTENT);
+                ChatRoomDto.from(chatLeftResult.orElseThrow(), currentUserId),
+                HttpStatus.OK);
     }
 
 }

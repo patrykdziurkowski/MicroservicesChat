@@ -129,7 +129,7 @@ class JoinChatTests extends ComposeContainersBase {
 
     @Test
     @Order(5)
-    void cleanUp_shouldWork() {
+    void cleanUp_shouldRemoveChat_whenNoMembers() {
         leaveFirstChat();
         driver.findElement(By.id("logoutSubmit"));
 
@@ -153,9 +153,12 @@ class JoinChatTests extends ComposeContainersBase {
     }
 
     private void leaveFirstChat() {
-        WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
-
+        WebElement leaveButton = wait
+                .until(ExpectedConditions.presenceOfNestedElementLocatedBy(
+                        By.id("serverContainer"),
+                        By.xpath(".//button")));
         leaveButton.click();
+
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));
         driver.findElement(By.id("leaveChatConfirm")).click();
     }

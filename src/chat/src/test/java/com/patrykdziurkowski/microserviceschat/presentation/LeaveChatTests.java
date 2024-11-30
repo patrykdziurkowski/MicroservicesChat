@@ -33,6 +33,7 @@ import org.springframework.test.context.DynamicPropertySource;
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
 class LeaveChatTests extends ComposeContainersBase {
     private static WebDriver driver;
+    private static WebDriverWait wait;
 
     @BeforeAll
     static void setup() {
@@ -46,6 +47,7 @@ class LeaveChatTests extends ComposeContainersBase {
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @DynamicPropertySource
@@ -56,7 +58,6 @@ class LeaveChatTests extends ComposeContainersBase {
     @Test
     @Order(1)
     void authentication_shouldSucceed() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         driver.navigate().to("https://localhost/register");
         driver.findElement(By.id("usernameInput")).sendKeys("validUser50");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
@@ -76,7 +77,6 @@ class LeaveChatTests extends ComposeContainersBase {
     @Order(2)
     void creatingAChat_shouldWork_whenGivenValidData() {
         driver.navigate().to("https://localhost/chats");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
 
         driver.findElement(By.id("showCreateChatModal")).click();
@@ -89,8 +89,7 @@ class LeaveChatTests extends ComposeContainersBase {
 
     @Test
     @Order(3)
-    void leavingChat_shouldRemoveTheChat_whenPressed() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+    void leavingChat_shouldRemoveTheChat_whenNoMembersLeft() {
         WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
 
         leaveButton.click();
@@ -101,7 +100,6 @@ class LeaveChatTests extends ComposeContainersBase {
     }
 
     private boolean serverCardCount(int expectedNumberOfCards) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(d -> {
             WebElement serverContainer = driver.findElement(By.id("serverContainer"));
             return serverContainer.findElements(By.xpath("./*")).size() == expectedNumberOfCards;
