@@ -1,10 +1,10 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
-import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 public class ChatRoomDto {
     private UUID id;
@@ -12,10 +12,12 @@ public class ChatRoomDto {
     private UUID ownerId;
     private boolean isPublic;
     private boolean isMember;
-    private List<UUID> memberIds = new ArrayList<UUID>();
+    private boolean isPasswordProtected;
+    private List<UUID> memberIds = new ArrayList<>();
     private int memberCount;
-    
-    private ChatRoomDto() {}
+
+    private ChatRoomDto() {
+    }
 
     public static ChatRoomDto from(ChatRoom chatRoom, UUID userId) {
         ChatRoomDto chatDto = new ChatRoomDto();
@@ -25,14 +27,15 @@ public class ChatRoomDto {
         chatDto.isPublic = chatRoom.getIsPublic();
         chatDto.memberIds = chatRoom.getMemberIds();
         chatDto.isMember = chatDto.memberIds.contains(userId);
+        chatDto.isPasswordProtected = chatRoom.getPasswordHash().isPresent();
         chatDto.memberCount = chatDto.memberIds.size();
-        
+
         return chatDto;
     }
 
     public static List<ChatRoomDto> fromList(List<ChatRoom> chatRooms, UUID userId) {
-        List<ChatRoomDto> chatsDto = new ArrayList<ChatRoomDto>();
-        for(ChatRoom chat : chatRooms) {
+        List<ChatRoomDto> chatsDto = new ArrayList<>();
+        for (ChatRoom chat : chatRooms) {
             chatsDto.add(from(chat, userId));
         }
         return chatsDto;
@@ -100,6 +103,14 @@ public class ChatRoomDto {
 
     public void setMemberCount(int memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public boolean getIsPasswordProtected() {
+        return this.isPasswordProtected;
+    }
+
+    public void setIsPasswordProtected(boolean isPasswordProtected) {
+        this.isPasswordProtected = isPasswordProtected;
     }
 
 }

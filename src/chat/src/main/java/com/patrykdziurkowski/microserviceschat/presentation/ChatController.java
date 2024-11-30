@@ -1,8 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,24 +39,24 @@ public class ChatController {
 
     @PostMapping("/chats")
     public ResponseEntity<ChatRoomDto> createChat(Authentication authentication,
-                                             @RequestBody @Valid ChatModel chatData) {
+            @RequestBody @Valid ChatModel chatData) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         ChatRoom createdChat = createChatCommand.execute(currentUserId,
-            chatData.getChatName(),
-            chatData.getIsPublic(),
-            Optional.ofNullable(chatData.getChatPassword()));
-        
+                chatData.getChatName(),
+                chatData.getIsPublic(),
+                Optional.ofNullable(chatData.getChatPassword()));
+
         return new ResponseEntity<>(
-            ChatRoomDto.from(createdChat, currentUserId),
-            HttpStatus.CREATED);
+                ChatRoomDto.from(createdChat, currentUserId),
+                HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}")
     public ResponseEntity<String> deleteChat(Authentication authentication,
-                                             @PathVariable UUID chatId) {
+            @PathVariable UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isChatDeleted = deleteChatCommand.execute(currentUserId, chatId);
-        if(isChatDeleted == false) {
+        if (isChatDeleted == false) {
             return new ResponseEntity<>("Chat deletion failed.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -66,13 +64,13 @@ public class ChatController {
 
     @GetMapping("/chats/load")
     public ResponseEntity<List<ChatRoomDto>> getChats(Authentication authentication,
-                                                   @RequestParam(defaultValue = "0") int offset) {
-        if(offset < 0) {
+            @RequestParam(defaultValue = "0") int offset) {
+        if (offset < 0) {
             return ResponseEntity.badRequest().build();
         }
         UUID currentUserId = UUID.fromString(authentication.getName());
         List<ChatRoom> chats = chatsQuery.execute(currentUserId, offset, NUMBER_OF_CHATS_TO_RETRIEVE);
-        if(chats.isEmpty()) {
+        if (chats.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, currentUserId);

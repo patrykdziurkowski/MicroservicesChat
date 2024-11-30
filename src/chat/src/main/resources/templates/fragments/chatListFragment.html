@@ -1,6 +1,8 @@
 <div th:fragment="chatList" class="d-flex flex-column align-items-start h-100">
     <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
     <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/joinChatModal.html :: joinChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
     <div class="d-flex justify-content-center mt-3 button-container" style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
@@ -14,33 +16,35 @@
         </form>
     </section>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        let offset = 0;
+    <script>
+        let selectedChatId = null;
+        let isSelectedChatPasswordProtected = false;
+        document.addEventListener("DOMContentLoaded", () => {
+            let offset = 0;
 
-        function loadChats() {
-            fetch(`/chats/load?offset=${offset}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.status === 204) {
-                    console.log("No content received");
-                    return [];
-                }
+            function loadChats() {
+                fetch(`/chats/load?offset=${offset}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => {
+                        if (response.status === 204) {
+                            console.log("No content received");
+                            return [];
+                        }
 
-                if (response.ok === false) {
-                    throw new Error(`Failed to load chats: HTTP ${response.status}`);
-                }
+                        if (response.ok === false) {
+                            throw new Error(`Failed to load chats: HTTP ${response.status}`);
+                        }
 
-                return response.json();
-            })
-            .then(data => {
-                if (!data || data.length === 0) return;
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data || data.length === 0) return;
 
-                console.log("Data received:", data);
+                        console.log("Data received:", data);
 
-                const serverContainer = document.getElementById('serverContainer');
+                        const serverContainer = document.getElementById('serverContainer');
 
                 data.forEach(chat => {
                     const section = createChatCard(chat);
@@ -62,23 +66,24 @@
             .catch(error => console.error('Error:', error));
         }
 
-        function createLoadMoreButton() {
-            const serverContainer = document.getElementById('serverContainer');
-            const button = document.createElement('button');
-            button.id = 'loadMoreButton';
-            button.classList.add('btn', 'btn-secondary', 'mt-3', 'w-100');
-            button.textContent = 'Load More';
-            button.addEventListener('click', () => loadChats());
-            serverContainer.appendChild(button);
-        }
+            function createLoadMoreButton() {
+                const serverContainer = document.getElementById('serverContainer');
+                const button = document.createElement('button');
+                button.id = 'loadMoreButton';
+                button.classList.add('btn', 'btn-secondary', 'mt-3', 'w-100');
+                button.textContent = 'Load More';
+                button.addEventListener('click', () => loadChats());
+                serverContainer.appendChild(button);
+            }
 
-        loadChats();
-    });
-
+            loadChats();
+        });
+      
     function createChatCard(chat) {
         const section = document.createElement('section');
         section.classList.add('chat-card', 'p-3');
         section.style.cursor = 'pointer';
+        section.setAttribute('data-chat-id', chat.id);
     
         if (chat.isMember) {
             section.addEventListener('click', () => {
@@ -92,17 +97,15 @@
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
                 </div>
-                ${chat.isMember ? 
-                    '' : 
-                    `<form method="POST" action="/chats/${chat.id}/user" onclick="event.stopPropagation();">
-                        <input type="submit" value="Join" class="btn btn-primary btn-sm">
-                    </form>`
-                }
-            </div>
-        `;
-    
-        return section;
-    }
-    
-</script>
+
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}"
+                onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isPasswordProtected};event.stopPropagation();">
+                    ${chat.isMember ? 'Leave' : 'Join'}
+                </button>
+            </div>`;
+
+            return section;
+        }
+    </script>
 </div>

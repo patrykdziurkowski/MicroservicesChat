@@ -25,6 +25,7 @@ import com.patrykdziurkowski.microserviceschat.application.InviteMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.JoinChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.KickMemberCommand;
 import com.patrykdziurkowski.microserviceschat.application.LeaveChatCommand;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @WebMvcTest(ChatMemberController.class)
 @TestPropertySource(properties = {
@@ -123,7 +124,7 @@ class ChatMemberControllerTests {
         JoinChatModel joinChatModel = new JoinChatModel("wrongPassword");
 
         when(joinChatCommand.execute(currentUserId, chatId, Optional.of("wrongPassword")))
-                .thenReturn(false);
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(post("/chats/{chatId}/user", chatId)
                 .with(csrf())
@@ -135,13 +136,13 @@ class ChatMemberControllerTests {
 
     @Test
     void joinChat_shouldReturnCreated_whenJoinSucceeds() throws Exception {
-        UUID chatId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat name", true);
         JoinChatModel joinChatModel = new JoinChatModel("correctP@ssword1");
 
-        when(joinChatCommand.execute(currentUserId, chatId, Optional.of("correctP@ssword1")))
-                .thenReturn(true);
+        when(joinChatCommand.execute(currentUserId, chat.getId(), Optional.of("correctP@ssword1")))
+                .thenReturn(Optional.of(chat));
 
-        mockMvc.perform(post("/chats/{chatId}/user", chatId)
+        mockMvc.perform(post("/chats/{chatId}/user", chat.getId())
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +155,7 @@ class ChatMemberControllerTests {
         UUID chatId = UUID.randomUUID();
 
         when(leaveChatCommand.execute(currentUserId, chatId))
-                .thenReturn(false);
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/chats/{chatId}/user", chatId)
                 .with(csrf())
@@ -165,15 +166,15 @@ class ChatMemberControllerTests {
 
     @Test
     void leaveChat_shouldReturnNoContent_whenLeaveSucceeds() throws Exception {
-        UUID chatId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(currentUserId, "name", true);
 
-        when(leaveChatCommand.execute(currentUserId, chatId))
-                .thenReturn(true);
+        when(leaveChatCommand.execute(currentUserId, chat.getId()))
+                .thenReturn(Optional.of(chat));
 
-        mockMvc.perform(delete("/chats/{chatId}/user", chatId)
+        mockMvc.perform(delete("/chats/{chatId}/user", chat.getId())
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 }
