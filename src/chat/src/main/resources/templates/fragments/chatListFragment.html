@@ -17,6 +17,7 @@
 
     <script>
         let selectedChatId = null;
+        let isSelectedChatPasswordProtected = false;
         document.addEventListener("DOMContentLoaded", () => {
             let offset = 0;
 
@@ -85,7 +86,12 @@
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
                 </div>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}" onclick="selectedChatId='${chat.id}'">${chat.isMember ? 'Leave' : 'Join'}</button>
+
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}"
+                onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isPasswordProtected}">
+                    ${chat.isMember ? 'Leave' : 'Join'}
+                </button>
             </div>`;
 
             return section;

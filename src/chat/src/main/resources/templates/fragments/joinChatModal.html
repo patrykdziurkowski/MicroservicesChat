@@ -9,7 +9,7 @@
             <div class="modal-body">
                 <p>Are you sure you want to join this chat?</p>
                 <form>
-                    <div class="form-group">
+                    <div class="form-group" id="joinChatPasswordGroup" style="display: none;">
                         <label for="chatPassword">You must provide the chat's password:</label>
                         <input name="chatPassword" type="password" id="joinChatPassword" class="form-control">
                     </div>
@@ -23,6 +23,13 @@
         </div>
     </div>
     <script>
+        document.querySelector("#joinChat").addEventListener('shown.bs.modal', function () {
+            if (isSelectedChatPasswordProtected) {
+                document.querySelector("#joinChatPasswordGroup").style.display = "block";
+            } else {
+                document.querySelector("#joinChatPasswordGroup").style.display = "none";
+            }
+        });
         function joinChat() {
             console.log(`Attemtping to join chat: ${selectedChatId}`);
 
@@ -57,7 +64,12 @@
                                     <h5 class="card-title truncate-text">${chat.name}</h5>
                                     <p class="card-text">${chat.memberCount} members</p>
                                 </div>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}" onclick="selectedChatId='${chat.id}'">${chat.isMember ? 'Leave' : 'Join'}</button>
+                                
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}"
+                                onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isSelectedChatPasswordProtected}">
+                                    ${chat.isMember ? 'Leave' : 'Join'}
+                                </button>
                             </div>`;
                         }
                     }
