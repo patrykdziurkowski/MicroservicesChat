@@ -5,8 +5,9 @@
     <div th:replace="~{fragments/joinChatModal.html :: joinChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
-    <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
-        data-bs-target="#createChat">+</button>
+    <div class="d-flex justify-content-center mt-3 button-container" style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
+        <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal" data-bs-target="#createChat">Create Chat</button>
+    </div>
     <section class="mt-auto row">
         <h5 class="col">Username</h5>
         <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
@@ -45,22 +46,25 @@
 
                         const serverContainer = document.getElementById('serverContainer');
 
-                        data.forEach(chat => {
-                            const section = createChatCard(chat);
-                            serverContainer.appendChild(section);
-                        });
-                        const loadMoreButton = document.getElementById('loadMoreButton');
-                        if (data.length === 20) {
-                            offset += 20;
-                            if (!loadMoreButton) {
-                                createLoadMoreButton();
-                            }
-                        } else if (loadMoreButton) {
-                            loadMoreButton.remove();
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
+                data.forEach(chat => {
+                    const section = createChatCard(chat);
+                    serverContainer.appendChild(section);
+                });
+                let loadMoreButton = document.getElementById('loadMoreButton');
+                if (loadMoreButton) {
+                    loadMoreButton.remove();
+                    loadMoreButton = null;
+                }
+                console.log("data.l:" + data.length);
+                if (data.length === 20) {
+                    offset += 20;
+                    if (!loadMoreButton) {
+                        createLoadMoreButton();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
             function createLoadMoreButton() {
                 const serverContainer = document.getElementById('serverContainer');
@@ -74,13 +78,20 @@
 
             loadChats();
         });
+      
+    function createChatCard(chat) {
+        const section = document.createElement('section');
+        section.classList.add('chat-card', 'p-3');
+        section.style.cursor = 'pointer';
+        section.setAttribute('data-chat-id', chat.id);
+    
+        if (chat.isMember) {
+            section.addEventListener('click', () => {
+                window.location.href = `/chats/${chat.id}`;
+            });
+        }
 
-        function createChatCard(chat) {
-            const section = document.createElement('section');
-            section.classList.add('card', 'p-3');
-            section.setAttribute('data-chat-id', chat.id);
-
-            section.innerHTML = `
+        section.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
@@ -89,7 +100,7 @@
 
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
                 data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}"
-                onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isPasswordProtected}">
+                onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isPasswordProtected};event.stopPropagation();">
                     ${chat.isMember ? 'Leave' : 'Join'}
                 </button>
             </div>`;

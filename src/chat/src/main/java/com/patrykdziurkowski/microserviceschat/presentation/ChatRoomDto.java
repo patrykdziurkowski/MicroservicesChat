@@ -9,6 +9,7 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 public class ChatRoomDto {
     private UUID id;
     private String name;
+    private UUID ownerId;
     private boolean isPublic;
     private boolean isMember;
     private boolean isPasswordProtected;
@@ -22,6 +23,7 @@ public class ChatRoomDto {
         ChatRoomDto chatDto = new ChatRoomDto();
         chatDto.id = chatRoom.getId();
         chatDto.name = chatRoom.getName();
+        chatDto.ownerId = chatRoom.getOwnerId();
         chatDto.isPublic = chatRoom.getIsPublic();
         chatDto.memberIds = chatRoom.getMemberIds();
         chatDto.isMember = chatDto.memberIds.contains(userId);
@@ -53,6 +55,14 @@ public class ChatRoomDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public UUID getOwnerId() {
+        return this.ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public boolean isIsPublic() {

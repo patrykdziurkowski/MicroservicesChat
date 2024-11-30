@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,8 +33,9 @@ import org.springframework.test.context.DynamicPropertySource;
 @ContextConfiguration(classes = ChatApplication.class)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
-class CreateChatTests extends ComposeContainersBase {
+class LoadMembersTests extends ComposeContainersBase {
     private static WebDriver driver;
+    private static WebDriverWait wait;
 
     @BeforeAll
     static void setup() {
@@ -47,6 +49,7 @@ class CreateChatTests extends ComposeContainersBase {
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
         driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @DynamicPropertySource
@@ -66,12 +69,11 @@ class CreateChatTests extends ComposeContainersBase {
     @Order(2)
     void registeringUser_shouldRedirect_toLogin() {
         driver.navigate().to("https://localhost/register");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser3");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser5");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("confirmPasswordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("registerSubmit")).click();
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.urlToBe("https://localhost/login"));
         assertEquals("https://localhost/login", driver.getCurrentUrl());
     }
@@ -80,20 +82,18 @@ class CreateChatTests extends ComposeContainersBase {
     @Order(3)
     void loggingIn_shouldRedirect_toChats() {
         driver.navigate().to("https://localhost/login");
-        driver.findElement(By.id("usernameInput")).sendKeys("validUser3");
+        driver.findElement(By.id("usernameInput")).sendKeys("validUser5");
         driver.findElement(By.id("passwordInput")).sendKeys("P@ssword1!");
         driver.findElement(By.id("loginSubmit")).click();
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.urlToBe("https://localhost/chats"));
         assertEquals("https://localhost/chats", driver.getCurrentUrl());
     }
 
     @Test
     @Order(4)
-    void createChat_shouldCreateNewChat() {
+    void loadingChats_shouldLoadNewlyCreatedChat() {
         driver.navigate().to("https://localhost/chats");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
 
         driver.findElement(By.id("showCreateChatModal")).click();
@@ -101,22 +101,31 @@ class CreateChatTests extends ComposeContainersBase {
         driver.findElement(By.id("createChatName")).sendKeys("ChatRoom");
         driver.findElement(By.id("createChatIsPrivate")).click();
         driver.findElement(By.id("createChatButton")).click();
-        assertTrue(waitForChildren(1));
+        WebElement serverContainer = driver.findElement(By.id("serverContainer"));
+        assertTrue(waitForChildren(1, serverContainer));
+    }
+
+    @Test
+    @Order(4)
+    void loadingChat_shouldRedirect_whenClickedChat() {
+        driver.navigate().to("https://localhost/chats");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
+        WebElement serverContainer = driver.findElement(By.id("serverContainer"));
+        waitForChildren(1, serverContainer);
+
+        WebElement chatCard = serverContainer.findElements(By.xpath("./*")).get(0);
+        chatCard.click();
+        wait.until(ExpectedConditions.urlContains("https://localhost/chats/"));
+        assertTrue(true);
     }
 
     @Test
     @Order(5)
-    void loadingChats_shouldLoadBothChats() {
-        driver.navigate().to("https://localhost/chats");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
-
-        driver.findElement(By.id("showCreateChatModal")).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("createChat")));
-        driver.findElement(By.id("createChatName")).sendKeys("ChatRoom");
-        driver.findElement(By.id("createChatIsPrivate")).click();
-        driver.findElement(By.id("createChatButton")).click();
-        assertTrue(waitForChildren(2));
+    void loadMembersList_shouldLoadMember_whenLoadedChat() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("memberContainer")));
+        
+        WebElement memberContainer = driver.findElement(By.id("memberContainer"));
+        assertTrue(waitForChildren(1, memberContainer));
     }
 
     @AfterAll
@@ -124,11 +133,9 @@ class CreateChatTests extends ComposeContainersBase {
         driver.quit();
     }
 
-    private boolean waitForChildren(int numberOfChildren) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    private boolean waitForChildren(int numberOfChildren, WebElement container) {
         wait.until(d -> {
-            WebElement serverContainer = driver.findElement(By.id("serverContainer"));
-            return serverContainer.findElements(By.xpath("./*")).size() == numberOfChildren;
+            return container.findElements(By.xpath("./*")).size() == numberOfChildren;
         });
         return true;
     }
