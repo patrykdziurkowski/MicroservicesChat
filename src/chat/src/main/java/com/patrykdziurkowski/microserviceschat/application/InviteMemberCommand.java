@@ -10,10 +10,10 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 @Service
 public class InviteMemberCommand {
     private final ChatRepository chatRepository;
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
     public InviteMemberCommand(ChatRepository chatRepository,
-            AuthenticationApiClient apiClient) {
+            UserApiClient apiClient) {
         this.chatRepository = chatRepository;
         this.apiClient = apiClient;
     }

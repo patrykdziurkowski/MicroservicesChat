@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChangeUserNameCommand {
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
-    public ChangeUserNameCommand(AuthenticationApiClient apiClient) {
+    public ChangeUserNameCommand(UserApiClient apiClient) {
         this.apiClient = apiClient;
     }
 

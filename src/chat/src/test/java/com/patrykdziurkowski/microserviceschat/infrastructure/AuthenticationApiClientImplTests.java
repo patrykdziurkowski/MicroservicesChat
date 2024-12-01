@@ -1,6 +1,5 @@
 package com.patrykdziurkowski.microserviceschat.infrastructure;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,71 +111,6 @@ class AuthenticationApiClientImplTests extends ComposeContainersBase {
 
         assertNotNull(token);
         assertTrue(userIdResult.isPresent());
-    }
-
-    @Test
-    @Order(9)
-    void sendUserNameRequest_shouldReturnUserName_whenValidUserId() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser",
-                "P@ssword1!");
-        String token = result.orElseThrow();
-        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
-
-        Optional<String> userNameResult = apiClient.sendUserNameRequest(userIdResult.get());
-
-        assertTrue(userNameResult.isPresent());
-        assertEquals("validUser", userNameResult.get());
-    }
-
-    @Test
-    @Order(10)
-    void sendUserNameRequest_shouldReturnEmpty_whenInvalidUserId() {
-        Optional<String> result = apiClient.sendLoginRequest("validUser",
-                "P@ssword1!");
-        String token = result.orElseThrow();
-        apiClient.sendTokenValidationRequest(token);
-
-        Optional<String> userNameResult = apiClient.sendUserNameRequest(UUID.randomUUID());
-
-        assertTrue(userNameResult.isEmpty());
-    }
-
-    @Test
-    @Order(11)
-    void sendUserNameChangeRequest_shouldReturnFalse_whenNotChanged() {
-        Optional<String> result = apiClient.sendLoginRequest(
-                "validUser",
-                "P@ssword1!");
-        String token = result.orElseThrow();
-        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
-
-        boolean changeResult = apiClient.sendUserNameChangeRequest(
-                userIdResult.orElseThrow(),
-                "validUser");
-
-        String userNameAfterResult = apiClient
-                .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
-        assertFalse(changeResult);
-        assertEquals("validUser", userNameAfterResult);
-    }
-
-    @Test
-    @Order(12)
-    void sendUserNameChangeRequest_shouldReturnTrue_whenChanged() {
-        Optional<String> result = apiClient.sendLoginRequest(
-                "validUser",
-                "P@ssword1!");
-        String token = result.orElseThrow();
-        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
-
-        boolean changeResult = apiClient.sendUserNameChangeRequest(
-                userIdResult.orElseThrow(),
-                "newUserName");
-
-        String userNameAfterResult = apiClient
-                .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
-        assertTrue(changeResult);
-        assertEquals("newUserName", userNameAfterResult);
     }
 
 }

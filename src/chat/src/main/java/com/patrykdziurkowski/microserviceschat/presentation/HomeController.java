@@ -8,13 +8,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
+import com.patrykdziurkowski.microserviceschat.application.UserApiClient;
 
 @Controller
 public class HomeController {
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
-    public HomeController(AuthenticationApiClient apiClient) {
+    public HomeController(UserApiClient apiClient) {
         this.apiClient = apiClient;
     }
 

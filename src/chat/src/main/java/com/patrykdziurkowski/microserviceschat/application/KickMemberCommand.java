@@ -10,10 +10,10 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 @Service
 public class KickMemberCommand {
     private final ChatRepository chatRepository;
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
     public KickMemberCommand(ChatRepository chatRepository,
-            AuthenticationApiClient apiClient) {
+            UserApiClient apiClient) {
         this.chatRepository = chatRepository;
         this.apiClient = apiClient;
     }
