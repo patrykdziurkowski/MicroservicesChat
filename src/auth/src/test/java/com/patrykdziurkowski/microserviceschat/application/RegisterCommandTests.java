@@ -50,7 +50,7 @@ class RegisterCommandTests extends AuthDbContainerBase {
         boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
 
         assertTrue(isSuccess);
-        List<User> users = userRepository.get();
+        List<User> users = userRepository.getByNumber(20, 0);
         assertEquals(1, users.size());
     }
 
@@ -62,7 +62,7 @@ class RegisterCommandTests extends AuthDbContainerBase {
         boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
 
         assertFalse(isSuccess);
-        List<User> users = userRepository.get();
+        List<User> users = userRepository.getByNumber(20, 0);
         assertEquals(1, users.size());
     }
 
@@ -70,7 +70,7 @@ class RegisterCommandTests extends AuthDbContainerBase {
     void execute_shouldHashUserPassword_whenRegistered() {
         boolean isSuccess = registerCommand.execute("userName123", "rawPassword");
 
-        List<User> users = userRepository.get();
+        List<User> users = userRepository.getByNumber(20, 0);
         User createdUser = users.get(0);
         assertTrue(isSuccess);
         assertEquals(1, users.size());
