@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 import com.patrykdziurkowski.microserviceschat.presentation.ComposeContainersBase;
 
@@ -53,15 +55,17 @@ class UserApiClientImplTests extends ComposeContainersBase {
     @Test
     @Order(2)
     void sendUserNameRequest_shouldReturnUserName_whenValidUserId() {
-        Optional<String> result = authApiClient.sendLoginRequest("validUser",
+        boolean isRegistered = authApiClient.sendRegisterRequest("validUser53", "P@ssword1!");
+        Optional<String> result = authApiClient.sendLoginRequest("validUser53",
                 "P@ssword1!");
         String token = result.orElseThrow();
         Optional<UUID> userIdResult = authApiClient.sendTokenValidationRequest(token);
 
         Optional<String> userNameResult = userApiClient.sendUserNameRequest(userIdResult.get());
 
+        assertTrue(isRegistered);
         assertTrue(userNameResult.isPresent());
-        assertEquals("validUser", userNameResult.get());
+        assertEquals("validUser53", userNameResult.get());
     }
 
     @Test
@@ -76,26 +80,26 @@ class UserApiClientImplTests extends ComposeContainersBase {
     @Order(4)
     void sendUserNameChangeRequest_shouldReturnFalse_whenNotChanged() {
         Optional<String> result = authApiClient.sendLoginRequest(
-                "validUser",
+                "validUser53",
                 "P@ssword1!");
         String token = result.orElseThrow();
         Optional<UUID> userIdResult = authApiClient.sendTokenValidationRequest(token);
 
         boolean changeResult = userApiClient.sendUserNameChangeRequest(
                 userIdResult.orElseThrow(),
-                "validUser");
+                "validUser53");
 
         String userNameAfterResult = userApiClient
                 .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
         assertFalse(changeResult);
-        assertEquals("validUser", userNameAfterResult);
+        assertEquals("validUser53", userNameAfterResult);
     }
 
     @Test
     @Order(5)
     void sendUserNameChangeRequest_shouldReturnTrue_whenChanged() {
         Optional<String> result = authApiClient.sendLoginRequest(
-                "validUser",
+                "validUser53",
                 "P@ssword1!");
         String token = result.orElseThrow();
         Optional<UUID> userIdResult = authApiClient.sendTokenValidationRequest(token);
@@ -108,6 +112,22 @@ class UserApiClientImplTests extends ComposeContainersBase {
                 .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
         assertTrue(changeResult);
         assertEquals("newUserName", userNameAfterResult);
+    }
+
+    @Test
+    @Order(6)
+    void getUsers_shouldReturnUsers_whenFiltered() {
+        List<User> users = userApiClient.getUsers(20, 0, "Name").orElseThrow();
+
+        assertTrue(users.size() > 0);
+    }
+
+    @Test
+    @Order(7)
+    void getUsers_shouldReturnUsers_whenTheyExist() {
+        List<User> users = userApiClient.getUsers(20, 0).orElseThrow();
+
+        assertTrue(users.size() > 0);
     }
 
 }

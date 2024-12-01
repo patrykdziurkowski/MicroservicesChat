@@ -53,8 +53,8 @@ class ChangeUserNameCommandTests extends ComposeContainersBase {
     @Test
     @Order(2)
     void setup_setupValidUser_whenValidData() {
-        boolean isRegistered = apiClient.sendRegisterRequest("validUser", "P@ssword1!");
-        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        boolean isRegistered = apiClient.sendRegisterRequest("validUser323", "P@ssword1!");
+        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser323", "P@ssword1!");
 
         assertTrue(isRegistered);
         assertTrue(tokenResult.orElseThrow().length() > 0);
@@ -63,18 +63,18 @@ class ChangeUserNameCommandTests extends ComposeContainersBase {
     @Test
     @Order(3)
     void command_shouldNotChangeUserName_whenDuplicate() {
-        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser323", "P@ssword1!");
         Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(tokenResult.orElseThrow());
         UUID userId = userIdResult.orElseThrow();
 
-        boolean isSuccess = command.execute(userId, "validUser");
+        boolean isSuccess = command.execute(userId, "validUser323");
         assertFalse(isSuccess);
     }
 
     @Test
     @Order(4)
     void command_shouldChangeUserName_whenUnique() {
-        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser", "P@ssword1!");
+        Optional<String> tokenResult = apiClient.sendLoginRequest("validUser323", "P@ssword1!");
         Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(tokenResult.orElseThrow());
         UUID userId = userIdResult.orElseThrow();
 

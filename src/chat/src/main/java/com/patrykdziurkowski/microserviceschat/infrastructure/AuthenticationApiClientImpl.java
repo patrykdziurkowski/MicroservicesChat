@@ -27,6 +27,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         this.restTemplate = restTemplate;
     }
 
+    @Override
     public boolean sendRegisterRequest(String userName, String password) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("userName", userName);
@@ -43,6 +44,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
+    @Override
     public Optional<String> sendLoginRequest(String userName, String password) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("userName", userName);
@@ -62,6 +64,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
+    @Override
     public Optional<UUID> sendTokenValidationRequest(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
