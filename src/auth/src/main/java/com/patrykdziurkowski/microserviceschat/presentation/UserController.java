@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,32 +12,40 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
 import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
 import com.patrykdziurkowski.microserviceschat.application.UserQuery;
+import com.patrykdziurkowski.microserviceschat.application.UsersQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 @RestController
 public class UserController {
-    private RegisterCommand registerCommand;
-    private LoginQuery loginQuery;
-    private UserQuery userQuery;
-    private ChangeUserNameCommand changeUserNameCommand;
-    private JwtTokenManager jwtTokenManager;
+    private final RegisterCommand registerCommand;
+    private final LoginQuery loginQuery;
+    private final UserQuery userQuery;
+    private final UsersQuery usersQuery;
+    private final ChangeUserNameCommand changeUserNameCommand;
+    private final JwtTokenManager jwtTokenManager;
 
     public UserController(RegisterCommand registerCommand,
             LoginQuery loginQuery,
             UserQuery userQuery,
+            UsersQuery usersQuery,
             ChangeUserNameCommand changeUserNameCommand,
             JwtTokenManager jwtTokenManager) {
         this.registerCommand = registerCommand;
         this.loginQuery = loginQuery;
         this.userQuery = userQuery;
+        this.usersQuery = usersQuery;
         this.changeUserNameCommand = changeUserNameCommand;
         this.jwtTokenManager = jwtTokenManager;
     }
@@ -92,6 +101,19 @@ public class UserController {
         }
         GetUserModel modelToReturn = new GetUserModel(user.get().getId(), user.get().getUserName());
         return ResponseEntity.ok(modelToReturn);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDto>> getUsers(
+            @RequestParam @Valid @Min(value = 1) @Max(value = 20) int number,
+            @RequestParam @Valid @Min(value = 0) int offset,
+            @RequestParam(required = false) @Valid @Size(min = 1, max = 15) String filter) {
+        List<User> users = usersQuery.execute(number, offset, Optional.ofNullable(filter));
+        List<UserDto> userDtos = UserDto.fromList(users);
+
+        return new ResponseEntity<>(
+                userDtos,
+                HttpStatus.OK);
     }
 
     private Optional<UserClaims> authenticate(String authorizationHeader) {
