@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
@@ -31,6 +32,8 @@ public class FavoriteChatRepositoryImplTests extends ChatDbContainerBase {
     private ChatRepositoryImpl chatRepository;
     @MockBean
     private RestTemplate restTemplate;
+    @MockBean
+    private ObjectMapper objectMapper;
 
     @Test
     void repository_shouldLoad() {

@@ -141,5 +141,42 @@ class AuthenticationApiClientImplTests extends ComposeContainersBase {
         assertTrue(userNameResult.isEmpty());
     }
 
-    
+    @Test
+    @Order(11)
+    void sendUserNameChangeRequest_shouldReturnFalse_whenNotChanged() {
+        Optional<String> result = apiClient.sendLoginRequest(
+                "validUser",
+                "P@ssword1!");
+        String token = result.orElseThrow();
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
+
+        boolean changeResult = apiClient.sendUserNameChangeRequest(
+                userIdResult.orElseThrow(),
+                "validUser");
+
+        String userNameAfterResult = apiClient
+                .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
+        assertFalse(changeResult);
+        assertEquals("validUser", userNameAfterResult);
+    }
+
+    @Test
+    @Order(12)
+    void sendUserNameChangeRequest_shouldReturnTrue_whenChanged() {
+        Optional<String> result = apiClient.sendLoginRequest(
+                "validUser",
+                "P@ssword1!");
+        String token = result.orElseThrow();
+        Optional<UUID> userIdResult = apiClient.sendTokenValidationRequest(token);
+
+        boolean changeResult = apiClient.sendUserNameChangeRequest(
+                userIdResult.orElseThrow(),
+                "newUserName");
+
+        String userNameAfterResult = apiClient
+                .sendUserNameRequest(userIdResult.orElseThrow()).orElseThrow();
+        assertTrue(changeResult);
+        assertEquals("newUserName", userNameAfterResult);
+    }
+
 }

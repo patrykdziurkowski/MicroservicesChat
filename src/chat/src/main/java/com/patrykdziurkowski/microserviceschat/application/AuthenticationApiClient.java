@@ -11,4 +11,6 @@ public interface AuthenticationApiClient {
     Optional<UUID> sendTokenValidationRequest(String token);
 
     Optional<String> sendUserNameRequest(UUID userId);
+
+    boolean sendUserNameChangeRequest(UUID userId, String newUserName);
 }
