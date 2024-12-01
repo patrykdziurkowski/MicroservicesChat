@@ -75,16 +75,9 @@ public class UserController {
     }
 
     @PutMapping("/username")
-    public ResponseEntity<String> changeUserName(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody @Valid UserNameModel userData) {
-        Optional<UserClaims> result = authenticate(authorizationHeader);
-        if (result.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
+    public ResponseEntity<String> changeUserName(@RequestBody @Valid UserNameModel userData) {
         boolean isSuccess = changeUserNameCommand.execute(
-                result.get().getId(), result.get().getUserName());
+                userData.getUserId(), userData.getUserName());
         if (isSuccess == false) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -94,7 +87,7 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public ResponseEntity<GetUserModel> getUser(@PathVariable UUID userId) {
         Optional<User> user = userQuery.execute(userId);
-        if(user.isEmpty()) {
+        if (user.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         GetUserModel modelToReturn = new GetUserModel(user.get().getId(), user.get().getUserName());

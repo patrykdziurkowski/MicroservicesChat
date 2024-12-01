@@ -182,7 +182,7 @@ class UserControllerTests {
             "ab\t", // username containing minimum characters but with a whitespace
     })
     void changeUserName_shouldReturnBadRequest_whenUserNameInvalid(String userName) throws Exception {
-        UserNameModel userModel = new UserNameModel(userName);
+        UserNameModel userModel = new UserNameModel(UUID.randomUUID(), userName);
         String userData = objectMapper.writeValueAsString(userModel);
 
         mockMvc.perform(put("/username")
@@ -192,8 +192,8 @@ class UserControllerTests {
     }
 
     @Test
-    void changeUserName_shouldReturnBadRequest_whenNoAuthenticationToken() throws Exception {
-        UserNameModel userModel = new UserNameModel("newUserName");
+    void changeUserName_shouldReturnBadRequest_whenNoUserId() throws Exception {
+        UserNameModel userModel = new UserNameModel(null, "newUserName");
         String userData = objectMapper.writeValueAsString(userModel);
 
         mockMvc.perform(put("/username")
@@ -206,14 +206,12 @@ class UserControllerTests {
     void changeUserName_shouldReturnForbidden_whenNotAllowedToChangeIt() throws Exception {
         UUID userId = UUID.randomUUID();
         String userName = "oldUserName";
-        String token = jwtTokenManager.generateToken(userId, userName);
-        UserNameModel userModel = new UserNameModel("newUserName");
+        UserNameModel userModel = new UserNameModel(userId, "newUserName");
         String userData = objectMapper.writeValueAsString(userModel);
         when(changeUserNameCommand.execute(userId, userName)).thenReturn(false);
 
         mockMvc.perform(put("/username")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .content(userData))
                 .andExpect(status().isForbidden());
     }
@@ -222,14 +220,12 @@ class UserControllerTests {
     void changeUserName_shouldReturnOk_whenSuccessfullyChanged() throws Exception {
         UUID userId = UUID.randomUUID();
         String userName = "oldUserName";
-        String token = jwtTokenManager.generateToken(userId, userName);
-        UserNameModel userModel = new UserNameModel("newUserName");
+        UserNameModel userModel = new UserNameModel(userId, "newUserName");
         String userData = objectMapper.writeValueAsString(userModel);
-        when(changeUserNameCommand.execute(userId, userName)).thenReturn(true);
+        when(changeUserNameCommand.execute(userId, "newUserName")).thenReturn(true);
 
         mockMvc.perform(put("/username")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
                 .content(userData))
                 .andExpect(status().isOk());
     }
