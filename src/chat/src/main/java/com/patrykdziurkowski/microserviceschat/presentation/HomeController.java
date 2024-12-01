@@ -8,8 +8,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
+
 @Controller
 public class HomeController {
+    private final AuthenticationApiClient apiClient;
+
+    public HomeController(AuthenticationApiClient apiClient) {
+        this.apiClient = apiClient;
+    }
+
     @GetMapping("/")
     public String index() {
         return "index";
@@ -29,10 +37,16 @@ public class HomeController {
     public String logout() {
         return "login";
     }
-  
+
     @GetMapping("/chats")
-    public String chats() {
-        
+    public String chats(
+            Authentication authentication,
+            Model model) {
+        UUID currentUserId = UUID.fromString(authentication.getName());
+        String currentUserName = apiClient.sendUserNameRequest(currentUserId).orElse("");
+
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("currentUserName", currentUserName);
         return "chats";
     }
 
@@ -42,7 +56,10 @@ public class HomeController {
             Authentication authentication,
             Model model) {
         UUID currentUserId = UUID.fromString(authentication.getName());
+        String currentUserName = apiClient.sendUserNameRequest(currentUserId).orElse("");
+
         model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("currentUserName", currentUserName);
         return "chat";
     }
 

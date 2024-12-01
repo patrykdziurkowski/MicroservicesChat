@@ -20,15 +20,15 @@ public class InviteMemberCommand {
 
     public boolean execute(UUID currentUserId, UUID chatId, UUID invitedMemberId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
-        if(retrievedChat.isEmpty()) {
+        if (retrievedChat.isEmpty()) {
             return false;
         }
         ChatRoom chat = retrievedChat.get();
         Optional<String> invitedUserName = apiClient.sendUserNameRequest(invitedMemberId);
-        if(invitedUserName.isEmpty()) {
+        if (invitedUserName.isEmpty()) {
             return false;
         }
-        if(chat.inviteMember(invitedMemberId, invitedUserName.orElseThrow(), currentUserId) == false) {
+        if (chat.inviteMember(invitedMemberId, invitedUserName.orElseThrow(), currentUserId) == false) {
             return false;
         }
         chatRepository.save(chat);
