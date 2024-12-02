@@ -51,15 +51,15 @@ public class ChatMemberController {
     }
 
     @DeleteMapping("/chats/{chatId}/members/{memberId}")
-    public ResponseEntity<String> kick(Authentication authentication,
+    public ResponseEntity<MessageResponse> kick(Authentication authentication,
             @PathVariable UUID chatId,
             @PathVariable UUID memberId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMemberKicked = kickMemberCommand.execute(currentUserId, chatId, memberId);
         if (isMemberKicked == false) {
-            return new ResponseEntity<>("Kicking member failed.", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new MessageResponse("Kicking member failed."), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>("Member was kicked successfully.", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new MessageResponse("Member was kicked successfully."), HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/chats/{chatId}/user")

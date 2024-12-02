@@ -59,24 +59,44 @@
             const memberContainer = document.getElementById('memberContainer');
             memberContainer.innerHTML = ''; 
 
+            let isMemberOnCard = false;
+
             memberIds.forEach(memberId => {
-                    const card = createMemberCard(memberId);
+                    if (memberId === currentUserId) {
+                        isMemberOnCard = true;
+                    }
+                    const card = createMemberCard(memberId, isMemberOnCard);
                     memberContainer.appendChild(card);
+                    isMemberOnCard = false;
             });
         }
 
-        function createMemberCard(memberId) {
+        function createMemberCard(memberId, isMemberOnCard) {
             const card = document.createElement('div');
-            card.classList.add('card', 'p-3', 'mb-3');
-        
-            card.innerHTML = `
-                <p class="card-title truncate-text">
+            card.classList.add('card', 'p-3', 'mb-3', `member-${memberId}`);
+
+            const memberName = `
+                <p class="card-title truncate-text mb-0" style="max-width: 200px;">
                     ${memberId}
-                    ${isRoomOwner ? 
-                        `<button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#kickMember" data-member-id="${memberId}">X</button>` : ''}
                 </p>
             `;
+            
+            let actionButton = '';
+            
+            if (!isMemberOnCard && isRoomOwner) {
+                actionButton = `
+                    <button class="btn btn-outline-danger" id="kickButton" data-bs-toggle="modal"
+                    data-bs-target="#kickMember" data-member-id="${memberId}">X</button>
+                `;
+            } 
+        
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    ${memberName}
+                    ${actionButton}
+                </div>
+            `;
+        
             return card;
         }
 

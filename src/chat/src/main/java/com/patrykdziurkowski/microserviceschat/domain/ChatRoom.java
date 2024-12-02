@@ -93,10 +93,10 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean removeMember(UUID memberId, String memberUsername, UUID currentUserId) {
-        if (currentUserId != ownerId) {
+        if (currentUserId.equals(ownerId) == false) {
             return false;
         }
-        if (currentUserId == memberId) {
+        if (currentUserId.equals(memberId)) {
             return false;
         }
         if (memberIds.remove(memberId) == false) {

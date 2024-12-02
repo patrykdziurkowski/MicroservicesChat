@@ -55,7 +55,6 @@
                     loadMoreButton.remove();
                     loadMoreButton = null;
                 }
-                console.log("data.l:" + data.length);
                 if (data.length === 20) {
                     offset += 20;
                     if (!loadMoreButton) {
@@ -84,15 +83,15 @@
         section.classList.add('chat-card', 'p-3');
         section.style.cursor = 'pointer';
         section.setAttribute('data-chat-id', chat.id);
-    
-        if (chat.isMember) {
-            section.addEventListener('click', () => {
-                window.location.href = `/chats/${chat.id}`;
-            });
-        }
 
-        section.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
+        section.innerHTML = cardText(chat);
+
+        return section;
+    }
+
+    function cardText(chat) {
+        return `
+            <div class="d-flex justify-content-between align-items-center" onclick="if(${chat.isMember}) window.location.href = '/chats/${chat.id}'">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
@@ -104,8 +103,7 @@
                     ${chat.isMember ? 'Leave' : 'Join'}
                 </button>
             </div>`;
+    }
 
-            return section;
-        }
     </script>
 </div>
