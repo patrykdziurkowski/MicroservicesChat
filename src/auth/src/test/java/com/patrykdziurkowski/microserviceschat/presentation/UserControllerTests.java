@@ -409,7 +409,7 @@ class UserControllerTests {
         String emptyListJson = objectMapper.writeValueAsString(Collections.emptyList());
         when(membersQuery.execute(Collections.emptyList())).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/members")
+        mockMvc.perform(post("/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(emptyListJson)
                 .with(csrf())
@@ -427,7 +427,7 @@ class UserControllerTests {
         List<UserDto> memberDtos = UserDto.fromList(members);
         when(membersQuery.execute(memberIds)).thenReturn(members);
 
-        mockMvc.perform(get("/members")
+        mockMvc.perform(post("/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(memberIds))
                 .with(csrf())

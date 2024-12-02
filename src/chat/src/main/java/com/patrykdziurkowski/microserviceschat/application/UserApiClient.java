@@ -12,4 +12,6 @@ public interface UserApiClient {
     Optional<List<User>> getUsers(int number, int offset, String filter);
 
     Optional<List<User>> getUsers(int number, int offset);
+
+    Optional<List<User>> getMembers(List<UUID> userIds);
 }

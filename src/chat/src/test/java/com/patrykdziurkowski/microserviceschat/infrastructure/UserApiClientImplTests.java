@@ -37,6 +37,8 @@ class UserApiClientImplTests extends ComposeContainersBase {
     @Autowired
     private AuthenticationApiClientImpl authApiClient;
 
+    private static UUID userId;
+
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         String hostname = containers.getServiceHost("auth", 8081);
@@ -60,6 +62,7 @@ class UserApiClientImplTests extends ComposeContainersBase {
                 "P@ssword1!");
         String token = result.orElseThrow();
         Optional<UUID> userIdResult = authApiClient.sendTokenValidationRequest(token);
+        userId = userIdResult.orElseThrow();
 
         Optional<String> userNameResult = userApiClient.sendUserNameRequest(userIdResult.get());
 
@@ -126,6 +129,14 @@ class UserApiClientImplTests extends ComposeContainersBase {
     @Order(7)
     void getUsers_shouldReturnUsers_whenTheyExist() {
         List<User> users = userApiClient.getUsers(20, 0).orElseThrow();
+
+        assertTrue(users.size() > 0);
+    }
+
+    @Test
+    @Order(8)
+    void getMembers_shouldReturnUsers_whenTheyExist() {
+        List<User> users = userApiClient.getMembers(List.of(userId, userId)).orElseThrow();
 
         assertTrue(users.size() > 0);
     }

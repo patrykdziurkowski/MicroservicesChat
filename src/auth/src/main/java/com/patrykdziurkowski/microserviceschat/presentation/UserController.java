@@ -120,7 +120,7 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/members")
+    @PostMapping("/members")
     public ResponseEntity<List<UserDto>> getMembers(@RequestBody List<UUID> memberIds) {
         List<User> members = membersQuery.execute(memberIds);
 

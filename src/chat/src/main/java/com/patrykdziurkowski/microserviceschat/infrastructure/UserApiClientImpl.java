@@ -129,4 +129,58 @@ public class UserApiClientImpl implements UserApiClient {
         }
     }
 
+    // @Override
+    // public Optional<List<User>> getMembers(List<UUID> userIds) {
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.setContentType(MediaType.APPLICATION_JSON);
+    // Map<String, Object> body = new HashMap<>();
+    // body.put("memberIds", userIds);
+    // try {
+    // HttpEntity<String> request = new HttpEntity<>(
+    // objectMapper.writeValueAsString(body),
+    // headers);
+    // ResponseEntity<List<User>> response = restTemplate.exchange(
+    // authServerUri + "/members",
+    // HttpMethod.GET,
+    // request,
+    // new ParameterizedTypeReference<>() {
+    // });
+
+    // if (response.getStatusCode().is2xxSuccessful() == false) {
+    // return Optional.empty();
+    // }
+    // return Optional.of(response.getBody());
+    // } catch (HttpClientErrorException e) {
+    // return Optional.empty();
+    // } catch (JsonProcessingException e) {
+    // return Optional.empty();
+    // }
+    // }
+
+    @Override
+    public Optional<List<User>> getMembers(List<UUID> userIds) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        try {
+            HttpEntity<String> request = new HttpEntity<>(
+                    objectMapper.writeValueAsString(userIds),
+                    headers);
+            ResponseEntity<List<User>> response = restTemplate.exchange(
+                    authServerUri + "/members",
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<>() {
+                    });
+
+            if (response.getStatusCode().is2xxSuccessful() == false) {
+                return Optional.empty();
+            }
+            return Optional.of(response.getBody());
+        } catch (HttpClientErrorException e) {
+            return Optional.empty();
+        } catch (JsonProcessingException e) {
+            return Optional.empty();
+        }
+    }
+
 }
