@@ -122,6 +122,7 @@ class ChatMessageControllerTests {
         UUID chatId = UUID.randomUUID();
         UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
         List<UserMessage> messages = List.of(userMessage);
+        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId);
 
         when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(messages);
 
@@ -138,6 +139,7 @@ class ChatMessageControllerTests {
         UUID chatId = UUID.randomUUID();
         UserMessage secondMessage = new UserMessage(chatId, "testUser2", UUID.randomUUID());
         List<UserMessage> messages = List.of(secondMessage);
+        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId);
 
         when(chatMessagesQuery.execute(chatId, 1, 20)).thenReturn(messages);
 
@@ -147,7 +149,7 @@ class ChatMessageControllerTests {
                 .param("offset", "1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(messages)));
+                .andExpect(content().json(objectMapper.writeValueAsString(messagesDto)));
     }
 
     @Test

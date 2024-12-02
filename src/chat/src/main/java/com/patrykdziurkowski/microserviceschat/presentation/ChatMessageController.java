@@ -62,7 +62,8 @@ public class ChatMessageController {
     }
 
     @GetMapping("/chats/{chatId}/messages")
-    public ResponseEntity<List<UserMessage>> getMessages(@PathVariable UUID chatId,
+    public ResponseEntity<List<MessageDto>> getMessages(Authentication authentication,
+                                                        @PathVariable UUID chatId,
                                                         @RequestParam(defaultValue = "0") int offset) {
         if(offset < 0) {
             return ResponseEntity.badRequest().build();
@@ -71,6 +72,8 @@ public class ChatMessageController {
         if(messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(messages);
+        UUID currentUserId = UUID.fromString(authentication.getName());
+        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId);
+        return ResponseEntity.ok(messagesDto);
     }
 }
