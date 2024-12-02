@@ -41,7 +41,7 @@ class KickMemberCommandTests extends ChatDbContainerBase {
     private ChatRepositoryImpl chatRepository;
 
     @MockBean
-    private AuthenticationApiClient apiClient;
+    private UserApiClient apiClient;
 
     @Test
     void memberRemoveCommand_shouldLoad() {

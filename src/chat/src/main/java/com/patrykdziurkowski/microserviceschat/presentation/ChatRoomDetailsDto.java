@@ -1,12 +1,12 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
-public class ChatRoomDto {
+public class ChatRoomDetailsDto {
     private UUID id;
     private String name;
     private UUID ownerId;
@@ -14,12 +14,13 @@ public class ChatRoomDto {
     private boolean isMember;
     private boolean isPasswordProtected;
     private int memberCount;
+    private List<UserDto> members;
 
-    private ChatRoomDto() {
+    private ChatRoomDetailsDto() {
     }
 
-    public static ChatRoomDto from(ChatRoom chatRoom, UUID currentUserId) {
-        ChatRoomDto chatDto = new ChatRoomDto();
+    public static ChatRoomDetailsDto from(ChatRoom chatRoom, List<User> members, UUID currentUserId) {
+        ChatRoomDetailsDto chatDto = new ChatRoomDetailsDto();
         chatDto.id = chatRoom.getId();
         chatDto.name = chatRoom.getName();
         chatDto.ownerId = chatRoom.getOwnerId();
@@ -27,16 +28,8 @@ public class ChatRoomDto {
         chatDto.isMember = chatRoom.getMemberIds().contains(currentUserId);
         chatDto.isPasswordProtected = chatRoom.getPasswordHash().isPresent();
         chatDto.memberCount = chatRoom.getMemberIds().size();
-
+        chatDto.members = UserDto.fromList(members);
         return chatDto;
-    }
-
-    public static List<ChatRoomDto> fromList(List<ChatRoom> chatRooms, UUID currentUserId) {
-        List<ChatRoomDto> chatsDto = new ArrayList<>();
-        for (ChatRoom chat : chatRooms) {
-            chatsDto.add(from(chat, currentUserId));
-        }
-        return chatsDto;
     }
 
     public UUID getId() {
@@ -101,6 +94,14 @@ public class ChatRoomDto {
 
     public void setIsPasswordProtected(boolean isPasswordProtected) {
         this.isPasswordProtected = isPasswordProtected;
+    }
+
+    public List<UserDto> getMembers() {
+        return this.members;
+    }
+
+    public void setMembers(List<UserDto> members) {
+        this.members = members;
     }
 
 }

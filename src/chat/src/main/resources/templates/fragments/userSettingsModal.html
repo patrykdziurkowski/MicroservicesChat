@@ -10,8 +10,32 @@
                 <div class="form-group">
                     <input type="text" class="form-control" id="usernameInput" placeholder="Username">
                 </div>
-                <input type="submit" class="btn btn-primary" value="Save">
+                <button class="btn btn-primary" value="Save" id="saveUsernameButton"
+                    onclick="saveUsername()">Save</button>
             </div>
         </div>
     </div>
+
+    <script>
+        function saveUsername() {
+            const username = document.querySelector("#usernameInput").value;
+            const payload = {
+                userName: username
+            }
+            const request = fetch('/username', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = request.then(response => {
+                if (response.status !== 200) {
+                    console.error('Unable to change username.');
+                    return;
+                }
+
+                document.querySelector('#userNameLabel').innerText = username;
+            }).catch(error => console.error(error));
+        }
+    </script>
 </div>

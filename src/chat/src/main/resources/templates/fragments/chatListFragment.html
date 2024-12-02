@@ -5,12 +5,15 @@
     <div th:replace="~{fragments/joinChatModal.html :: joinChatModal}"></div>
     <div id="serverContainer" class="scrollable-container">
     </div>
-    <div class="d-flex justify-content-center mt-3 button-container" style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
-        <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal" data-bs-target="#createChat">Create Chat</button>
+    <div class="d-flex justify-content-center mt-3 button-container"
+        style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
+        <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
+            data-bs-target="#createChat">Create Chat</button>
     </div>
     <section class="mt-auto row">
-        <h5 class="col">Username</h5>
-        <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings">Settings</button>
+        <h5 class="col" id="userNameLabel" th:text="${currentUserName}">Username</h5>
+        <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings"
+            id="userSettingsButton">Settings</button>
         <form class="col" th:action="@{/logout}" method="POST">
             <input id="logoutSubmit" type="submit" class="btn btn-primary" value="Logout">
         </form>
@@ -45,25 +48,25 @@
                         console.log("Data received:", data);
 
                         const serverContainer = document.getElementById('serverContainer');
-
-                data.forEach(chat => {
-                    const section = createChatCard(chat);
-                    serverContainer.appendChild(section);
-                });
-                let loadMoreButton = document.getElementById('loadMoreButton');
-                if (loadMoreButton) {
-                    loadMoreButton.remove();
-                    loadMoreButton = null;
-                }
-                if (data.length === 20) {
-                    offset += 20;
-                    if (!loadMoreButton) {
-                        createLoadMoreButton();
-                    }
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
+                        data.forEach(chat => {
+                            const section = createChatCard(chat);
+                            serverContainer.appendChild(section);
+                        });
+                        let loadMoreButton = document.getElementById('loadMoreButton');
+                        if (loadMoreButton) {
+                            loadMoreButton.remove();
+                            loadMoreButton = null;
+                        }
+                        console.log("data.l:" + data.length);
+                        if (data.length === 20) {
+                            offset += 20;
+                            if (!loadMoreButton) {
+                                createLoadMoreButton();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
 
             function createLoadMoreButton() {
                 const serverContainer = document.getElementById('serverContainer');

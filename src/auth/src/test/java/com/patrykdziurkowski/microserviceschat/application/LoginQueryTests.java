@@ -24,47 +24,47 @@ import com.patrykdziurkowski.microserviceschat.presentation.AuthDbContainerBase;
 @Transactional
 @ContextConfiguration(classes = AuthApplication.class)
 @TestPropertySource(properties = {
-                "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
+        "jwt.secret=8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz"
 })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class LoginQueryTests extends AuthDbContainerBase {
-        @Autowired
-        private LoginQuery loginQuery;
-        @Autowired
-        private RegisterCommand registerCommand;
+    @Autowired
+    private LoginQuery loginQuery;
+    @Autowired
+    private RegisterCommand registerCommand;
 
-        @Test
-        void registerCommand_shouldLoad() {
-                assertNotNull(loginQuery);
-        }
+    @Test
+    void registerCommand_shouldLoad() {
+        assertNotNull(loginQuery);
+    }
 
-        @Test
-        void execute_givenNonExistentUser_returnsEmpty() {
-                Optional<User> user = loginQuery.execute("fakeUser", "password123");
+    @Test
+    void execute_givenNonExistentUser_returnsEmpty() {
+        Optional<User> user = loginQuery.execute("fakeUser", "password123");
 
-                assertTrue(user.isEmpty());
-        }
+        assertTrue(user.isEmpty());
+    }
 
-        @Test
-        void execute_givenExistingUserWithWrongPassword_returnsFalse() {
-                boolean registrationIsSuccessful = registerCommand
-                                .execute("existingUser", "differentPasswordHash");
+    @Test
+    void execute_givenExistingUserWithWrongPassword_returnsFalse() {
+        boolean registrationIsSuccessful = registerCommand
+                .execute("existingUser", "differentPasswordHash");
 
-                Optional<User> user = loginQuery.execute("existingUser", "wrongPasswordHash");
+        Optional<User> user = loginQuery.execute("existingUser", "wrongPasswordHash");
 
-                assertTrue(registrationIsSuccessful);
-                assertTrue(user.isEmpty());
-        }
+        assertTrue(registrationIsSuccessful);
+        assertTrue(user.isEmpty());
+    }
 
-        @Test
-        void execute_givenExistingUserWithCorrectPassword_returnsTrue() {
-                boolean isRegisterSuccess = registerCommand
-                                .execute("existingUser", "correctPasswordHash");
+    @Test
+    void execute_givenExistingUserWithCorrectPassword_returnsTrue() {
+        boolean isRegisterSuccess = registerCommand
+                .execute("existingUser", "correctPasswordHash");
 
-                Optional<User> user = loginQuery
-                                .execute("existingUser", "correctPasswordHash");
+        Optional<User> user = loginQuery
+                .execute("existingUser", "correctPasswordHash");
 
-                assertTrue(isRegisterSuccess);
-                assertTrue(user.isPresent());
-        }
+        assertTrue(isRegisterSuccess);
+        assertTrue(user.isPresent());
+    }
 }

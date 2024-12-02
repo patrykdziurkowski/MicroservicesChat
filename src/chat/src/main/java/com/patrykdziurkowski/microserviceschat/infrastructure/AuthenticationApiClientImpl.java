@@ -15,11 +15,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
-import com.patrykdziurkowski.microserviceschat.presentation.GetUserModel;
 
 @Component
 public class AuthenticationApiClientImpl implements AuthenticationApiClient {
     private final RestTemplate restTemplate;
+
     @Value("${auth.server.uri}")
     private String authServerUri;
 
@@ -27,6 +27,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         this.restTemplate = restTemplate;
     }
 
+    @Override
     public boolean sendRegisterRequest(String userName, String password) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("userName", userName);
@@ -43,6 +44,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
+    @Override
     public Optional<String> sendLoginRequest(String userName, String password) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("userName", userName);
@@ -62,6 +64,7 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
+    @Override
     public Optional<UUID> sendTokenValidationRequest(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
@@ -82,22 +85,4 @@ public class AuthenticationApiClientImpl implements AuthenticationApiClient {
         }
     }
 
-    public Optional<String> sendUserNameRequest(UUID userId) {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        try {
-            ResponseEntity<GetUserModel> response = restTemplate.exchange(
-                    authServerUri + "/users/" + userId, 
-                    HttpMethod.GET,
-                    request,
-                    GetUserModel.class);
-    
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return Optional.of(response.getBody().getUserName());
-            }
-            return Optional.empty();
-        } catch (HttpClientErrorException e) {
-            return Optional.empty();
-        }
-    }
 }

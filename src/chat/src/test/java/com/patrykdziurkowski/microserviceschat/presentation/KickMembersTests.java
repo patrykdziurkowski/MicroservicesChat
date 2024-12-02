@@ -176,7 +176,7 @@ class KickMembersTests extends ComposeContainersBase {
     @Order(9)
     void loadMembersList_shouldLoad2Members_whenLoadedChat() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("memberContainer")));
-        
+
         WebElement memberContainer = driver.findElement(By.id("memberContainer"));
         assertTrue(waitForChildren(2, memberContainer));
     }
