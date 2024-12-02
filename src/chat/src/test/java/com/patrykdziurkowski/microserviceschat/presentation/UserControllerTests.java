@@ -4,9 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
+import com.patrykdziurkowski.microserviceschat.application.SearchUsersQuery;
+import com.patrykdziurkowski.microserviceschat.application.User;
 
 @WebMvcTest(ChatMessageController.class)
 @TestPropertySource(properties = {
@@ -32,6 +39,8 @@ class UserControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private SearchUsersQuery searchUsersQuery;
     @MockBean
     private ChangeUserNameCommand changeUserNameCommand;
 
@@ -70,6 +79,154 @@ class UserControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(data))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenNumberIsZero() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(0))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenNumberNegative() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(-1))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenNumberTooHigh() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(21))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenOffsetNegative() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(-1))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenFilterTooLong() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "this16characters"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenNumberNotProvided() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenOffsetNotProvided() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnBadRequest_whenFilterIsEmptyString() throws Exception {
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", ""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUsers_shouldReturnOk_whenFilterNotProvided() throws Exception {
+        List<User> users = new ArrayList<>();
+        users.add(new User(UUID.randomUUID(), "userName1"));
+        users.add(new User(UUID.randomUUID(), "userName2"));
+        users.add(new User(UUID.randomUUID(), "userName3"));
+        when(searchUsersQuery.execute(20, 0, Optional.empty())).thenReturn(Optional.of(users));
+
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(0)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUsers_shouldReturnOk_whenEverythingIsValid() throws Exception {
+        List<User> users = new ArrayList<>();
+        users.add(new User(UUID.randomUUID(), "userName1"));
+        users.add(new User(UUID.randomUUID(), "userName2"));
+        users.add(new User(UUID.randomUUID(), "userName3"));
+        when(searchUsersQuery.execute(20, 0, Optional.of("filter"))).thenReturn(Optional.of(users));
+
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(0))
+                .queryParam("filter", "filter"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUsers_shouldReturnData_whenEverythingIsValid() throws Exception {
+        List<User> users = new ArrayList<>();
+        users.add(new User(UUID.randomUUID(), "userName1"));
+        users.add(new User(UUID.randomUUID(), "userName2"));
+        users.add(new User(UUID.randomUUID(), "userName3"));
+        when(searchUsersQuery.execute(20, 0, Optional.empty())).thenReturn(Optional.of(users));
+        List<UserDto> userDtos = UserDto.fromList(users);
+
+        mockMvc.perform(get("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER"))
+                .queryParam("number", String.valueOf(20))
+                .queryParam("offset", String.valueOf(0)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(userDtos)));
     }
 
 }
