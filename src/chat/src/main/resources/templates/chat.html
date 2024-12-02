@@ -11,6 +11,7 @@
 
 <body>
     <div th:replace="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
     <div th:replace="~{fragments/kickMemberModal.html :: kickMemberModal}"></div>
     <div th:replace="~{fragments/inviteMemberModal.html :: inviteMemberModal}"></div>
     <section class="row vh-100">
@@ -34,22 +35,51 @@
                             <input type="text" placeholder="Your message here...">
                             <input type="submit" class="btn btn-primary" value="Send">
                         </form>
-                        <button class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#dissolveChat">Dissolve</button>
-                        <button class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#leaveChat">Leave</button>
                     </section>
                 </section>
-                <div class="col-4" th:insert="~{fragments/memberListFragment.html :: memberList}"></div>
+                <section class="col-4 d-flex flex-column">
+                    <div th:insert="~{fragments/memberListFragment.html :: memberList}"></div>
+                    <div id="ownerButtonsContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto" style="margin-bottom: 20px;">
+                    </div>
+                </section>
             </div>
         </div>
-
-
     </section>
 
     <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
     <script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>
     <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+
+    <script>
+        function createDissolveButton() {
+            const button = document.createElement('button');
+            
+            button.className = 'btn btn-danger';
+            button.setAttribute('id', 'dissolveChatButton');
+            button.setAttribute('data-bs-toggle', 'modal');
+            button.setAttribute('data-bs-target', '#dissolveChat');
+            button.textContent = 'Dissolve Chat';
+            
+            return button;
+        }
+
+        function createInviteButton() {
+            const button = document.createElement('button');
+
+            button.className = 'btn btn-primary';
+            button.setAttribute('id', 'inviteMembersButton');
+            button.setAttribute('data-bs-toggle', 'modal');
+            button.setAttribute('data-bs-target', '#inviteMember');
+            button.textContent = 'Invite Member';
+            
+            return button;
+        }
+
+        const ownerButtonsContainer = document.getElementById("ownerButtonsContainer");
+        ownerButtonsContainer.classList.add('d-none');
+        ownerButtonsContainer.appendChild(createInviteButton());
+        ownerButtonsContainer.appendChild(createDissolveButton());
+    </script>
 </body>
 
 </html>

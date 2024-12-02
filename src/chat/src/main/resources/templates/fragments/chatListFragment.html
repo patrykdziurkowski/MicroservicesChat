@@ -48,7 +48,6 @@
                         console.log("Data received:", data);
 
                         const serverContainer = document.getElementById('serverContainer');
-
                         data.forEach(chat => {
                             const section = createChatCard(chat);
                             serverContainer.appendChild(section);
@@ -81,21 +80,21 @@
 
             loadChats();
         });
+      
+    function createChatCard(chat) {
+        const section = document.createElement('section');
+        section.classList.add('chat-card', 'p-3');
+        section.style.cursor = 'pointer';
+        section.setAttribute('data-chat-id', chat.id);
 
-        function createChatCard(chat) {
-            const section = document.createElement('section');
-            section.classList.add('chat-card', 'p-3');
-            section.style.cursor = 'pointer';
-            section.setAttribute('data-chat-id', chat.id);
+        section.innerHTML = cardText(chat);
 
-            if (chat.isMember) {
-                section.addEventListener('click', () => {
-                    window.location.href = `/chats/${chat.id}`;
-                });
-            }
+        return section;
+    }
 
-            section.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
+    function cardText(chat) {
+        return `
+            <div class="d-flex justify-content-between align-items-center" onclick="if(${chat.isMember}) window.location.href = '/chats/${chat.id}'">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
                     <p class="card-text">${chat.memberCount} members</p>
@@ -107,8 +106,7 @@
                     ${chat.isMember ? 'Leave' : 'Join'}
                 </button>
             </div>`;
+    }
 
-            return section;
-        }
     </script>
 </div>

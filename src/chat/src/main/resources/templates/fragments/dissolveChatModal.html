@@ -10,9 +10,38 @@
                 <p>Are you sure you want to dissolve this chat?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger">Yes</button>
+                <button id="confirmDissolveChat" type="button" class="btn btn-danger">Yes</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            const confirmDissolveChatButton = document.getElementById('confirmDissolveChat');
+
+            confirmDissolveChatButton.addEventListener('click', () => {
+                console.log(`Attempting to dissolve chat: ${chatId}`);
+                
+                fetch(`/chats/${chatId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Chat successfully dissolved.');
+
+                        window.location.href = '/chats';
+                    } else {
+                        return response.text().then(errorMessage => {
+                            alert(errorMessage || 'Failed to dissolve the chat.');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error when dissolving chat:', error);
+                    alert('An error occurred while trying to dissolve the chat.');
+                });
+            });
+        });
+    </script>
 </div>
