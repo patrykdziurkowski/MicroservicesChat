@@ -32,10 +32,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
 import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
+import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
 import com.patrykdziurkowski.microserviceschat.application.UserQuery;
 import com.patrykdziurkowski.microserviceschat.application.UsersQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
+
+import io.jsonwebtoken.lang.Collections;
 
 @WebMvcTest(UserController.class)
 @TestPropertySource(properties = {
@@ -59,6 +62,8 @@ class UserControllerTests {
     private UserQuery userQuery;
     @MockBean
     private UsersQuery usersQuery;
+    @MockBean
+    private MembersQuery membersQuery;
     @MockBean
     private ChangeUserNameCommand changeUserNameCommand;
 
@@ -397,6 +402,38 @@ class UserControllerTests {
                 .queryParam("offset", String.valueOf(0)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(userDtos)));
+    }
+
+    @Test
+    void getMembers_shouldReturnEmptyList_whenNoIdsProvided() throws Exception {
+        String emptyListJson = objectMapper.writeValueAsString(Collections.emptyList());
+        when(membersQuery.execute(Collections.emptyList())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(emptyListJson)
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(Collections.emptyList())));
+    }
+
+    @Test
+    void getMembers_shouldReturnMappedMembers_whenIdsProvided() throws Exception {
+        User user1 = new User("userName1", "passwordHash");
+        User user2 = new User("userName2", "passwordHash");
+        List<UUID> memberIds = List.of(user1.getId(), user2.getId());
+        List<User> members = List.of(user1, user2);
+        List<UserDto> memberDtos = UserDto.fromList(members);
+        when(membersQuery.execute(memberIds)).thenReturn(members);
+
+        mockMvc.perform(get("/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberIds))
+                .with(csrf())
+                .with(user(UUID.randomUUID().toString()).password("").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(memberDtos)));
     }
 
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
 import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
+import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
 import com.patrykdziurkowski.microserviceschat.application.UserQuery;
 import com.patrykdziurkowski.microserviceschat.application.UsersQuery;
@@ -33,6 +34,7 @@ public class UserController {
     private final LoginQuery loginQuery;
     private final UserQuery userQuery;
     private final UsersQuery usersQuery;
+    private final MembersQuery membersQuery;
     private final ChangeUserNameCommand changeUserNameCommand;
     private final JwtTokenManager jwtTokenManager;
 
@@ -40,12 +42,14 @@ public class UserController {
             LoginQuery loginQuery,
             UserQuery userQuery,
             UsersQuery usersQuery,
+            MembersQuery membersQuery,
             ChangeUserNameCommand changeUserNameCommand,
             JwtTokenManager jwtTokenManager) {
         this.registerCommand = registerCommand;
         this.loginQuery = loginQuery;
         this.userQuery = userQuery;
         this.usersQuery = usersQuery;
+        this.membersQuery = membersQuery;
         this.changeUserNameCommand = changeUserNameCommand;
         this.jwtTokenManager = jwtTokenManager;
     }
@@ -114,6 +118,13 @@ public class UserController {
         return new ResponseEntity<>(
                 userDtos,
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/members")
+    public ResponseEntity<List<UserDto>> getMembers(@RequestBody List<UUID> memberIds) {
+        List<User> members = membersQuery.execute(memberIds);
+
+        return new ResponseEntity<>(UserDto.fromList(members), HttpStatus.OK);
     }
 
     private Optional<UserClaims> authenticate(String authorizationHeader) {
