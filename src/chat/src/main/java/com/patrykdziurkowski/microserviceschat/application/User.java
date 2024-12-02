@@ -3,23 +3,23 @@ package com.patrykdziurkowski.microserviceschat.application;
 import java.util.UUID;
 
 public class User {
-    private UUID id;
+    private UUID userId;
     private String userName;
 
     public User() {
     }
 
     public User(UUID id, String userName) {
-        this.id = id;
+        this.userId = id;
         this.userName = userName;
     }
 
-    public UUID getId() {
-        return this.id;
+    public UUID getUserId() {
+        return this.userId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setUserId(UUID id) {
+        this.userId = id;
     }
 
     public String getUserName() {
