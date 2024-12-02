@@ -67,7 +67,7 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean dissolve(UUID currentUserId) {
-        if (currentUserId != ownerId) {
+        if (currentUserId.equals(ownerId) == false) {
             return false;
         }
         raiseDomainEvent(new ChatDissolvedEvent());

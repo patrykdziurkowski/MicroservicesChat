@@ -1,13 +1,11 @@
 <div th:fragment="memberList" class="d-flex flex-column align-items-start h-100">
     <div id="memberContainer" class="scrollable-container">
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal"
-        data-bs-target="#inviteMember" style="margin: auto; margin-top: 20px;">Invite</button>
 
 <script th:inline="javascript">
     const urlParts = window.location.pathname.split('/');
     const chatId = urlParts[urlParts.length - 1];
-    
+
     document.addEventListener("DOMContentLoaded", () => {
 
         const currentUserId = [[${currentUserId}]];
@@ -37,6 +35,7 @@
                         chatFound = true;
                         if (chat.ownerId === currentUserId) {
                             isRoomOwner = true;
+                            ownerButtonsContainer.style.display = "flex";
                         }
                         createMemberCards(chat.memberIds);
                         return;
@@ -45,6 +44,10 @@
                 if (!chatFound) {
                     alert("Incorrect chat id");
                     window.location.href = "/chats";
+                }
+                if (isRoomOwner) {
+                    const roomOwnerButtons = document.getElementById("ownerButtonsContainer");
+                    ownerButtonsContainer.classList.remove('d-none');
                 }
             })
             .catch(error => console.error('Error loading member IDs:', error));
