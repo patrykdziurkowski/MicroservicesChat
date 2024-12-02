@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -123,7 +122,7 @@ class LoadMembersTests extends ComposeContainersBase {
     @Order(5)
     void loadMembersList_shouldLoadMember_whenLoadedChat() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("memberContainer")));
-        
+
         WebElement memberContainer = driver.findElement(By.id("memberContainer"));
         assertTrue(waitForChildren(1, memberContainer));
     }

@@ -1,86 +1,71 @@
 <div th:fragment="memberList" class="d-flex flex-column align-items-start h-100">
     <div id="memberContainer" class="scrollable-container">
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal"
-        data-bs-target="#inviteMember" style="margin: auto; margin-top: 20px;">Invite</button>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inviteMember"
+        style="margin: auto; margin-top: 20px;">Invite</button>
 
-<script th:inline="javascript">
-    const urlParts = window.location.pathname.split('/');
-    const chatId = urlParts[urlParts.length - 1];
-    
-    document.addEventListener("DOMContentLoaded", () => {
+    <script th:inline="javascript">
+        const urlParts = window.location.pathname.split('/');
+        const chatId = urlParts[urlParts.length - 1];
 
-        const currentUserId = [[${currentUserId}]];
-        let isRoomOwner = false;
+        document.addEventListener("DOMContentLoaded", () => {
 
-        function loadMembers() {
-            fetch(`/chats/load`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.status === 204) {
-                    console.log("No content received");
-                    return [];
-                }
+            const currentUserId = [[${ currentUserId }]];
+            let isRoomOwner = false;
 
-                if (response.ok === false) {
-                    throw new Error(`Failed to load members: HTTP ${response.status}`);
-                }
+            function loadMembers() {
+                const request = fetch(`/chats/${chatId}/details`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-                return response.json();
-            })
-            .then(data => {
-                let chatFound = false;
-                data.forEach(chat => {
-                    if (chat.id === chatId) {
-                        chatFound = true;
-                        if (chat.ownerId === currentUserId) {
-                            isRoomOwner = true;
-                        }
-                        createMemberCards(chat.memberIds);
+                const response = request.then(r => {
+                    if (r.status !== 200) {
+                        console.error('Could not load members.', r.error);
                         return;
                     }
+                    return r.json();
                 });
-                if (!chatFound) {
-                    alert("Incorrect chat id");
-                    window.location.href = "/chats";
-                }
-            })
-            .catch(error => console.error('Error loading member IDs:', error));
 
-        }
+                response.then(chat => {
+                    if (chat.ownerId === currentUserId) {
+                        isRoomOwner = true;
+                    }
+                    createMemberCards(chat.members);
+                    chatFound = true;
+                });
 
-        function createMemberCards(memberIds) {
-            if (!memberIds || memberIds.length === 0) return;
+            }
 
-            console.log("Member IDs received:", memberIds);
+            function createMemberCards(members) {
+                if (!members || members.length === 0) return;
+                console.log("Member IDs received:", members);
 
-            const memberContainer = document.getElementById('memberContainer');
-            memberContainer.innerHTML = ''; 
+                const memberContainer = document.getElementById('memberContainer');
+                memberContainer.innerHTML = '';
 
-            memberIds.forEach(memberId => {
-                    const card = createMemberCard(memberId);
+                members.forEach(member => {
+                    const card = createMemberCard(member);
                     memberContainer.appendChild(card);
-            });
-        }
+                });
+            }
 
-        function createMemberCard(memberId) {
-            const card = document.createElement('div');
-            card.classList.add('card', 'p-3', 'mb-3');
-        
-            card.innerHTML = `
+            function createMemberCard(member) {
+                const card = document.createElement('div');
+                card.classList.add('card', 'p-3', 'mb-3');
+
+                card.innerHTML = `
                 <p class="card-title truncate-text">
-                    ${memberId}
-                    ${isRoomOwner ? 
+                    ${member.userName}
+                    ${isRoomOwner ?
                         `<button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#kickMember" data-member-id="${memberId}">X</button>` : ''}
+                        data-bs-target="#kickMember" data-member-id="${member.userId}">X</button>` : ''}
                 </p>
             `;
-            return card;
-        }
+                return card;
+            }
 
-        loadMembers();
-    });
-</script>
+            loadMembers();
+        });
+    </script>
 </div>
