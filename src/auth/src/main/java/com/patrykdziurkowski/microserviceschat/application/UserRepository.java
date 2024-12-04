@@ -7,7 +7,9 @@ import java.util.UUID;
 import com.patrykdziurkowski.microserviceschat.domain.User;
 
 public interface UserRepository {
-    List<User> get();
+    List<User> getByNumber(int number, int offset, String contains);
+
+    List<User> getByNumber(int number, int offset);
 
     Optional<User> getById(UUID id);
 

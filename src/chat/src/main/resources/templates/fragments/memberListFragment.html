@@ -2,108 +2,82 @@
     <div id="memberContainer" class="scrollable-container">
     </div>
 
-<script th:inline="javascript">
-    const urlParts = window.location.pathname.split('/');
-    const chatId = urlParts[urlParts.length - 1];
+    <script th:inline="javascript">
+        const urlParts = window.location.pathname.split('/');
+        const chatId = urlParts[urlParts.length - 1];
 
-    document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentUserId = /*[[${ currentUserId }]]*/ null;
+            let isRoomOwner = false;
 
-        const currentUserId = [[${currentUserId}]];
-        let isRoomOwner = false;
-
-        function loadMembers() {
-            fetch(`/chats/load`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.status === 204) {
-                    console.log("No content received");
-                    return [];
-                }
-
-                if (response.ok === false) {
-                    throw new Error(`Failed to load members: HTTP ${response.status}`);
-                }
-
-                return response.json();
-            })
-            .then(data => {
-                let chatFound = false;
-                data.forEach(chat => {
-                    if (chat.id === chatId) {
-                        chatFound = true;
-                        if (chat.ownerId === currentUserId) {
-                            isRoomOwner = true;
-                            ownerButtonsContainer.style.display = "flex";
-                        }
-                        createMemberCards(chat.memberIds);
-                        return;
-                    }
+            function loadMembers() {
+                const request = fetch(`/chats/${chatId}/details`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
                 });
-                if (!chatFound) {
-                    alert("Incorrect chat id");
-                    window.location.href = "/chats";
-                }
-                if (isRoomOwner) {
-                    const roomOwnerButtons = document.getElementById("ownerButtonsContainer");
-                    ownerButtonsContainer.classList.remove('d-none');
-                }
-            })
-            .catch(error => console.error('Error loading member IDs:', error));
 
-        }
-
-        function createMemberCards(memberIds) {
-            if (!memberIds || memberIds.length === 0) return;
-
-            console.log("Member IDs received:", memberIds);
-
-            const memberContainer = document.getElementById('memberContainer');
-            memberContainer.innerHTML = ''; 
-
-            let isMemberOnCard = false;
-
-            memberIds.forEach(memberId => {
-                    if (memberId === currentUserId) {
-                        isMemberOnCard = true;
+                const response = request.then(r => {
+                    if (r.status !== 200) {
+                        console.error('Could not load members.', r.error);
                     }
-                    const card = createMemberCard(memberId, isMemberOnCard);
+                    return r.json();
+                });
+
+                response.then(chat => {
+                    console.log(chat);
+                    if (chat.ownerId === currentUserId) {
+                        isRoomOwner = true;
+                        ownerButtonsContainer.style.display = "flex";
+                    }
+                    createMemberCards(chat.members);
+                    if (isRoomOwner) {
+                        const roomOwnerButtons = document.getElementById("ownerButtonsContainer");
+                        ownerButtonsContainer.classList.remove('d-none');
+                    }
+                }).catch(error => console.error('Error loading member IDs:', error));
+            }
+
+            function createMemberCards(members) {
+                if (!members || members.length === 0) return;
+                console.log("Member IDs received:", members);
+
+                const memberContainer = document.getElementById('memberContainer');
+                memberContainer.innerHTML = '';
+                members.forEach(member => {
+                    const card = createMemberCard(member);
                     memberContainer.appendChild(card);
-                    isMemberOnCard = false;
-            });
-        }
+                });
+            }
 
-        function createMemberCard(memberId, isMemberOnCard) {
-            const card = document.createElement('div');
-            card.classList.add('card', 'p-3', 'mb-3', `member-${memberId}`);
+            function createMemberCard(member) {
+                const card = document.createElement('div');
+                card.classList.add('card', 'p-3', 'mb-3', `member-${member.userId}`);
 
-            const memberName = `
-                <p class="card-title truncate-text mb-0" style="max-width: 200px;">
-                    ${memberId}
-                </p>
-            `;
-            
-            let actionButton = '';
-            
-            if (!isMemberOnCard && isRoomOwner) {
-                actionButton = `
-                    <button class="btn btn-outline-danger" id="kickButton" data-bs-toggle="modal"
-                    data-bs-target="#kickMember" data-member-id="${memberId}">X</button>
+                const memberName = `
+                  <p class="card-title truncate-text mb-0" style="max-width: 200px;">
+                      ${member.userName}
+                  </p>
                 `;
-            } 
-        
-            card.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    ${memberName}
-                    ${actionButton}
-                </div>
-            `;
-        
-            return card;
-        }
+                let actionButton = `
+                      <button class="btn btn-outline-danger" id="kickButton" data-bs-toggle="modal"
+                      data-bs-target="#kickMember" data-member-id="${member.userId}">X</button>
+                  `;
 
-        loadMembers();
-    });
-</script>
+                if (!isRoomOwner || member.userId === currentUserId) {
+                    actionButton = '';
+                }
+
+                card.innerHTML = `
+                  <div class="d-flex justify-content-between align-items-center">
+                      ${memberName}
+                      ${actionButton}
+                  </div>
+                `;
+
+                return card;
+            }
+
+            loadMembers();
+        });
+    </script>
 </div>

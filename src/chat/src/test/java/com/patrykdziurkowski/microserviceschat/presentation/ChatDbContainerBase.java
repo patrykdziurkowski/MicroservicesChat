@@ -10,7 +10,7 @@ public class ChatDbContainerBase {
     @Container
     @ServiceConnection
     protected static MSSQLServerContainer<?> db = new MSSQLServerContainer<>(
-            "mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04")
+            "mcr.microsoft.com/mssql/server:2022-latest")
             .withExposedPorts(1433)
             .waitingFor(Wait.forSuccessfulCommand(
                     "/opt/mssql-tools18/bin/sqlcmd -U sa -S localhost -P examplePassword123 -No -Q 'SELECT 1'"))

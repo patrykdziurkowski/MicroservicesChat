@@ -39,7 +39,7 @@ class LeaveChatCommandTests extends ChatDbContainerBase {
     private ChatRepositoryImpl chatRepository;
 
     @MockBean
-    private AuthenticationApiClient apiClient;
+    private UserApiClient apiClient;
 
     @Test
     void memberLeaveCommand_shouldLoad() {

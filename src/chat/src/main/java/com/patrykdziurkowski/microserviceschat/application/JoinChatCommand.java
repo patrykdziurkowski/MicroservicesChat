@@ -12,11 +12,11 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 public class JoinChatCommand {
     private final ChatRepository chatRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
     public JoinChatCommand(ChatRepository chatRepository,
             PasswordEncoder passwordEncoder,
-            AuthenticationApiClient apiClient) {
+            UserApiClient apiClient) {
         this.chatRepository = chatRepository;
         this.passwordEncoder = passwordEncoder;
         this.apiClient = apiClient;

@@ -22,27 +22,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "chatroom")
 public class ChatRoom extends AggreggateRoot {
-
     @Id
     private UUID id;
-
     private UUID ownerId;
     private String name;
     private boolean isPublic;
-
     @ElementCollection
     @CollectionTable(name = "memberIds", joinColumns = @JoinColumn(name = "chatRoomId"))
     @Column(name = "id")
-    private List<UUID> memberIds = new ArrayList<UUID>();
-
-    private List<UUID> messageIds = new ArrayList<UUID>();
-
+    private List<UUID> memberIds = new ArrayList<>();
+    private List<UUID> messageIds = new ArrayList<>();
     private int totalMessageCount;
-
     @Nullable
     @Basic(optional = true)
     private String passwordHash;
