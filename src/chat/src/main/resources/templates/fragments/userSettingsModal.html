@@ -6,18 +6,19 @@
                 <h5 class="modal-title" id="userSettingsLabel">User settings</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" id="usernameInput" placeholder="Username">
+            <div class="modal-body p-3 d-flex">
+                <div class="form-group" style="flex-grow: 1">
+                    <input type=" text" class="form-control" id="usernameInput" placeholder="Username">
                 </div>
-                <button class="btn btn-primary" value="Save" id="saveUsernameButton"
-                    onclick="saveUsername()">Save</button>
+                <button class="btn btn-primary" value="Save" id="saveUsernameButton" onclick="saveUsername()"
+                    data-bs-dismiss="modal">Save</button>
             </div>
         </div>
     </div>
 
     <script>
         function saveUsername() {
+            const oldUserName = document.querySelector('#userNameLabel').innerText;
             const username = document.querySelector("#usernameInput").value;
             const payload = {
                 userName: username
@@ -29,12 +30,22 @@
             });
 
             const result = request.then(response => {
-                if (response.status !== 200) {
-                    console.error('Unable to change username.');
+                if (response.status === 403) {
+                    alert('Unable to change to the selected username.');
                     return;
                 }
 
+                if (response.status !== 200) {
+                    console.error(`Username change error. Response: ${response}`);
+                }
+
                 document.querySelector('#userNameLabel').innerText = username;
+                const memberContainer = document.querySelector('#memberContainer');
+                for (const memberEntry of memberContainer.children) {
+                    if (memberEntry.querySelector('p').innerText === oldUserName) {
+                        memberEntry.querySelector('p').innerText = username;
+                    }
+                }
             }).catch(error => console.error(error));
         }
     </script>

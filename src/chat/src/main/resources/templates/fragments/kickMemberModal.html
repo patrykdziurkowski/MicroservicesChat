@@ -23,25 +23,25 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    const memberCard = document.querySelector(`.member-${memberId}`);
-                    if (memberCard) {
-                        memberCard.remove();
+                .then(response => {
+                    if (response.ok) {
+                        const memberCard = document.querySelector(`.member-${memberId}`);
+                        if (memberCard) {
+                            memberCard.remove();
+                        }
+                    } else {
+                        return response.text().then(errorMessage => {
+                            alert(errorMessage || 'Failed to kick the member.');
+                        });
                     }
-                } else {
-                    return response.text().then(errorMessage => {
-                        alert(errorMessage || 'Failed to kick the member.');
-                    });
-                }
-                const kickMemberModal = document.getElementById('kickMember');
+                    const kickMemberModal = document.getElementById('kickMember');
                     const modalInstance = bootstrap.Modal.getInstance(kickMemberModal);
                     modalInstance.hide();
-            })
-            .catch(error => {
-                console.error('Error kicking member:', error);
-                alert('An error occurred while trying to kick the member.');
-            });
+                })
+                .catch(error => {
+                    console.error('Error kicking member:', error);
+                    alert('An error occurred while trying to kick the member.');
+                });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -50,7 +50,7 @@
                 const button = event.relatedTarget;
 
                 const memberId = button.getAttribute('data-member-id');
-        
+
                 const confirmKickButton = document.getElementById('confirmKick');
                 confirmKickButton.onclick = () => {
                     console.log(`Kicking user with ID: ${memberId}`);

@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
@@ -8,14 +9,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.patrykdziurkowski.microserviceschat.application.ChatRepository;
 import com.patrykdziurkowski.microserviceschat.application.UserApiClient;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @Controller
 public class HomeController {
     private final UserApiClient apiClient;
+    private final ChatRepository chatRepository;
 
-    public HomeController(UserApiClient apiClient) {
+    public HomeController(UserApiClient apiClient, ChatRepository chatRepository) {
         this.apiClient = apiClient;
+        this.chatRepository = chatRepository;
     }
 
     @GetMapping("/")
@@ -60,6 +65,18 @@ public class HomeController {
 
         model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("currentUserName", currentUserName);
+
+        UUID parsedChatId;
+        try {
+            parsedChatId = UUID.fromString(chatId);
+        } catch (IllegalArgumentException e) {
+            return "chats";
+        }
+
+        Optional<ChatRoom> chat = chatRepository.getById(parsedChatId);
+        if (chat.isEmpty()) {
+            return "chats";
+        }
         return "chat";
     }
 

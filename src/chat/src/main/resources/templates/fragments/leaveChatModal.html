@@ -18,7 +18,6 @@
     </div>
     <script>
         function leaveChat() {
-            console.log(`Attemtping to leave chat: ${selectedChatId}`);
             fetch(`/chats/${selectedChatId}/user`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }

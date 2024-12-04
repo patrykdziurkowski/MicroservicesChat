@@ -10,7 +10,7 @@
 
 <body>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form method="POST" th:action="@{/register}">
+        <form method="POST" th:action="@{/register}" onsubmit="return passwordsMatch()">
             <div class="form-group">
                 <label for="usernameInput">Username</label>
                 <input type="text" class="form-control" id="usernameInput" name="userName"
@@ -31,6 +31,19 @@
         </form>
     </div>
 
+    <script>
+        function passwordsMatch() {
+            const password = document.getElementById('passwordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+            if (password !== confirmPassword) {
+                alert("The passwords must match.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
     <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
 </body>
 
