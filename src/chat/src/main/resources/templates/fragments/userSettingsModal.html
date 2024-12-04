@@ -18,6 +18,7 @@
 
     <script>
         function saveUsername() {
+            const oldUserName = document.querySelector('#userNameLabel').innerText;
             const username = document.querySelector("#usernameInput").value;
             const payload = {
                 userName: username
@@ -35,6 +36,12 @@
                 }
 
                 document.querySelector('#userNameLabel').innerText = username;
+                const memberContainer = document.querySelector('#memberContainer');
+                for (const memberEntry of memberContainer.children) {
+                    if (memberEntry.querySelector('p').innerText === oldUserName) {
+                        memberEntry.querySelector('p').innerText = username;
+                    }
+                }
             }).catch(error => console.error(error));
         }
     </script>
