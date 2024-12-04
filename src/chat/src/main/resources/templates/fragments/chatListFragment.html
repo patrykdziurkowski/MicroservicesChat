@@ -10,7 +10,7 @@
         <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
             data-bs-target="#createChat">Create Chat</button>
     </div>
-    <section class="mt-auto row">
+    <section class="mt-auto row p-3">
         <h5 class="col" id="userNameLabel" th:text="${currentUserName}">Username</h5>
         <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings"
             id="userSettingsButton">Settings</button>
@@ -80,20 +80,20 @@
 
             loadChats();
         });
-      
-    function createChatCard(chat) {
-        const section = document.createElement('section');
-        section.classList.add('chat-card', 'p-3');
-        section.style.cursor = 'pointer';
-        section.setAttribute('data-chat-id', chat.id);
 
-        section.innerHTML = cardText(chat);
+        function createChatCard(chat) {
+            const section = document.createElement('section');
+            section.classList.add('chat-card', 'p-3');
+            section.style.cursor = 'pointer';
+            section.setAttribute('data-chat-id', chat.id);
 
-        return section;
-    }
+            section.innerHTML = cardText(chat);
 
-    function cardText(chat) {
-        return `
+            return section;
+        }
+
+        function cardText(chat) {
+            return `
             <div class="d-flex justify-content-between align-items-center" onclick="if(${chat.isMember}) window.location.href = '/chats/${chat.id}'">
                 <div>
                     <h5 class="card-title truncate-text">${chat.name}</h5>
@@ -106,7 +106,7 @@
                     ${chat.isMember ? 'Leave' : 'Join'}
                 </button>
             </div>`;
-    }
+        }
 
     </script>
 </div>
