@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
+
+import io.jsonwebtoken.lang.Collections;
 
 public class ChatRoomDto {
     private UUID id;
@@ -13,12 +16,17 @@ public class ChatRoomDto {
     private boolean isPublic;
     private boolean isMember;
     private boolean isPasswordProtected;
+    private boolean isFavorite;
     private int memberCount;
 
     private ChatRoomDto() {
     }
 
     public static ChatRoomDto from(ChatRoom chatRoom, UUID currentUserId) {
+        return from(chatRoom, false, currentUserId);
+    }
+
+    public static ChatRoomDto from(ChatRoom chatRoom, boolean isFavorite, UUID currentUserId) {
         ChatRoomDto chatDto = new ChatRoomDto();
         chatDto.id = chatRoom.getId();
         chatDto.name = chatRoom.getName();
@@ -27,16 +35,25 @@ public class ChatRoomDto {
         chatDto.isMember = chatRoom.getMemberIds().contains(currentUserId);
         chatDto.isPasswordProtected = chatRoom.getPasswordHash().isPresent();
         chatDto.memberCount = chatRoom.getMemberIds().size();
+        chatDto.isFavorite = isFavorite;
 
         return chatDto;
     }
 
-    public static List<ChatRoomDto> fromList(List<ChatRoom> chatRooms, UUID currentUserId) {
+    public static List<ChatRoomDto> fromList(
+            List<ChatRoom> chatRooms,
+            List<FavoriteChatRoom> favorites,
+            UUID currentUserId) {
         List<ChatRoomDto> chatsDto = new ArrayList<>();
         for (ChatRoom chat : chatRooms) {
-            chatsDto.add(from(chat, currentUserId));
+            boolean isFavorite = favorites.stream().anyMatch(f -> f.getChatRoomId().equals(chat.getId()));
+            chatsDto.add(from(chat, isFavorite, currentUserId));
         }
         return chatsDto;
+    }
+
+    public static List<ChatRoomDto> fromList(List<ChatRoom> chatRooms, UUID currentUserId) {
+        return fromList(chatRooms, Collections.emptyList(), currentUserId);
     }
 
     public UUID getId() {
@@ -101,6 +118,18 @@ public class ChatRoomDto {
 
     public void setIsPasswordProtected(boolean isPasswordProtected) {
         this.isPasswordProtected = isPasswordProtected;
+    }
+
+    public boolean isIsPasswordProtected() {
+        return this.isPasswordProtected;
+    }
+
+    public boolean getIsFavorite() {
+        return this.isFavorite;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
 }

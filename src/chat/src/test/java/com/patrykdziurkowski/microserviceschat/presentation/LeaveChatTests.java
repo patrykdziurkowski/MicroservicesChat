@@ -90,7 +90,8 @@ class LeaveChatTests extends ComposeContainersBase {
     @Test
     @Order(3)
     void leavingChat_shouldRemoveTheChat_whenNoMembersLeft() {
-        WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
+        WebElement leaveButton = driver.findElement(By.id("serverContainer"))
+                .findElement(By.xpath(".//*[contains(@class, 'modify-membership-button')]"));
 
         leaveButton.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));

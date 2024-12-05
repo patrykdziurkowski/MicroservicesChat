@@ -19,9 +19,11 @@ import com.patrykdziurkowski.microserviceschat.application.ChatQuery;
 import com.patrykdziurkowski.microserviceschat.application.ChatsQuery;
 import com.patrykdziurkowski.microserviceschat.application.CreateChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.DeleteChatCommand;
+import com.patrykdziurkowski.microserviceschat.application.FavoritesQuery;
 import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 
 import jakarta.validation.Valid;
 
@@ -32,18 +34,17 @@ public class ChatController {
     private final ChatsQuery chatsQuery;
     private final ChatQuery chatQuery;
     private final MembersQuery membersQuery;
+    private final FavoritesQuery favoritesQuery;
     private static final int NUMBER_OF_CHATS_TO_RETRIEVE = 20;
 
-    public ChatController(CreateChatCommand createChatCommand,
-            DeleteChatCommand deleteChatCommand,
-            ChatsQuery chatsQuery,
-            ChatQuery chatQuery,
-            MembersQuery membersQuery) {
+    public ChatController(CreateChatCommand createChatCommand, DeleteChatCommand deleteChatCommand,
+            ChatsQuery chatsQuery, ChatQuery chatQuery, MembersQuery membersQuery, FavoritesQuery favoritesQuery) {
         this.createChatCommand = createChatCommand;
         this.deleteChatCommand = deleteChatCommand;
         this.chatsQuery = chatsQuery;
         this.chatQuery = chatQuery;
         this.membersQuery = membersQuery;
+        this.favoritesQuery = favoritesQuery;
     }
 
     @PostMapping("/chats")
@@ -75,15 +76,18 @@ public class ChatController {
     public ResponseEntity<List<ChatRoomDto>> getChats(Authentication authentication,
             @RequestParam(defaultValue = "0") int offset) {
         if (offset < 0) {
-            return ResponseEntity.badRequest().build();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         UUID currentUserId = UUID.fromString(authentication.getName());
         List<ChatRoom> chats = chatsQuery.execute(currentUserId, offset, NUMBER_OF_CHATS_TO_RETRIEVE);
         if (chats.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, currentUserId);
-        return ResponseEntity.ok(chatsDto);
+
+        List<FavoriteChatRoom> favorites = favoritesQuery.execute(currentUserId);
+
+        List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, favorites, currentUserId);
+        return new ResponseEntity<>(chatsDto, HttpStatus.OK);
     }
 
     @GetMapping("/chats/{chatId}/details")

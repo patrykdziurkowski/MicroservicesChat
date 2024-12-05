@@ -18,17 +18,18 @@ public class UnsetFavoriteCommand {
 
     public boolean execute(UUID currentUserId, UUID chatId) {
         final List<FavoriteChatRoom> retrievedFavoriteChats = favoriteChatRepository.getByUserId(currentUserId);
-        if(retrievedFavoriteChats.isEmpty()) {
+        if (retrievedFavoriteChats.isEmpty()) {
             return false;
         }
         Optional<FavoriteChatRoom> foundFavoriteChat = findFavoriteChatById(chatId, retrievedFavoriteChats);
-        boolean operationSucceeded = foundFavoriteChat.isPresent() && foundFavoriteChat.get().unsetFavorite(currentUserId);
-        if(operationSucceeded == false) {
+        boolean operationSucceeded = foundFavoriteChat.isPresent()
+                && foundFavoriteChat.get().unsetFavorite(currentUserId);
+        if (operationSucceeded == false) {
             return false;
         }
         favoriteChatRepository.save(foundFavoriteChat.get());
         return true;
-        
+
     }
 
     private Optional<FavoriteChatRoom> findFavoriteChatById(UUID chatId, List<FavoriteChatRoom> listOfFavoriteChats) {
