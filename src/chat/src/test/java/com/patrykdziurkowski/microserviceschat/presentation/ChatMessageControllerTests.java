@@ -58,6 +58,9 @@ class ChatMessageControllerTests {
     private MembersQuery membersQuery;
 
     private UUID currentUserId = UUID.randomUUID();
+    private UUID chatId = UUID.randomUUID();
+    private User chatMember = new User(currentUserId, "chatMember");
+    private ChatRoom chat = new ChatRoom(chatId,"chat", false);
 
     @Test
     void contextLoads() {
@@ -66,11 +69,12 @@ class ChatMessageControllerTests {
 
     @Test
     void addMessage_shouldReturnCreated_whenMessageIsAdded() throws Exception {
-        UUID chatId = UUID.randomUUID();
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
                 .thenReturn(Optional.of(new UserMessage(chatId, "Hello, World!", currentUserId)));
+        when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(post("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -83,7 +87,6 @@ class ChatMessageControllerTests {
 
     @Test
     void addMessage_shouldReturnBadRequest_whenMessageCannotBeAdded() throws Exception {
-        UUID chatId = UUID.randomUUID();
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
@@ -128,11 +131,8 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnOk_whenMessagesExist() throws Exception {
-        UUID chatId = UUID.randomUUID();
-        User chatMember = new User(currentUserId, "chatMember");
         UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
         List<UserMessage> messages = List.of(userMessage);
-        ChatRoom chat = new ChatRoom(chatId,"chat", false);
 
         when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(messages);
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
@@ -148,12 +148,10 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnOnlySecondMessage_whenOffsetIsOne() throws Exception {
-        UUID chatId = UUID.randomUUID();
-        User chatMember = new User(currentUserId, "chatMember");
         UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
         List<UserMessage> messages = List.of(userMessage);
         List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId, List.of(chatMember));
-        ChatRoom chat = new ChatRoom(chatId,"chat", false);
+        
 
         when(chatMessagesQuery.execute(chatId, 1, 20)).thenReturn(messages);
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
@@ -170,10 +168,6 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnNoContent_whenNoMessagesExist() throws Exception {
-        UUID chatId = UUID.randomUUID();
-        User chatMember = new User(currentUserId, "chatMember");
-        ChatRoom chat = new ChatRoom(chatId,"chat", false);
-
         when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(Collections.emptyList());
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
         when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
@@ -188,8 +182,6 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnBadRequest_whenNoOffsetIsNegative() throws Exception {
-        UUID chatId = UUID.randomUUID();
-
         when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)

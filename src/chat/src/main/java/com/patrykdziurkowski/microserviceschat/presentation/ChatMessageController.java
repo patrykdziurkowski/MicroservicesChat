@@ -50,7 +50,7 @@ public class ChatMessageController {
     }
 
     @PostMapping("/chats/{chatId}/messages")
-    public ResponseEntity<UserMessage> addMessage(Authentication authentication,
+    public ResponseEntity<MessageDto> addMessage(Authentication authentication,
             @PathVariable UUID chatId,
             @RequestBody @Valid NewMessageModel newMessage) {
         UUID currentUserId = UUID.fromString(authentication.getName());
@@ -58,7 +58,16 @@ public class ChatMessageController {
         if (addedMessage.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(addedMessage.get(), HttpStatus.CREATED);
+        Optional<ChatRoom> chat = chatQuery.execute(chatId);
+        if (chat.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<List<User>> chatMembers = membersQuery.execute(chat.orElseThrow().getMemberIds());
+        if (chatMembers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<MessageDto> messagesDto = MessageDto.fromList(List.of(addedMessage.get()), currentUserId, chatMembers.get());
+        return new ResponseEntity<>(messagesDto.get(0), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")

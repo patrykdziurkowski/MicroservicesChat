@@ -93,8 +93,12 @@
                     if (!response.ok) {
                         throw new Error(`Error: ${response.status}`);
                     }
+
+                    return response.json(); 
                 })
                 .then(data => {
+                    console.log(data);
+
                     const messageDiv = createMessageDiv(data)
                     document.getElementById("messageContainer").appendChild(messageDiv);
                     contentInput.value = "";
