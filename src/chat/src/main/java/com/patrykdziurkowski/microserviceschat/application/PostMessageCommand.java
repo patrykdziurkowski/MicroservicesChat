@@ -18,17 +18,17 @@ public class PostMessageCommand {
         this.chatRepository = chatRepository;
     }
 
-    public boolean execute(UUID chatId, String text, UUID currentUserId) {
+    public Optional<UserMessage> execute(UUID chatId, String text, UUID currentUserId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
         if(retrievedChat.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
         final ChatRoom chat = retrievedChat.get();
         if(chat.getMemberIds().contains(currentUserId) == false) {
-            return false;
+            return Optional.empty();
         }
         UserMessage message = new UserMessage(chatId, text, currentUserId);
         messageRepository.save(message);
-        return true;
+        return Optional.of(message);
     }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 import com.patrykdziurkowski.microserviceschat.infrastructure.ChatRepositoryImpl;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatApplication;
 import com.patrykdziurkowski.microserviceschat.presentation.ChatDbContainerBase;
@@ -46,9 +48,9 @@ class PostMessageCommandTests extends ChatDbContainerBase {
         ChatRoom chat = new ChatRoom(userId, "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = messagePostCommand.execute(chat.getId(), "text", userId);
+        Optional<UserMessage> addedMessage = messagePostCommand.execute(chat.getId(), "text", userId);
 
-        assertTrue(didSucceed);
+        assertFalse(addedMessage.isEmpty());
     }
 
     @Test
@@ -56,18 +58,18 @@ class PostMessageCommandTests extends ChatDbContainerBase {
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
         chatRepository.save(chat);
 
-        boolean didSucceed = messagePostCommand.execute(chat.getId(), "text", UUID.randomUUID());
+        Optional<UserMessage> addedMessage = messagePostCommand.execute(chat.getId(), "text", UUID.randomUUID());
 
-        assertFalse(didSucceed);
+        assertTrue(addedMessage.isEmpty());
     }
 
     @Test
     void execute_whenChatDoesntExists_shouldReturnFalse() {
         UUID userId = UUID.randomUUID();
 
-        boolean didSucceed = messagePostCommand.execute(UUID.randomUUID(), "text", userId);
+        Optional<UserMessage> addedMessage = messagePostCommand.execute(UUID.randomUUID(), "text", userId);
 
-        assertFalse(didSucceed);
+        assertTrue(addedMessage.isEmpty());
     }
 
 }

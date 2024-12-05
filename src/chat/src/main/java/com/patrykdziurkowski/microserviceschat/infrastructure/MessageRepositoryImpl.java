@@ -23,7 +23,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     // Last Message provided by lastMessageId is skipped
     public List<UserMessage> getByAmount(UUID chatId, int lastMessagePosition, int messagesToRetrieve) {
         final String query = "SELECT m FROM UserMessage m WHERE " +
-                "m.chatRoomId = :chatId ORDER BY m.datePosted";
+                "m.chatRoomId = :chatId ORDER BY m.datePosted DESC";
         return entityManager
                 .createQuery(query, UserMessage.class)
                 .setParameter("chatId", chatId)

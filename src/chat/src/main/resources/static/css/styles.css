@@ -29,3 +29,20 @@
 .button-container {
     width: 100%;
 }
+.message {
+    padding: 20px;
+}
+.message .message-button-container {
+    display: none;
+}
+.message:hover {
+    background-color: #def8fa;
+}
+.message:hover .message-button-container {
+    display: block;
+}
+.announcement .message-text-container {
+    margin: auto;
+    text-align: center;
+    font-style: italic;
+}

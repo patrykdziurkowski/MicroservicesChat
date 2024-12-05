@@ -5,48 +5,55 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
+import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
 import jakarta.annotation.Nullable;
 
 public class MessageDto {
-    UUID messageId;
-    LocalDateTime datePosted;
-    String text;
-    boolean isMessageOwner;
-    boolean isAnnouncement;
+    private UUID messageId;
+    private LocalDateTime datePosted;
+    private String text;
+    private boolean isMessageOwner;
+    private boolean isAnnouncement;
     @Nullable
-    String ownerId;
+    private String ownerId;
+    @Nullable
+    private String ownerUserName;
 
     private MessageDto() {}
 
-    public static MessageDto from(UserMessage message, UUID userId) {
+    public static MessageDto from(UserMessage message, UUID userId, User chatMember) {
         MessageDto messageDto = new MessageDto();
         messageDto.messageId = message.getId();
         messageDto.text = message.getText();
         messageDto.datePosted = message.getDatePosted();
-        messageDto.isAnnouncement = false;
-        messageDto.isMessageOwner = false;
 
-        if(message.getOwnerId() == null) {
-            messageDto.isAnnouncement = true;
-        } else {
-            messageDto.ownerId = message.getId().toString();
-        }
-        if(message.getOwnerId().equals(userId)) {
-            messageDto.isMessageOwner = true;
-        }
-
+        messageDto.isAnnouncement = (message.getOwnerId() == null) ? true : false;
+        messageDto.isMessageOwner = (userId.equals(message.getOwnerId())) ? true : false; 
+        messageDto.ownerId = (message.getOwnerId() == null) ? null : message.getOwnerId().toString();
+        messageDto.ownerUserName = (message.getOwnerId() == null) ? null : chatMember.getUserName();
+        
         return messageDto;
     }
 
-    public static List<MessageDto> fromList(List<UserMessage> messages, UUID userId) {
+    public static List<MessageDto> fromList(List<UserMessage> messages, UUID userId, List<User> chatMembers) {
         List<MessageDto> messagesDto = new ArrayList<>();
         for (UserMessage message : messages) {
-            messagesDto.add(from(message, userId));
+            User chatMember = getUser(message.getOwnerId(), chatMembers);
+            messagesDto.add(from(message, userId, chatMember));
         }
         return messagesDto;
+    }
+
+    private static User getUser(UUID messageOwnerId, List<User> chatMembers) {
+        User user = new User();
+        for (User member : chatMembers) {
+            if (member.getUserId().equals(messageOwnerId)) {
+                user = member;
+            } 
+        }
+        return user;
     }
 
     public UUID getMessageId() {
@@ -104,4 +111,13 @@ public class MessageDto {
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
     }
+
+    public String getOwnerUserName() {
+        return this.ownerUserName;
+    }
+
+    public void setOwnerUserName(String ownerUserName) {
+        this.ownerUserName = ownerUserName;
+    }
+
 }

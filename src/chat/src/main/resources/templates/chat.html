@@ -19,23 +19,13 @@
         <div class="col-9">
             <div class="row h-100">
                 <section class="col-8 d-flex flex-column align-items-start">
-                    <section class="w-100">
-                        <article class="card">
-                            <p class="card-text">Announcement contents</p>
-                            <p class="card-text">Date</p>
-                        </article>
-                        <article class="card">
-                            <h5 class="card-title">Member name</h5>
-                            <p class="card-text">Message contents</p>
-                            <p class="card-text">Date</p>
-                        </article>
-                    </section>
-                    <section class="mt-auto w-100">
+                    <div th:insert="~{fragments/messageListFragment.html :: messageList}" style="width: 100%;"></div>
+                    <div id="postMessageFromContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto" style="margin-bottom: 20px; margin-left:auto; margin-right:auto;">
                         <form>
-                            <input type="text" placeholder="Your message here...">
-                            <input type="submit" class="btn btn-primary" value="Send">
+                            <input type="text" id="content" placeholder="Message text...">
+                            <button type="button" class="btn btn-primary" onClick="postMessage();">Send Message</button>
                         </form>
-                    </section>
+                    </div>
                 </section>
                 <section class="col-4 d-flex flex-column">
                     <div th:insert="~{fragments/memberListFragment.html :: memberList}"></div>
@@ -79,6 +69,42 @@
         ownerButtonsContainer.classList.add('d-none');
         ownerButtonsContainer.appendChild(createInviteButton());
         ownerButtonsContainer.appendChild(createDissolveButton());
+
+        function postMessage() {
+            const contentInput = document.getElementById("content");
+            if (contentInput.value !== "" || contentInput.value !== null) {
+                const content = contentInput.value;
+
+                const payload = {
+                    content: content,
+                };
+
+                fetch(`/chats/${chatId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+        
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    const messageDiv = createMessageDiv(data)
+                    document.getElementById("messageContainer").appendChild(messageDiv);
+                    contentInput.value = "";
+                })
+                .catch(error => {
+                    console.error('Error posting message:', error);
+                });
+            }
+        }
+
     </script>
 </body>
 

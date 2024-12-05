@@ -1,6 +1,7 @@
 package com.patrykdziurkowski.microserviceschat.presentation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.patrykdziurkowski.microserviceschat.application.ChatMessagesQuery;
+import com.patrykdziurkowski.microserviceschat.application.ChatQuery;
+import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.PostMessageCommand;
 import com.patrykdziurkowski.microserviceschat.application.RemoveMessageCommand;
+import com.patrykdziurkowski.microserviceschat.application.User;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
 import jakarta.validation.Valid;
@@ -27,27 +32,33 @@ public class ChatMessageController {
     private final PostMessageCommand postMessageCommand;
     private final RemoveMessageCommand removeMessageCommand;
     private final ChatMessagesQuery chatMessagesQuery;
+    private final MembersQuery membersQuery;
+    private final ChatQuery chatQuery;
 
     private static final int NUMBER_OF_MESSAGES_TO_RETRIEVE = 20;
 
     public ChatMessageController(PostMessageCommand addMessageCommand,
             RemoveMessageCommand deleteMessageCommand,
-            ChatMessagesQuery chatMessagesQuery) {
+            ChatMessagesQuery chatMessagesQuery,
+            MembersQuery membersQuery,
+            ChatQuery chatQuery) {
         this.postMessageCommand = addMessageCommand;
         this.removeMessageCommand = deleteMessageCommand;
         this.chatMessagesQuery = chatMessagesQuery;
+        this.membersQuery = membersQuery;
+        this.chatQuery = chatQuery;
     }
 
     @PostMapping("/chats/{chatId}/messages")
-    public ResponseEntity<String> addMessage(Authentication authentication,
+    public ResponseEntity<UserMessage> addMessage(Authentication authentication,
             @PathVariable UUID chatId,
             @RequestBody @Valid NewMessageModel newMessage) {
         UUID currentUserId = UUID.fromString(authentication.getName());
-        boolean isMessageAdded = postMessageCommand.execute(chatId, newMessage.getContent(), currentUserId);
-        if (isMessageAdded == false) {
-            return new ResponseEntity<>("Message could not be added.", HttpStatus.BAD_REQUEST);
+        Optional<UserMessage> addedMessage = postMessageCommand.execute(chatId, newMessage.getContent(), currentUserId);
+        if (addedMessage.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("Message added successfully.", HttpStatus.CREATED);
+        return new ResponseEntity<>(addedMessage.get(), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")
@@ -70,10 +81,18 @@ public class ChatMessageController {
         }
         List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIEVE);
         if (messages.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        Optional<ChatRoom> chat = chatQuery.execute(chatId);
+        if (chat.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<List<User>> chatMembers = membersQuery.execute(chat.orElseThrow().getMemberIds());
+        if (chatMembers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UUID currentUserId = UUID.fromString(authentication.getName());
-        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId);
+        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId, chatMembers.get());
         return ResponseEntity.ok(messagesDto);
     }
 }
