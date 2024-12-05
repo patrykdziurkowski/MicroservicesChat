@@ -20,7 +20,7 @@ public class FavoriteChatRoom extends AggreggateRoot {
     }
 
     public boolean unsetFavorite(UUID currentUserId) {
-        if (currentUserId != userId) {
+        if (currentUserId.equals(userId) == false) {
             return false;
         }
         raiseDomainEvent(new FavoriteUnsetEvent());
