@@ -1,4 +1,5 @@
 <div th:fragment="messageList">
+    <div th:replace="~{fragments/deleteMessageModal.html :: deleteMessageModal}"></div>
     <div id="messageContainer" class="scrollable-container d-flex flex-column">
     </div>
     <script>
@@ -85,7 +86,6 @@
             setTimeout(() => loadMessages(false), 1000);
         });
 
-
         function createMessageDiv(message) {
             const messageDiv = document.createElement("div");
             const postDate = `<small class="message-date">${new Date(message.datePosted).toLocaleString(undefined, { timeZone: 'CET' })}</small>`;
@@ -94,7 +94,7 @@
                           </svg>`;
             const deleteMessageButton = `<div class="message-button-container">
                                         <button class="btn btn-outline-danger" style="padding-top: 4px;" type="button" id="deleteMessageButton" data-bs-toggle="modal"
-                                          data-bs-target="#deleteMessage" data-member-id="${message.messageId}">${icon}</button>
+                                          data-bs-target="#deleteMessage" data-message-id="${message.messageId}">${icon}</button>
                                     </div>`;
             if (message.isAnnouncement) {
                 messageDiv.className = "message announcement";

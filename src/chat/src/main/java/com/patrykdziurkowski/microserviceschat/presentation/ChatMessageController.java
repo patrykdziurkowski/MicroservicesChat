@@ -71,14 +71,16 @@ public class ChatMessageController {
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")
-    public ResponseEntity<String> deleteMessage(Authentication authentication,
+    public ResponseEntity<MessageResponse> deleteMessage(
+            Authentication authentication,
+            @PathVariable UUID chatId, 
             @PathVariable UUID messageId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageDeleted = removeMessageCommand.execute(currentUserId, messageId);
-        if (isMessageDeleted == false) {
-            return new ResponseEntity<>("Message could not be deleted.", HttpStatus.FORBIDDEN);
+        if (!isMessageDeleted) {
+            return new ResponseEntity<>(new MessageResponse("Message could not be deleted."), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>("Message deleted successfully.", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new MessageResponse("Message was deleted successfully."), HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/chats/{chatId}/messages")
