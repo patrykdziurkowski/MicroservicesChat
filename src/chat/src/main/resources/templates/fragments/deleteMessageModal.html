@@ -1,0 +1,61 @@
+<div th:fragment="deleteMessageModal" class="modal fade" id="deleteMessage" tabindex="-1" aria-labelledby="deleteMessageLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMessageLabel">Leave chat?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to leave this chat?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="deleteMessageConfirm" type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="deleteMessage()">Yes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function deleteMessage(messageId) {
+            fetch(`/chats/${chatId}/messages/${messageId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.status !== 204) {
+                        console.error('Unable to delete the message.');
+                        return;
+                    }
+
+                    if (response.status === 204) {
+                        const messageContainer = document.querySelector('#messageContainer');
+                        const messageCards = messageContainer.children;
+                        for (const messageCard of messageCards) {
+                            const cardMessageId = document.querySelector('#deleteMessageButton').getAttribute('data-message-id');
+                            if (cardMessageId === messageId.toString()) {
+                                messageCard.remove();
+                                break;
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error('Error when deleting message:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteMessageModal = document.getElementById('deleteMessage');
+            deleteMessageModal.addEventListener('show.bs.modal', (event) => {
+                const button = event.relatedTarget;
+
+                const messageId = button.getAttribute('data-message-id');
+
+                const confirmDeleteButton = document.getElementById('deleteMessageConfirm');
+                confirmDeleteButton.onclick = () => {
+                    console.log(`Deleting message with ID: ${messageId}`);
+                    deleteMessage(messageId);
+                };
+            });
+        });
+    </script>
+</div>

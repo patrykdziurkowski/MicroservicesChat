@@ -1,14 +1,11 @@
 <div th:fragment="memberList" class="d-flex flex-column align-items-start h-100">
     <div id="memberContainer" class="scrollable-container">
     </div>
-
     <script th:inline="javascript">
-        const urlParts = window.location.pathname.split('/');
-        const chatId = urlParts[urlParts.length - 1];
+        let isRoomOwner = false;
 
         document.addEventListener("DOMContentLoaded", () => {
             const currentUserId = /*[[${ currentUserId }]]*/ null;
-            let isRoomOwner = false;
 
             function loadMembers() {
                 const request = fetch(`/chats/${chatId}/details`, {
@@ -31,7 +28,6 @@
                     }
                     createMemberCards(chat.members);
                     if (isRoomOwner) {
-                        const roomOwnerButtons = document.getElementById("ownerButtonsContainer");
                         ownerButtonsContainer.classList.remove('d-none');
                     }
                 }).catch(error => console.error('Error loading member IDs:', error));

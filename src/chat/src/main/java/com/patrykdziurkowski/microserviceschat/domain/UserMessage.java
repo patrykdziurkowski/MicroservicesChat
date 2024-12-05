@@ -28,7 +28,7 @@ public class UserMessage extends Message {
     }
 
     public boolean delete(UUID currentUserId, UUID chatRoomOwnerId) {
-        boolean hasDeletePermissions = currentUserId == ownerId || currentUserId == chatRoomOwnerId;
+        boolean hasDeletePermissions = currentUserId.equals(ownerId) || currentUserId.equals(chatRoomOwnerId);
         if (hasDeletePermissions == false) {
             return false;
         }

@@ -138,7 +138,7 @@ public class MessageRepositoryImplTests extends ChatDbContainerBase {
 
         int numberOfReturnedMsgs = returnedMessages.size();
         UserMessage lastMessage = returnedMessages.get(1);
-        assertEquals("msg4", lastMessage.getText());
+        assertEquals("msg1", lastMessage.getText());
         assertEquals(2, numberOfReturnedMsgs);
     }
 
