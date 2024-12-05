@@ -110,10 +110,10 @@ class JoinChatTests extends ComposeContainersBase {
     void joiningChat_shouldIncreaseMemberCount() {
         WebElement serverContainer = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
-        WebElement joinButton = wait.until(
-                ExpectedConditions.visibilityOfNestedElementsLocatedBy(
-                        serverContainer,
-                        By.xpath(".//button")))
+        WebElement joinButton = wait
+                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(
+                        By.id("serverContainer"),
+                        By.xpath(".//*[contains(@class, 'modify-membership-button')]")))
                 .get(0);
 
         joinButton.click();
@@ -122,12 +122,15 @@ class JoinChatTests extends ComposeContainersBase {
         wait.until(ExpectedConditions.visibilityOf(joinConfirmButton));
         joinConfirmButton.click();
 
-        boolean memberCountUpdated = wait.until(d -> {
-            String memberCount = serverContainer.findElement(
-                    By.xpath(".//section//p[contains(text(),'members')]")).getText();
-            return memberCount.startsWith("2 members");
+        boolean isCountIncreased = wait.until(d -> {
+            WebElement memberCount = wait
+                    .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(
+                            By.id("serverContainer"),
+                            By.xpath(".//section//p[contains(text(),'members')]")))
+                    .get(0);
+            return memberCount.getText().startsWith("2 members");
         });
-        assertTrue(memberCountUpdated);
+        assertTrue(isCountIncreased);
     }
 
     @Test
@@ -159,7 +162,7 @@ class JoinChatTests extends ComposeContainersBase {
         WebElement leaveButton = wait
                 .until(ExpectedConditions.presenceOfNestedElementLocatedBy(
                         By.id("serverContainer"),
-                        By.xpath(".//button")));
+                        By.xpath(".//*[contains(@class, 'modify-membership-button')]")));
         leaveButton.click();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));

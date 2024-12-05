@@ -28,7 +28,7 @@ public class FavoriteChatController {
     public ResponseEntity<String> addFavorite(Authentication authentication, @RequestParam UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isSet = setFavoriteCommand.execute(currentUserId, chatId);
-        if(isSet == false) {
+        if (isSet == false) {
             return new ResponseEntity<>("Failed to add chat to favorites.", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("Chat added to favorites successfully.", HttpStatus.CREATED);
@@ -38,7 +38,7 @@ public class FavoriteChatController {
     public ResponseEntity<String> removeFavorite(Authentication authentication, @RequestParam UUID chatId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isUnset = unsetFavoriteCommand.execute(currentUserId, chatId);
-        if(isUnset == false) {
+        if (isUnset == false) {
             return new ResponseEntity<>("Failed to remove chat from favorites.", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("Chat removed from favorites successfully.", HttpStatus.NO_CONTENT);

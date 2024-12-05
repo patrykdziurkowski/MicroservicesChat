@@ -16,34 +16,34 @@ import jakarta.transaction.Transactional;
 
 @Repository
 @Transactional
-public class FavoriteChatRepositoryImpl implements FavoriteChatRepository{
+public class FavoriteChatRepositoryImpl implements FavoriteChatRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
     public Optional<FavoriteChatRoom> getById(UUID chatId) {
         return Optional.ofNullable(entityManager
-            .find(FavoriteChatRoom.class, chatId));
+                .find(FavoriteChatRoom.class, chatId));
     }
 
     public List<FavoriteChatRoom> getByUserId(UUID userId) {
         final String query = "SELECT f FROM FavoriteChatRoom f WHERE f.userId = :userId";
         return entityManager
-            .createQuery(query, FavoriteChatRoom.class)
-            .setParameter("userId", userId)
-            .getResultList();
+                .createQuery(query, FavoriteChatRoom.class)
+                .setParameter("userId", userId)
+                .getResultList();
     }
 
     public void save(FavoriteChatRoom favoriteChatRoom) {
         final boolean favoriteChatExists = favoriteChatExists(favoriteChatRoom.getId());
-        if(favoriteChatExists) {
+        if (favoriteChatExists) {
             entityManager.merge(favoriteChatRoom);
         } else {
             entityManager.persist(favoriteChatRoom);
         }
         final boolean chatUnset = favoriteChatRoom
-            .getDomainEvents()
-            .contains(new FavoriteUnsetEvent());
-        if(chatUnset) {
+                .getDomainEvents()
+                .contains(new FavoriteUnsetEvent());
+        if (chatUnset) {
             entityManager.remove(favoriteChatRoom);
         }
         entityManager.flush();
@@ -52,8 +52,8 @@ public class FavoriteChatRepositoryImpl implements FavoriteChatRepository{
     private boolean favoriteChatExists(UUID chatId) {
         final String query = "SELECT COUNT(f) FROM FavoriteChatRoom f WHERE f.id = :id";
         return entityManager
-            .createQuery(query, Long.class)
-            .setParameter("id", chatId)
-            .getSingleResult() > 0;
+                .createQuery(query, Long.class)
+                .setParameter("id", chatId)
+                .getSingleResult() > 0;
     }
 }

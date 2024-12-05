@@ -31,6 +31,7 @@ import com.patrykdziurkowski.microserviceschat.application.ChatQuery;
 import com.patrykdziurkowski.microserviceschat.application.ChatsQuery;
 import com.patrykdziurkowski.microserviceschat.application.CreateChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.DeleteChatCommand;
+import com.patrykdziurkowski.microserviceschat.application.FavoritesQuery;
 import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
@@ -56,6 +57,8 @@ class ChatControllerTests {
     private ChatQuery chatQuery;
     @MockBean
     private MembersQuery membersQuery;
+    @MockBean
+    private FavoritesQuery favoritesQuery;
 
     private UUID currentUserId = UUID.randomUUID();
 

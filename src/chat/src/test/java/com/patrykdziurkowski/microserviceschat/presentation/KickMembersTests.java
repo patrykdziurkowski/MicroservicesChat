@@ -127,8 +127,11 @@ class KickMembersTests extends ComposeContainersBase {
     void joiningChat_shouldIncreaseMemberCount() {
         WebElement serverContainer = wait.until(
                 ExpectedConditions.presenceOfElementLocated(By.id("serverContainer")));
-        WebElement joinButton = wait.until(
-                ExpectedConditions.visibilityOfNestedElementsLocatedBy(serverContainer, By.xpath(".//button"))).get(0);
+        WebElement joinButton = wait
+                .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(
+                        By.id("serverContainer"),
+                        By.xpath(".//*[contains(@class, 'modify-membership-button')]")))
+                .get(0);
 
         joinButton.click();
         WebElement joinConfirmButton = wait
@@ -198,7 +201,8 @@ class KickMembersTests extends ComposeContainersBase {
     @Test
     @Order(11)
     void leaveChat_shouldLeaveAndDeleteChat_whenNoMembersLeft() {
-        WebElement leaveButton = driver.findElement(By.id("serverContainer")).findElement(By.xpath(".//button"));
+        WebElement leaveButton = driver.findElement(By.id("serverContainer"))
+                .findElement(By.xpath(".//*[contains(@class, 'modify-membership-button')]"));
 
         leaveButton.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("leaveChat")));
