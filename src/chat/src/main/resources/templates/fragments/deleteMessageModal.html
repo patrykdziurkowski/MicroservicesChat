@@ -28,15 +28,16 @@
                         return;
                     }
 
-                    if (response.status === 204) {
-                        const messageContainer = document.querySelector('#messageContainer');
-                        const messageCards = messageContainer.children;
-                        for (const messageCard of messageCards) {
-                            const cardMessageId = document.querySelector('#deleteMessageButton').getAttribute('data-message-id');
-                            if (cardMessageId === messageId.toString()) {
-                                messageCard.remove();
-                                break;
-                            }
+                    const messageContainer = document.querySelector('#messageContainer');
+                    const messageCards = messageContainer.children;
+                    for (const messageCard of messageCards) {
+                        const deleteButton = messageCard.querySelector('.delete-message-button');
+                        if (deleteButton === null) continue;
+
+                        const cardMessageId = deleteButton.getAttribute('data-message-id');
+                        if (cardMessageId === messageId.toString()) {
+                            messageCard.remove();
+                            break;
                         }
                     }
                 })
