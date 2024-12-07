@@ -1,6 +1,13 @@
 <div th:fragment="messageList">
     <div th:replace="~{fragments/deleteMessageModal.html :: deleteMessageModal}"></div>
     <div id="messageContainer" class="scrollable-container d-flex flex-column">
+        <div class="message your-message">
+            <div class="message-content d-flex justify-content-between">
+                <div class="message-text-container">
+                    <p class="message-text" style="opacity: 50%;">Loading...</p>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
         const urlParts = window.location.pathname.split('/');
@@ -34,7 +41,9 @@
                         return;
                     }
                     const messageContainer = document.getElementById("messageContainer");
-
+                    if (offset === 0) {
+                        messageContainer.innerHTML = '';
+                    }
                     if (isLoadingMore) {
                         const loadMoreButton = document.getElementById("loadMoreButton");
                         if (loadMoreButton) {

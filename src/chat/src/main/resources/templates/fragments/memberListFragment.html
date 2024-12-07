@@ -1,5 +1,12 @@
 <div th:fragment="memberList" class="d-flex flex-column align-items-start h-100">
     <div id="memberContainer" class="scrollable-container">
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="card-title truncate-text mb-0" style="max-width: 200px;">
+                    Loading...
+                </p>
+            </div>
+        </div>
     </div>
     <script th:inline="javascript">
         let isRoomOwner = false;
