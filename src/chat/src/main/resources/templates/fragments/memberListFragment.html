@@ -21,9 +21,14 @@
                 });
 
                 const response = request.then(r => {
+                    const memberContainer = document.getElementById('memberContainer');
+                    memberContainer.innerHTML = '';
+
                     if (r.status !== 200) {
                         console.error('Could not load members.', r.error);
+                        return;
                     }
+
                     return r.json();
                 });
 
@@ -41,8 +46,6 @@
             }
 
             function createMemberCards(members) {
-                const memberContainer = document.getElementById('memberContainer');
-                memberContainer.innerHTML = '';
                 if (!members || members.length === 0) return;
 
                 members.forEach(member => {

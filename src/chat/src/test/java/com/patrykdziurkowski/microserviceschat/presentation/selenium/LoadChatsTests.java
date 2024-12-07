@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -100,11 +99,11 @@ class LoadChatsTests extends ComposeContainersBase {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
 
-        WebElement serverContainer = driver.findElement(By.id("serverContainer"));
-        List<WebElement> children = serverContainer.findElements(By.xpath("./*"));
-        children.forEach(e -> {
-            assertTrue(false, "Container not empty!");
-        });
+        assertTrue(wait.until(
+                ExpectedConditions.not(
+                        ExpectedConditions.presenceOfNestedElementsLocatedBy(
+                                By.id("serverContainer"),
+                                By.xpath("./*")))));
     }
 
     @Test

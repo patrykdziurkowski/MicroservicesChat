@@ -21,6 +21,10 @@
                 headers: { 'Content-Type': 'application/json' },
             })
                 .then(response => {
+                    if (offset === 0) {
+                        messageContainer.innerHTML = '';
+                    }
+
                     if (response.status === 204) {
                         console.log("No more messages to load.");
                         if (isLoadingMore) {
@@ -31,16 +35,13 @@
 
                     if (!response.ok) {
                         throw new Error(`Failed to load messages: HTTP ${response.status}`);
+                        return;
                     }
 
                     return response.json();
                 })
                 .then(messages => {
-                    if (offset === 0) {
-                        messageContainer.innerHTML = '';
-                    }
                     if (messages.length === 0) {
-                        console.log("No messages received.");
                         return;
                     }
                     const messageContainer = document.getElementById("messageContainer");

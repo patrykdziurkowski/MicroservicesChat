@@ -54,6 +54,11 @@
                     headers: { 'Content-Type': 'application/json' }
                 })
                     .then(response => {
+                        const serverContainer = document.getElementById('serverContainer');
+                        if (offset === 0) {
+                            serverContainer.innerHTML = '';
+                        }
+
                         if (response.status === 204) {
                             console.log("No content received");
                             return [];
@@ -61,15 +66,13 @@
 
                         if (response.ok === false) {
                             throw new Error(`Failed to load chats: HTTP ${response.status}`);
+                            return;
                         }
+
 
                         return response.json();
                     })
                     .then(data => {
-                        const serverContainer = document.getElementById('serverContainer');
-                        if (offset === 0) {
-                            serverContainer.innerHTML = '';
-                        }
                         if (!data || data.length === 0) return;
 
                         data.forEach(chat => {
