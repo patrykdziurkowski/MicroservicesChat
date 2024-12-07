@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -46,76 +47,122 @@ class ChatMessagesQueryTests extends ChatDbContainerBase {
     }
 
     @Test
-    void execute_whenChatDoesntExists_shouldReturnEmpty() {
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(UUID.randomUUID(), 0, 20);
+    void execute_whenChatDoesntExist_shouldReturnEmpty() {
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                0,
+                20);
+
+        assertTrue(returnedMessages.isEmpty());
+    }
+
+    @Test
+    void execute_whenChatExistsButMemberNotInChat_shouldReturnEmpty() {
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+        chat.join(UUID.randomUUID(), "member");
+        chatRepository.save(chat);
+
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                UUID.randomUUID(),
+                chat.getId(),
+                0,
+                20);
 
         assertTrue(returnedMessages.isEmpty());
     }
 
     @Test
     void execute_whenChatExistsAndMemberJoined_shouldReturnAnnouncementMessage() {
+        UUID joinedUserId = UUID.randomUUID();
         ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
-        chat.join(UUID.randomUUID(), "member");
+        chat.join(joinedUserId, "member");
         chatRepository.save(chat);
 
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
+        Optional<List<UserMessage>> returnedMessagesResult = chatMessagesQuery.execute(
+                joinedUserId,
+                chat.getId(),
+                0,
+                20);
 
+        assertTrue(returnedMessagesResult.isPresent());
+        List<UserMessage> returnedMessages = returnedMessagesResult.orElseThrow();
         assertTrue(returnedMessages.size() > 0);
         assertEquals(1, returnedMessages.size());
     }
 
     @Test
     void execute_whenChatExistsAndMessagePosted_shouldReturnMessages() {
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
-        UserMessage message = new UserMessage(chat.getId(), "text", UUID.randomUUID());
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
+        UserMessage message = new UserMessage(chat.getId(), "text", ownerId);
         chatRepository.save(chat);
         messageRepository.save(message);
 
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 20);
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                ownerId,
+                chat.getId(),
+                0,
+                20);
 
-        assertTrue(returnedMessages.size() > 0);
-        assertEquals(1, returnedMessages.size());
+        assertTrue(returnedMessages.orElseThrow().size() > 0);
+        assertEquals(1, returnedMessages.orElseThrow().size());
     }
 
     @Test
     void execute_whenChatExistsAndMessagesPosted_shouldReturnSpecifiedNumberOfMessages() {
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
         for (int i = 0; i < 5; i++) {
-            messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
+            messageRepository.save(new UserMessage(chat.getId(), "text", ownerId));
         }
 
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 0, 2);
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                ownerId,
+                chat.getId(),
+                0,
+                2);
 
-        assertTrue(returnedMessages.size() > 0);
-        assertEquals(2, returnedMessages.size());
+        assertTrue(returnedMessages.orElseThrow().size() > 0);
+        assertEquals(2, returnedMessages.orElseThrow().size());
     }
 
     @Test
     void execute_whenChatExistsAndMessagesPosted_shouldReturnOnlyRemainingMessages() {
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
         for (int i = 0; i < 5; i++) {
-            messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
+            messageRepository.save(new UserMessage(chat.getId(), "text", ownerId));
         }
 
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 2, 20);
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                ownerId,
+                chat.getId(),
+                2,
+                20);
 
-        assertTrue(returnedMessages.size() > 0);
-        assertEquals(3, returnedMessages.size());
+        assertTrue(returnedMessages.orElseThrow().size() > 0);
+        assertEquals(3, returnedMessages.orElseThrow().size());
     }
 
     @Test
-    void execute_whenChatExistsAndMessagesPosted_shouldntReturnAnyMessages() {
-        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "chat", false);
+    void execute_whenOffsetBiggerThanNumberOfMessages_shouldntReturnAnyMessages() {
+        UUID ownerId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(ownerId, "chat", false);
         chatRepository.save(chat);
         for (int i = 0; i < 5; i++) {
-            messageRepository.save(new UserMessage(chat.getId(), "text", UUID.randomUUID()));
+            messageRepository.save(new UserMessage(chat.getId(), "text", ownerId));
         }
 
-        List<UserMessage> returnedMessages = chatMessagesQuery.execute(chat.getId(), 20, 20);
+        Optional<List<UserMessage>> returnedMessages = chatMessagesQuery.execute(
+                ownerId,
+                chat.getId(),
+                20,
+                20);
 
-        assertTrue(returnedMessages.isEmpty());
+        assertTrue(returnedMessages.orElseThrow().isEmpty());
     }
 
 }

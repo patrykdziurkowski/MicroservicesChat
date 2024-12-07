@@ -134,7 +134,8 @@ class ChatMessageControllerTests {
         UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
         List<UserMessage> messages = List.of(userMessage);
 
-        when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(messages);
+        when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
+                .thenReturn(Optional.of(messages));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
         when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
@@ -152,8 +153,8 @@ class ChatMessageControllerTests {
         List<UserMessage> messages = List.of(userMessage);
         List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId, List.of(chatMember));
         
-
-        when(chatMessagesQuery.execute(chatId, 1, 20)).thenReturn(messages);
+        when(chatMessagesQuery.execute(currentUserId, chatId, 1, 20))
+                .thenReturn(Optional.of(messages));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
         when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
@@ -168,21 +169,28 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnNoContent_whenNoMessagesExist() throws Exception {
-        when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(Collections.emptyList());
+        UUID chatId = UUID.randomUUID();
+        when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
+                .thenReturn(Optional.of(Collections.emptyList()));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
         when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
+        
+
+        
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
                 .with(user(currentUserId.toString()).password("").roles("USER"))
                 .param("offset", "0")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
     void getMessages_shouldReturnBadRequest_whenNoOffsetIsNegative() throws Exception {
-        when(chatMessagesQuery.execute(chatId, 0, 20)).thenReturn(Collections.emptyList());
+        UUID chatId = UUID.randomUUID();
+        when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
+                .thenReturn(Optional.of(Collections.emptyList()));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -190,5 +198,20 @@ class ChatMessageControllerTests {
                 .param("offset", "-1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getMessages_shouldReturnForbidden_whenUserNotInChat() throws Exception {
+        UUID chatId = UUID.randomUUID();
+
+        when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/chats/{chatId}/messages", chatId)
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
+                .param("offset", "0")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 }

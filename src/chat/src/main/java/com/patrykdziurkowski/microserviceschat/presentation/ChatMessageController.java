@@ -90,7 +90,13 @@ public class ChatMessageController {
         if(offset < 0) {
             return ResponseEntity.badRequest().build();
         }
-        List<UserMessage> messages = chatMessagesQuery.execute(chatId, offset, NUMBER_OF_MESSAGES_TO_RETRIEVE);
+  
+        UUID currentUserId = UUID.fromString(authentication.getName());
+        Optional<List<UserMessage>> messages = chatMessagesQuery.execute(
+                currentUserId,
+                chatId,
+                offset,
+                NUMBER_OF_MESSAGES_TO_RETRIEVE);
         if (messages.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
