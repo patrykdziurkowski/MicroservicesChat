@@ -30,13 +30,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
-import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
-import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
-import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
-import com.patrykdziurkowski.microserviceschat.application.UserQuery;
-import com.patrykdziurkowski.microserviceschat.application.UsersQuery;
+import com.patrykdziurkowski.microserviceschat.application.commands.ChangeUserNameCommand;
+import com.patrykdziurkowski.microserviceschat.application.commands.RegisterCommand;
+import com.patrykdziurkowski.microserviceschat.application.queries.LoginQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.MembersQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.UserQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.UsersQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
+import com.patrykdziurkowski.microserviceschat.presentation.models.GetUserModel;
+import com.patrykdziurkowski.microserviceschat.presentation.models.UserModel;
+import com.patrykdziurkowski.microserviceschat.presentation.models.UserNameModel;
 
 import io.jsonwebtoken.lang.Collections;
 
@@ -231,7 +234,6 @@ class UserControllerTests {
     @Test
     void changeUserName_shouldReturnOk_whenSuccessfullyChanged() throws Exception {
         UUID userId = UUID.randomUUID();
-        String userName = "oldUserName";
         UserNameModel userModel = new UserNameModel(userId, "newUserName");
         String userData = objectMapper.writeValueAsString(userModel);
         when(changeUserNameCommand.execute(userId, "newUserName")).thenReturn(true);

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-public class UserMessageTests {
+class UserMessageTests {
     @Test
     void delete_whenOwnerOfMessegeDeletesMessage_messageIsDeleted() {
         UUID msgOwner = UUID.randomUUID();

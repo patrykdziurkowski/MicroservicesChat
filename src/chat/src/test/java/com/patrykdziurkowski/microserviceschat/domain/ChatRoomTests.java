@@ -1,5 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.ChatDissolvedEvent;
 import com.patrykdziurkowski.microserviceschat.domain.shared.DomainEvent;
 
-public class ChatRoomTests {
+class ChatRoomTests {
 
     @Test
     void dissolve_givenValidData_dissolvesChatRoom() {
@@ -41,10 +42,10 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.inviteMember(newMember, "username",  currentUserId);
+        chatRoom.inviteMember(newMember, "username", currentUserId);
 
         assertTrue(chatRoom.getMemberIds().contains(newMember));
-        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertEquals(2, chatRoom.getMemberIds().size());
     }
 
     @Test
@@ -54,22 +55,22 @@ public class ChatRoomTests {
         UUID currentUserId = UUID.randomUUID();
         UUID newMember = UUID.randomUUID();
 
-        chatRoom.inviteMember(newMember, "username",  currentUserId);
+        chatRoom.inviteMember(newMember, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
     }
 
     @Test
-    void invitemember_givenIvalidDataMemberAlreadyInChatRoom_doesNotInvateMember() {
+    void invitemember_givenInvalidDataMemberAlreadyInChatRoom_doesNotInvateMember() {
         UUID ownerId = UUID.randomUUID();
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID newMember = UUID.randomUUID();
-        chatRoom.inviteMember(newMember, "username",  ownerId);
+        chatRoom.inviteMember(newMember, "username", ownerId);
 
-        chatRoom.inviteMember(newMember, "username",  currentUserId);
+        chatRoom.inviteMember(newMember, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertEquals(2, chatRoom.getMemberIds().size());
     }
 
     @Test
@@ -78,11 +79,11 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = ownerId;
         UUID memberToRemove = UUID.randomUUID();
-        chatRoom.inviteMember(memberToRemove, "username",  ownerId);
+        chatRoom.inviteMember(memberToRemove, "username", ownerId);
 
-        chatRoom.removeMember(memberToRemove, "username",  currentUserId);
+        chatRoom.removeMember(memberToRemove, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
     }
 
     @Test
@@ -91,11 +92,11 @@ public class ChatRoomTests {
         ChatRoom chatRoom = new ChatRoom(ownerId, "Test Room", true);
         UUID currentUserId = UUID.randomUUID();
         UUID memberToRmove = UUID.randomUUID();
-        chatRoom.inviteMember(memberToRmove, "username",  ownerId);
+        chatRoom.inviteMember(memberToRmove, "username", ownerId);
 
-        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
+        chatRoom.removeMember(memberToRmove, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertEquals(2, chatRoom.getMemberIds().size());
         assertTrue(chatRoom.getMemberIds().contains(memberToRmove));
     }
 
@@ -106,9 +107,9 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID memberToRmove = ownerId;
 
-        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
+        chatRoom.removeMember(memberToRmove, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
         assertTrue(chatRoom.getMemberIds().contains(ownerId));
     }
 
@@ -119,9 +120,9 @@ public class ChatRoomTests {
         UUID currentUserId = ownerId;
         UUID memberToRmove = UUID.randomUUID();
 
-        chatRoom.removeMember(memberToRmove, "username",  currentUserId);
+        chatRoom.removeMember(memberToRmove, "username", currentUserId);
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
     }
 
     @Test
@@ -133,10 +134,9 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertEquals(2, chatRoom.getMemberIds().size());
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
-
 
     @Test
     void join_givenInvalidDataMemberAlreadyInRoom_doesNotJoinChatRoom() {
@@ -147,7 +147,7 @@ public class ChatRoomTests {
 
         chatRoom.join(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 2);
+        assertEquals(2, chatRoom.getMemberIds().size());
         assertTrue(chatRoom.getMemberIds().contains(currentUserId));
     }
 
@@ -160,7 +160,7 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
         assertTrue(!chatRoom.getMemberIds().contains(currentUserId));
     }
 
@@ -172,7 +172,7 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
     }
 
     @Test
@@ -185,9 +185,9 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 1);
+        assertEquals(1, chatRoom.getMemberIds().size());
         assertTrue(!chatRoom.getMemberIds().contains(ownerId));
-        assertTrue(chatRoom.getOwnerId().equals(anotherMember));
+        assertEquals(chatRoom.getOwnerId(), anotherMember);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ChatRoomTests {
 
         chatRoom.leave(currentUserId, "username");
 
-        assertTrue(chatRoom.getMemberIds().size() == 0);
+        assertTrue(chatRoom.getMemberIds().isEmpty());
         DomainEvent event = chatRoom.getDomainEvents().get(0);
         assertTrue(event instanceof ChatDissolvedEvent);
     }

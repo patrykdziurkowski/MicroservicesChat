@@ -15,13 +15,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.patrykdziurkowski.microserviceschat.application.ChangeUserNameCommand;
-import com.patrykdziurkowski.microserviceschat.application.LoginQuery;
-import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
-import com.patrykdziurkowski.microserviceschat.application.RegisterCommand;
-import com.patrykdziurkowski.microserviceschat.application.UserQuery;
-import com.patrykdziurkowski.microserviceschat.application.UsersQuery;
+import com.patrykdziurkowski.microserviceschat.application.commands.ChangeUserNameCommand;
+import com.patrykdziurkowski.microserviceschat.application.commands.RegisterCommand;
+import com.patrykdziurkowski.microserviceschat.application.queries.LoginQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.MembersQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.UserQuery;
+import com.patrykdziurkowski.microserviceschat.application.queries.UsersQuery;
 import com.patrykdziurkowski.microserviceschat.domain.User;
+import com.patrykdziurkowski.microserviceschat.presentation.models.GetUserModel;
+import com.patrykdziurkowski.microserviceschat.presentation.models.UserClaims;
+import com.patrykdziurkowski.microserviceschat.presentation.models.UserModel;
+import com.patrykdziurkowski.microserviceschat.presentation.models.UserNameModel;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

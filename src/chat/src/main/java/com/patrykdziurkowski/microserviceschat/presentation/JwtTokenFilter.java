@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.patrykdziurkowski.microserviceschat.application.AuthenticationApiClient;
+import com.patrykdziurkowski.microserviceschat.application.interfaces.AuthenticationApiClient;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
