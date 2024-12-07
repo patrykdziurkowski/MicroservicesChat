@@ -66,14 +66,15 @@ public class ChatMessageController {
         if (chatMembers.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        List<MessageDto> messagesDto = MessageDto.fromList(List.of(addedMessage.get()), currentUserId, chatMembers.get());
+        List<MessageDto> messagesDto = MessageDto.fromList(List.of(addedMessage.get()), currentUserId,
+                chatMembers.get());
         return new ResponseEntity<>(messagesDto.get(0), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")
     public ResponseEntity<MessageResponse> deleteMessage(
             Authentication authentication,
-            @PathVariable UUID chatId, 
+            @PathVariable UUID chatId,
             @PathVariable UUID messageId) {
         UUID currentUserId = UUID.fromString(authentication.getName());
         boolean isMessageDeleted = removeMessageCommand.execute(currentUserId, messageId);
@@ -85,12 +86,12 @@ public class ChatMessageController {
 
     @GetMapping("/chats/{chatId}/messages")
     public ResponseEntity<List<MessageDto>> getMessages(Authentication authentication,
-                                                        @PathVariable UUID chatId,
-                                                        @RequestParam(defaultValue = "0") int offset) {
-        if(offset < 0) {
+            @PathVariable UUID chatId,
+            @RequestParam(defaultValue = "0") int offset) {
+        if (offset < 0) {
             return ResponseEntity.badRequest().build();
         }
-  
+
         UUID currentUserId = UUID.fromString(authentication.getName());
         Optional<List<UserMessage>> messages = chatMessagesQuery.execute(
                 currentUserId,
@@ -98,7 +99,7 @@ public class ChatMessageController {
                 offset,
                 NUMBER_OF_MESSAGES_TO_RETRIEVE);
         if (messages.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Optional<ChatRoom> chat = chatQuery.execute(chatId);
         if (chat.isEmpty()) {
@@ -108,8 +109,8 @@ public class ChatMessageController {
         if (chatMembers.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        UUID currentUserId = UUID.fromString(authentication.getName());
-        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId, chatMembers.get());
+
+        List<MessageDto> messagesDto = MessageDto.fromList(messages.orElseThrow(), currentUserId, chatMembers.get());
         return ResponseEntity.ok(messagesDto);
     }
 }

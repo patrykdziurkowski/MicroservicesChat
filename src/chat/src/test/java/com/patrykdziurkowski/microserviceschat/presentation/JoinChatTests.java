@@ -108,8 +108,6 @@ class JoinChatTests extends ComposeContainersBase {
     @Test
     @Order(4)
     void joiningChat_shouldIncreaseMemberCount() {
-        WebElement serverContainer = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.id("serverContainer")));
         WebElement joinButton = wait
                 .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(
                         By.id("serverContainer"),
@@ -122,15 +120,8 @@ class JoinChatTests extends ComposeContainersBase {
         wait.until(ExpectedConditions.visibilityOf(joinConfirmButton));
         joinConfirmButton.click();
 
-        boolean isCountIncreased = wait.until(d -> {
-            WebElement memberCount = wait
-                    .until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(
-                            By.id("serverContainer"),
-                            By.xpath(".//section//p[contains(text(),'members')]")))
-                    .get(0);
-            return memberCount.getText().startsWith("2 members");
-        });
-        assertTrue(isCountIncreased);
+        assertTrue(wait.until(ExpectedConditions
+                .textToBe(By.xpath("//div[@id='serverContainer']//p"), "2 members")));
     }
 
     @Test
