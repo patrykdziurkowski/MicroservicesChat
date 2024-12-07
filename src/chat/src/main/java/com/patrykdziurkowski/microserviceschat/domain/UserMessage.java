@@ -1,6 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.domain;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.domain.domainevents.MessageDeletedEvent;
@@ -15,14 +15,15 @@ public class UserMessage extends Message {
     @Nullable
     private UUID ownerId;
 
-    UserMessage() {}
+    UserMessage() {
+    }
 
     public UserMessage(UUID chatRoomId, String text, UUID ownerId) {
         super(chatRoomId, text);
         this.ownerId = ownerId;
     }
 
-    public UserMessage(UUID chatRoomId, String text, UUID ownerId, LocalDateTime datePosted) {
+    public UserMessage(UUID chatRoomId, String text, UUID ownerId, Instant datePosted) {
         super(chatRoomId, text, datePosted);
         this.ownerId = ownerId;
     }
@@ -35,7 +36,7 @@ public class UserMessage extends Message {
         raiseDomainEvent(new MessageDeletedEvent());
         return true;
     }
-    
+
     public UUID getOwnerId() {
         return ownerId;
     }

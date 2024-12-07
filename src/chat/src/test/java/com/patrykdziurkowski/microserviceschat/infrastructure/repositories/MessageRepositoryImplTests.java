@@ -5,7 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -129,7 +130,8 @@ class MessageRepositoryImplTests extends ChatDbContainerBase {
         UserMessage message;
 
         for (int i = 1; i < 5; i++) {
-            message = new UserMessage(chatRoomId, "msg" + i, UUID.randomUUID(), LocalDateTime.now().withHour(i));
+            message = new UserMessage(chatRoomId, "msg" + i, UUID.randomUUID(),
+                    Instant.now().plus(Duration.ofHours(i)));
             messageRepository.save(message);
         }
 

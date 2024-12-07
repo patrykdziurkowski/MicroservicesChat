@@ -1,6 +1,6 @@
 package com.patrykdziurkowski.microserviceschat.presentation.dtos;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import jakarta.annotation.Nullable;
 
 public class MessageDto {
     private UUID messageId;
-    private LocalDateTime datePosted;
+    private Instant datePosted;
     private String text;
     private boolean isMessageOwner;
     private boolean isAnnouncement;
@@ -65,11 +65,11 @@ public class MessageDto {
         this.messageId = messageId;
     }
 
-    public LocalDateTime getDatePosted() {
+    public Instant getDatePosted() {
         return this.datePosted;
     }
 
-    public void setDatePosted(LocalDateTime datePosted) {
+    public void setDatePosted(Instant datePosted) {
         this.datePosted = datePosted;
     }
 
