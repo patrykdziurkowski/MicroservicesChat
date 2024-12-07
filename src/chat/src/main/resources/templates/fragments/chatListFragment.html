@@ -66,12 +66,12 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (!data || data.length === 0) return;
-
                         const serverContainer = document.getElementById('serverContainer');
                         if (offset === 0) {
                             serverContainer.innerHTML = '';
                         }
+                        if (!data || data.length === 0) return;
+
                         data.forEach(chat => {
                             const section = createChatCard(chat);
                             serverContainer.appendChild(section);

@@ -41,11 +41,10 @@
             }
 
             function createMemberCards(members) {
-                if (!members || members.length === 0) return;
-                console.log("Member IDs received:", members);
-
                 const memberContainer = document.getElementById('memberContainer');
                 memberContainer.innerHTML = '';
+                if (!members || members.length === 0) return;
+
                 members.forEach(member => {
                     const card = createMemberCard(member);
                     memberContainer.appendChild(card);

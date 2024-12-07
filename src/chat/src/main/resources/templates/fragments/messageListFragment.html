@@ -36,14 +36,14 @@
                     return response.json();
                 })
                 .then(messages => {
+                    if (offset === 0) {
+                        messageContainer.innerHTML = '';
+                    }
                     if (messages.length === 0) {
                         console.log("No messages received.");
                         return;
                     }
                     const messageContainer = document.getElementById("messageContainer");
-                    if (offset === 0) {
-                        messageContainer.innerHTML = '';
-                    }
                     if (isLoadingMore) {
                         const loadMoreButton = document.getElementById("loadMoreButton");
                         if (loadMoreButton) {
