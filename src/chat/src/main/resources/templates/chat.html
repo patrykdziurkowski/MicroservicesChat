@@ -20,7 +20,8 @@
             <div class="row h-100">
                 <section class="col-8 d-flex flex-column align-items-start">
                     <div th:insert="~{fragments/messageListFragment.html :: messageList}" style="width: 100%;"></div>
-                    <div id="postMessageFromContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto" style="margin-bottom: 20px; margin-left:auto; margin-right:auto;">
+                    <div id="postMessageFromContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto"
+                        style="margin-bottom: 20px; margin-left:auto; margin-right:auto;">
                         <form>
                             <input type="text" id="content" placeholder="Message text...">
                             <button type="button" class="btn btn-primary" onClick="postMessage();">Send Message</button>
@@ -29,7 +30,8 @@
                 </section>
                 <section class="col-4 d-flex flex-column">
                     <div th:insert="~{fragments/memberListFragment.html :: memberList}"></div>
-                    <div id="ownerButtonsContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto" style="margin-bottom: 20px;">
+                    <div id="ownerButtonsContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto"
+                        style="margin-bottom: 20px;">
                     </div>
                 </section>
             </div>
@@ -43,13 +45,13 @@
     <script>
         function createDissolveButton() {
             const button = document.createElement('button');
-            
+
             button.className = 'btn btn-danger';
             button.setAttribute('id', 'dissolveChatButton');
             button.setAttribute('data-bs-toggle', 'modal');
             button.setAttribute('data-bs-target', '#dissolveChat');
             button.textContent = 'Dissolve Chat';
-            
+
             return button;
         }
 
@@ -61,7 +63,7 @@
             button.setAttribute('data-bs-toggle', 'modal');
             button.setAttribute('data-bs-target', '#inviteMember');
             button.textContent = 'Invite Member';
-            
+
             return button;
         }
 
@@ -86,26 +88,22 @@
                     },
                     body: JSON.stringify(payload)
                 })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-        
-                    if (!response.ok) {
-                        throw new Error(`Error: ${response.status}`);
-                    }
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
 
-                    return response.json(); 
-                })
-                .then(data => {
-                    console.log(data);
+                        if (!response.ok) {
+                            throw new Error(`Error: ${response.status}`);
+                        }
 
-                    const messageDiv = createMessageDiv(data)
-                    document.getElementById("messageContainer").appendChild(messageDiv);
-                    contentInput.value = "";
-                })
-                .catch(error => {
-                    console.error('Error posting message:', error);
-                });
+                        return response.json();
+                    })
+                    .then(data => {
+                        contentInput.value = "";
+                    })
+                    .catch(error => {
+                        console.error('Error posting message:', error);
+                    });
             }
         }
 

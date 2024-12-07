@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class ChatMessageController {
     private final ChatMessagesQuery chatMessagesQuery;
     private final MembersQuery membersQuery;
     private final ChatQuery chatQuery;
+    private final SimpMessagingTemplate messagingTemplate;
 
     private static final int NUMBER_OF_MESSAGES_TO_RETRIEVE = 20;
 
@@ -44,12 +46,14 @@ public class ChatMessageController {
             RemoveMessageCommand deleteMessageCommand,
             ChatMessagesQuery chatMessagesQuery,
             MembersQuery membersQuery,
-            ChatQuery chatQuery) {
+            ChatQuery chatQuery,
+            SimpMessagingTemplate messagingTemplate) {
         this.postMessageCommand = addMessageCommand;
         this.removeMessageCommand = deleteMessageCommand;
         this.chatMessagesQuery = chatMessagesQuery;
         this.membersQuery = membersQuery;
         this.chatQuery = chatQuery;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/chats/{chatId}/messages")
@@ -69,9 +73,10 @@ public class ChatMessageController {
         if (chatMembers.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        List<MessageDto> messagesDto = MessageDto.fromList(List.of(addedMessage.get()), currentUserId,
-                chatMembers.get());
-        return new ResponseEntity<>(messagesDto.get(0), HttpStatus.CREATED);
+        MessageDto messagesDto = MessageDto.from(addedMessage.orElseThrow(), currentUserId,
+                chatMembers.orElseThrow());
+        messagingTemplate.convertAndSend("/chat/" + chatId, messagesDto);
+        return new ResponseEntity<>(messagesDto, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/chats/{chatId}/messages/{messageId}")

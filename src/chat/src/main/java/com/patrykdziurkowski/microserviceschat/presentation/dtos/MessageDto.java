@@ -3,6 +3,7 @@ package com.patrykdziurkowski.microserviceschat.presentation.dtos;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.patrykdziurkowski.microserviceschat.application.models.User;
@@ -30,12 +31,22 @@ public class MessageDto {
         messageDto.text = message.getText();
         messageDto.datePosted = message.getDatePosted();
 
-        messageDto.isAnnouncement = (message.getOwnerId() == null) ? true : false;
-        messageDto.isMessageOwner = (userId.equals(message.getOwnerId())) ? true : false;
+        messageDto.isAnnouncement = message.getOwnerId() == null;
+        messageDto.isMessageOwner = userId.equals(message.getOwnerId());
         messageDto.ownerId = (message.getOwnerId() == null) ? null : message.getOwnerId().toString();
         messageDto.ownerUserName = (message.getOwnerId() == null) ? null : chatMember.getUserName();
 
         return messageDto;
+    }
+
+    public static MessageDto from(UserMessage message, UUID userId, List<User> chatMembers) {
+        Optional<User> author = chatMembers.stream()
+                .filter(u -> u.getUserId().equals(message.getOwnerId()))
+                .findFirst();
+        if (author.isEmpty()) {
+            throw new IllegalArgumentException("User not found amongst chat members.");
+        }
+        return from(message, userId, author.orElseThrow());
     }
 
     public static List<MessageDto> fromList(List<UserMessage> messages, UUID userId, List<User> chatMembers) {

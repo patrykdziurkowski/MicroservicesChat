@@ -29,7 +29,7 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint((request, response, exception) -> response.sendRedirect("/login")))
                 .logout(options -> options.disable())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
