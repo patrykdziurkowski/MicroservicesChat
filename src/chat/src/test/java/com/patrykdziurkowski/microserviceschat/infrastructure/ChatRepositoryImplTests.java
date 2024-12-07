@@ -3,6 +3,7 @@ package com.patrykdziurkowski.microserviceschat.infrastructure;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.FavoriteChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
@@ -34,6 +36,8 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
     private FavoriteChatRepositoryImpl favoriteChatRepository;
     @MockBean
     private RestTemplate restTemplate;
+    @MockBean
+    private ObjectMapper objectMapper;
 
     @Test
     void repository_shouldLoad() {
@@ -115,12 +119,40 @@ class ChatRepositoryImplTests extends ChatDbContainerBase {
         secondChat.join(memberId, "username");
         chatRepository.save(chat);
         chatRepository.save(secondChat);
-        
+
         List<ChatRoom> chats = chatRepository.getByMemberId(memberId, 1, 20);
 
         assertFalse(chats.contains(chat));
         assertTrue(chats.contains(secondChat));
 
+    }
+
+    @Test
+    void getByMemberId_shouldOrderChatByFavoritesFirst_whenFavoritesExist() {
+        UUID memberId = UUID.randomUUID();
+        ChatRoom chat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        ChatRoom secondChat = new ChatRoom(UUID.randomUUID(), "Chat", false);
+        ChatRoom thirdChat = new ChatRoom(memberId, "Chat", false);
+        chat.join(memberId, "username");
+        secondChat.join(memberId, "username");
+        chatRepository.save(chat);
+        chatRepository.save(secondChat);
+        chatRepository.save(thirdChat);
+        List<ChatRoom> chatsBeforeFavorited = chatRepository.getByMemberId(memberId, 0, 20);
+        favoriteChatRepository.save(FavoriteChatRoom.set(memberId, thirdChat).orElseThrow());
+
+        List<ChatRoom> chatsAfterFavorited = chatRepository.getByMemberId(memberId, 0, 20);
+
+        // Before
+        assertTrue(chatsBeforeFavorited.contains(chat));
+        assertTrue(chatsBeforeFavorited.contains(secondChat));
+        assertTrue(chatsBeforeFavorited.contains(thirdChat));
+        assertEquals(thirdChat, chatsBeforeFavorited.get(2));
+        // After
+        assertTrue(chatsAfterFavorited.contains(chat));
+        assertTrue(chatsAfterFavorited.contains(secondChat));
+        assertTrue(chatsAfterFavorited.contains(thirdChat));
+        assertEquals(thirdChat, chatsAfterFavorited.get(0));
     }
 
     @Test

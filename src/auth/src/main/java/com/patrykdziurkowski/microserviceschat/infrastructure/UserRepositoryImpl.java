@@ -22,9 +22,23 @@ public class UserRepositoryImpl implements UserRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<User> get() {
+    public List<User> getByNumber(int number, int offset, String contains) {
+        final String query = "SELECT u FROM User u WHERE u.userName LIKE :contains ORDER BY u.userName";
         return entityManager
-                .createQuery("SELECT u FROM User u", User.class)
+                .createQuery(query, User.class)
+                .setParameter("contains", "%" + contains + "%")
+                .setFirstResult(offset)
+                .setMaxResults(number)
+                .getResultList();
+    }
+
+    @Override
+    public List<User> getByNumber(int number, int offset) {
+        final String query = "SELECT u FROM User u ORDER BY u.userName";
+        return entityManager
+                .createQuery(query, User.class)
+                .setFirstResult(offset)
+                .setMaxResults(number)
                 .getResultList();
     }
 

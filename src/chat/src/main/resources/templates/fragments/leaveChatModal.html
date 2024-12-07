@@ -10,9 +10,47 @@
                 <p>Are you sure you want to leave this chat?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger">Yes</button>
+                <button id="leaveChatConfirm" type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="leaveChat()">Yes</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
+    <script>
+        function leaveChat() {
+            fetch(`/chats/${selectedChatId}/user`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.status !== 200) {
+                        console.error('Unable to leave the chat.');
+                        return;
+                    }
+
+                    return response.json();
+                })
+                .then(chat => {
+                    console.log(chat);
+                    if (!chat || chat.length === 0) return;
+
+                    const serverContainer = document.querySelector('#serverContainer');
+                    const serverCards = serverContainer.children;
+                    for (const serverCard of serverCards) {
+                        if (serverCard.getAttribute('data-chat-id') === selectedChatId) {
+                            if (chat.memberCount == 0) {
+                                serverCard.remove();
+                            } else {
+                                serverCard.innerHTML = cardText(chat);
+                            }
+                        }
+                    }
+
+                    if (window.location.href.includes('/chats/')) {
+                        window.location.href = '/chats';
+                    }
+                })
+                .catch(error => console.error('Error when leaving chat:', error));
+        }
+    </script>
 </div>

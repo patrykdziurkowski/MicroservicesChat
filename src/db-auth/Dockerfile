@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/mssql/server:2022-CU15-GDR1-ubuntu-22.04
+FROM mcr.microsoft.com/mssql/server:2022-latest
 EXPOSE 1433
 USER root
 

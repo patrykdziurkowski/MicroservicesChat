@@ -16,38 +16,38 @@ import jakarta.transaction.Transactional;
 
 @Repository
 @Transactional
-public class MessageRepositoryImpl implements MessageRepository{
+public class MessageRepositoryImpl implements MessageRepository {
     @PersistenceContext
     EntityManager entityManager;
 
     // Last Message provided by lastMessageId is skipped
     public List<UserMessage> getByAmount(UUID chatId, int lastMessagePosition, int messagesToRetrieve) {
-        final String query = "SELECT m FROM UserMessage m WHERE " + 
-                "m.chatRoomId = :chatId ORDER BY m.datePosted";
+        final String query = "SELECT m FROM UserMessage m WHERE " +
+                "m.chatRoomId = :chatId ORDER BY m.datePosted DESC";
         return entityManager
-            .createQuery(query, UserMessage.class)
-            .setParameter("chatId", chatId)
-            .setFirstResult(lastMessagePosition)
-            .setMaxResults(messagesToRetrieve)
-            .getResultList();
+                .createQuery(query, UserMessage.class)
+                .setParameter("chatId", chatId)
+                .setFirstResult(lastMessagePosition)
+                .setMaxResults(messagesToRetrieve)
+                .getResultList();
     }
 
     public Optional<UserMessage> getById(UUID messageId) {
         return Optional.ofNullable(entityManager
-            .find(UserMessage.class, messageId));
+                .find(UserMessage.class, messageId));
     }
 
     public void save(UserMessage message) {
         final boolean messageExists = messageExists(message.getId());
-        if(messageExists) {
+        if (messageExists) {
             entityManager.merge(message);
         } else {
             entityManager.persist(message);
         }
         final boolean messageDeleted = message
-            .getDomainEvents()
-            .contains(new MessageDeletedEvent());
-        if(messageDeleted) {
+                .getDomainEvents()
+                .contains(new MessageDeletedEvent());
+        if (messageDeleted) {
             entityManager.remove(message);
         }
         entityManager.flush();
@@ -56,9 +56,9 @@ public class MessageRepositoryImpl implements MessageRepository{
     private boolean messageExists(UUID messageId) {
         final String query = "SELECT COUNT(m) FROM UserMessage m WHERE m.id = :id";
         return entityManager
-            .createQuery(query, Long.class)
-            .setParameter("id", messageId)
-            .getSingleResult() > 0;
+                .createQuery(query, Long.class)
+                .setParameter("id", messageId)
+                .getSingleResult() > 0;
     }
-    
+
 }

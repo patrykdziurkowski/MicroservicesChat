@@ -26,8 +26,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrykdziurkowski.microserviceschat.application.ChatMessagesQuery;
+import com.patrykdziurkowski.microserviceschat.application.ChatQuery;
+import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
 import com.patrykdziurkowski.microserviceschat.application.PostMessageCommand;
 import com.patrykdziurkowski.microserviceschat.application.RemoveMessageCommand;
+import com.patrykdziurkowski.microserviceschat.application.User;
+import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 import com.patrykdziurkowski.microserviceschat.domain.UserMessage;
 
 @WebMvcTest(ChatMessageController.class)
@@ -48,8 +52,15 @@ class ChatMessageControllerTests {
     private RemoveMessageCommand removeMessageCommand;
     @MockBean
     private ChatMessagesQuery chatMessagesQuery;
+    @MockBean
+    private ChatQuery chatQuery;
+    @MockBean
+    private MembersQuery membersQuery;
 
     private UUID currentUserId = UUID.randomUUID();
+    private UUID chatId = UUID.randomUUID();
+    private User chatMember = new User(currentUserId, "chatMember");
+    private ChatRoom chat = new ChatRoom(chatId, "chat", false);
 
     @Test
     void contextLoads() {
@@ -58,11 +69,12 @@ class ChatMessageControllerTests {
 
     @Test
     void addMessage_shouldReturnCreated_whenMessageIsAdded() throws Exception {
-        UUID chatId = UUID.randomUUID();
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
-                .thenReturn(true);
+                .thenReturn(Optional.of(new UserMessage(chatId, "Hello, World!", currentUserId)));
+        when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(post("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -75,11 +87,10 @@ class ChatMessageControllerTests {
 
     @Test
     void addMessage_shouldReturnBadRequest_whenMessageCannotBeAdded() throws Exception {
-        UUID chatId = UUID.randomUUID();
         NewMessageModel newMessage = new NewMessageModel("Hello, World!");
 
         when(postMessageCommand.execute(chatId, "Hello, World!", currentUserId))
-                .thenReturn(false);
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(post("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -120,12 +131,13 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnOk_whenMessagesExist() throws Exception {
-        UUID chatId = UUID.randomUUID();
         UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
         List<UserMessage> messages = List.of(userMessage);
 
         when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
                 .thenReturn(Optional.of(messages));
+        when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -137,12 +149,14 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnOnlySecondMessage_whenOffsetIsOne() throws Exception {
-        UUID chatId = UUID.randomUUID();
-        UserMessage secondMessage = new UserMessage(chatId, "testUser2", UUID.randomUUID());
-        List<UserMessage> messages = List.of(secondMessage);
+        UserMessage userMessage = new UserMessage(chatId, "testUser", UUID.randomUUID());
+        List<UserMessage> messages = List.of(userMessage);
+        List<MessageDto> messagesDto = MessageDto.fromList(messages, currentUserId, List.of(chatMember));
 
         when(chatMessagesQuery.execute(currentUserId, chatId, 1, 20))
                 .thenReturn(Optional.of(messages));
+        when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -150,15 +164,15 @@ class ChatMessageControllerTests {
                 .param("offset", "1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(messages)));
+                .andExpect(content().json(objectMapper.writeValueAsString(messagesDto)));
     }
 
     @Test
     void getMessages_shouldReturnNoContent_whenNoMessagesExist() throws Exception {
-        UUID chatId = UUID.randomUUID();
-
         when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
                 .thenReturn(Optional.of(Collections.emptyList()));
+        when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -169,9 +183,7 @@ class ChatMessageControllerTests {
     }
 
     @Test
-    void getMessages_shouldReturnBadRequest_whenOffsetIsNegative() throws Exception {
-        UUID chatId = UUID.randomUUID();
-
+    void getMessages_shouldReturnBadRequest_whenNoOffsetIsNegative() throws Exception {
         when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
                 .thenReturn(Optional.of(Collections.emptyList()));
 
@@ -185,9 +197,7 @@ class ChatMessageControllerTests {
 
     @Test
     void getMessages_shouldReturnForbidden_whenUserNotInChat() throws Exception {
-        UUID chatId = UUID.randomUUID();
-
-        when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
+        when(chatMessagesQuery.execute(UUID.randomUUID(), chatId, 0, 20))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)

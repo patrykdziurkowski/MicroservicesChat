@@ -44,7 +44,7 @@ class CreateChatCommandTests extends ChatDbContainerBase {
     }
 
     @Test
-    void execute_whenValidData_shouldAddChat() {
+    void execute_whenWithPassword_shouldAddChat() {
         chatCreationCommand.execute(UUID.randomUUID(), "chat", false, Optional.ofNullable("password"));
 
         List<ChatRoom> chats = chatRepository.get();
@@ -56,7 +56,7 @@ class CreateChatCommandTests extends ChatDbContainerBase {
     }
 
     @Test
-    void execute_whenDiffrentValidData_shouldAddChat() {
+    void execute_whenNoPassword_shouldAddChat() {
         chatCreationCommand.execute(UUID.randomUUID(), "chat", true, Optional.empty());
 
         List<ChatRoom> chats = chatRepository.get();

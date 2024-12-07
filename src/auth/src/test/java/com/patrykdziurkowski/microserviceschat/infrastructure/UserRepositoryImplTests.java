@@ -34,23 +34,6 @@ class UserRepositoryImplTests extends AuthDbContainerBase {
     }
 
     @Test
-    void get_shouldReturnEmpty_whenNoUsers() {
-        List<User> users = userRepository.get();
-
-        assertEquals(0, users.size());
-    }
-
-    @Test
-    void get_shouldReturnUser_whenSingleUserExists() {
-        User user = new User("userName", "password");
-        userRepository.save(user);
-
-        List<User> users = userRepository.get();
-
-        assertEquals(1, users.size());
-    }
-
-    @Test
     void get_shouldReturnThreeUsers_whenGivenThreeUsers() {
         List<User> users = new ArrayList<>();
         users.add(new User("userName1", "password"));
@@ -58,9 +41,35 @@ class UserRepositoryImplTests extends AuthDbContainerBase {
         users.add(new User("userName3", "password"));
         userRepository.save(users);
 
-        List<User> usersInDatabase = userRepository.get();
+        List<User> returnedUsers = userRepository.getByNumber(20, 0);
 
-        assertEquals(3, usersInDatabase.size());
+        assertEquals(3, returnedUsers.size());
+    }
+
+    @Test
+    void get_shouldReturnThreeUsers_whenGiven23UsersWith20Offset() {
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 23; ++i) {
+            users.add(new User("userName" + i, "password"));
+        }
+        userRepository.save(users);
+
+        List<User> returnedUsers = userRepository.getByNumber(20, 20);
+
+        assertEquals(3, returnedUsers.size());
+    }
+
+    @Test
+    void get_shouldReturn11Users_whenSearchingWithAFilter() {
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 20; ++i) {
+            users.add(new User("userName" + i, "password"));
+        }
+        userRepository.save(users);
+
+        List<User> returnedUsers = userRepository.getByNumber(20, 0, "1");
+
+        assertEquals(11, returnedUsers.size());
     }
 
     @Test
@@ -132,7 +141,7 @@ class UserRepositoryImplTests extends AuthDbContainerBase {
 
         userRepository.save(users);
 
-        List<User> createdUsers = userRepository.get();
+        List<User> createdUsers = userRepository.getByNumber(20, 0);
         assertEquals(1, createdUsers.size());
     }
 

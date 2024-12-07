@@ -18,7 +18,7 @@ public class CreateChatCommand {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean execute(UUID currentUserId, String chatName, boolean isPublic, Optional<String> chatPassword) {
+    public ChatRoom execute(UUID currentUserId, String chatName, boolean isPublic, Optional<String> chatPassword) {
         ChatRoom chat;
         if(chatPassword.isPresent()) {
             final String encodedPassword = passwordEncoder.encode(chatPassword.get());
@@ -28,6 +28,6 @@ public class CreateChatCommand {
         }
         
         chatRepository.save(chat);
-        return true;
+        return chat;
     }
 }

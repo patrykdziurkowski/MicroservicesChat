@@ -12,43 +12,46 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 public class JoinChatCommand {
     private final ChatRepository chatRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
     public JoinChatCommand(ChatRepository chatRepository,
-            PasswordEncoder passwordEncoder, 
-            AuthenticationApiClient apiClient) {
+            PasswordEncoder passwordEncoder,
+            UserApiClient apiClient) {
         this.chatRepository = chatRepository;
         this.passwordEncoder = passwordEncoder;
         this.apiClient = apiClient;
     }
 
-    public boolean execute(UUID currentUserId, UUID chatId, Optional<String> givenChatPassword) {
+    public Optional<ChatRoom> execute(UUID currentUserId, UUID chatId, Optional<String> givenChatPassword) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
-        if(retrievedChat.isEmpty()) {
-            return false;
+        if (retrievedChat.isEmpty()) {
+            return Optional.empty();
         }
+
         ChatRoom chat = retrievedChat.get();
-        if(checkPassword(chat.getPasswordHash(), givenChatPassword) == false) {
-            return false;
+        if (passwordDoesntPass(chat.getPasswordHash(), givenChatPassword)) {
+            return Optional.empty();
         }
+
         Optional<String> currentUserName = apiClient.sendUserNameRequest(currentUserId);
-        if(currentUserName.isEmpty()) {
-            return false;
+        if (currentUserName.isEmpty()) {
+            return Optional.empty();
         }
-        if(chat.join(currentUserId, currentUserName.orElseThrow()) == false) {
-            return false;
+
+        if (chat.join(currentUserId, currentUserName.orElseThrow()) == false) {
+            return Optional.empty();
         }
         chatRepository.save(chat);
-        return true;
+        return Optional.of(chat);
     }
 
-    private boolean checkPassword(Optional<String> chatPassword, Optional<String> givenChatPassword) {
-        if(chatPassword.isEmpty()) {
-            return true;
-        }
-        if(givenChatPassword.isEmpty()) {
+    private boolean passwordDoesntPass(Optional<String> chatPassword, Optional<String> givenChatPassword) {
+        if (chatPassword.isEmpty()) {
             return false;
         }
-        return passwordEncoder.matches(givenChatPassword.get(), chatPassword.get());
+        if (givenChatPassword.isEmpty()) {
+            return true;
+        }
+        return !passwordEncoder.matches(givenChatPassword.get(), chatPassword.get());
     }
 }

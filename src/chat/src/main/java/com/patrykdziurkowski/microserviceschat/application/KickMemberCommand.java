@@ -10,25 +10,25 @@ import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 @Service
 public class KickMemberCommand {
     private final ChatRepository chatRepository;
-    private final AuthenticationApiClient apiClient;
+    private final UserApiClient apiClient;
 
     public KickMemberCommand(ChatRepository chatRepository,
-            AuthenticationApiClient apiClient) {
+            UserApiClient apiClient) {
         this.chatRepository = chatRepository;
         this.apiClient = apiClient;
     }
 
     public boolean execute(UUID currentUserId, UUID chatId, UUID memberId) {
         final Optional<ChatRoom> retrievedChat = chatRepository.getById(chatId);
-        if(retrievedChat.isEmpty()) {
+        if (retrievedChat.isEmpty()) {
             return false;
         }
         ChatRoom chat = retrievedChat.get();
         Optional<String> memberUserName = apiClient.sendUserNameRequest(memberId);
-        if(memberUserName.isEmpty()) {
+        if (memberUserName.isEmpty()) {
             return false;
         }
-        if(chat.removeMember(memberId, memberUserName.orElseThrow(), currentUserId) == false) {
+        if (chat.removeMember(memberId, memberUserName.orElseThrow(), currentUserId) == false) {
             return false;
         }
         chatRepository.save(chat);

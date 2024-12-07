@@ -1,0 +1,79 @@
+<div th:fragment="memberList" class="d-flex flex-column align-items-start h-100">
+    <div id="memberContainer" class="scrollable-container">
+    </div>
+    <script th:inline="javascript">
+        let isRoomOwner = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentUserId = /*[[${ currentUserId }]]*/ null;
+
+            function loadMembers() {
+                const request = fetch(`/chats/${chatId}/details`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const response = request.then(r => {
+                    if (r.status !== 200) {
+                        console.error('Could not load members.', r.error);
+                    }
+                    return r.json();
+                });
+
+                response.then(chat => {
+                    console.log(chat);
+                    if (chat.ownerId === currentUserId) {
+                        isRoomOwner = true;
+                        ownerButtonsContainer.style.display = "flex";
+                    }
+                    createMemberCards(chat.members);
+                    if (isRoomOwner) {
+                        ownerButtonsContainer.classList.remove('d-none');
+                    }
+                }).catch(error => console.error('Error loading member IDs:', error));
+            }
+
+            function createMemberCards(members) {
+                if (!members || members.length === 0) return;
+                console.log("Member IDs received:", members);
+
+                const memberContainer = document.getElementById('memberContainer');
+                memberContainer.innerHTML = '';
+                members.forEach(member => {
+                    const card = createMemberCard(member);
+                    memberContainer.appendChild(card);
+                });
+            }
+
+            function createMemberCard(member) {
+                const card = document.createElement('div');
+                card.classList.add('card', 'p-3', 'mb-3', `member-${member.userId}`);
+
+                const memberName = `
+                  <p class="card-title truncate-text mb-0" style="max-width: 200px;">
+                      ${member.userName}
+                  </p>
+                `;
+                let actionButton = `
+                      <button class="btn btn-outline-danger" id="kickButton" data-bs-toggle="modal"
+                      data-bs-target="#kickMember" data-member-id="${member.userId}">X</button>
+                  `;
+
+                if (!isRoomOwner || member.userId === currentUserId) {
+                    actionButton = '';
+                }
+
+                card.innerHTML = `
+                  <div class="d-flex justify-content-between align-items-center">
+                      ${memberName}
+                      ${actionButton}
+                  </div>
+                `;
+
+                return card;
+            }
+
+            loadMembers();
+        });
+    </script>
+</div>

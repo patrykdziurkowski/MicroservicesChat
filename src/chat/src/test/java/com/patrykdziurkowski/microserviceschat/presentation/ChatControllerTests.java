@@ -2,13 +2,13 @@ package com.patrykdziurkowski.microserviceschat.presentation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,9 +27,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.patrykdziurkowski.microserviceschat.application.ChatQuery;
 import com.patrykdziurkowski.microserviceschat.application.ChatsQuery;
 import com.patrykdziurkowski.microserviceschat.application.CreateChatCommand;
 import com.patrykdziurkowski.microserviceschat.application.DeleteChatCommand;
+import com.patrykdziurkowski.microserviceschat.application.FavoritesQuery;
+import com.patrykdziurkowski.microserviceschat.application.MembersQuery;
+import com.patrykdziurkowski.microserviceschat.application.User;
 import com.patrykdziurkowski.microserviceschat.domain.ChatRoom;
 
 @WebMvcTest(ChatController.class)
@@ -42,13 +46,19 @@ class ChatControllerTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @MockBean
     private CreateChatCommand createChatCommand;
     @MockBean
     private DeleteChatCommand deleteChatCommand;
     @MockBean
     private ChatsQuery chatsQuery;
+    @MockBean
+    private ChatQuery chatQuery;
+    @MockBean
+    private MembersQuery membersQuery;
+    @MockBean
+    private FavoritesQuery favoritesQuery;
 
     private UUID currentUserId = UUID.randomUUID();
 
@@ -74,10 +84,11 @@ class ChatControllerTests {
     })
     void createChat_shouldReturnBadRequest_whenInputInvalid(String chatName, String password) throws Exception {
         ChatModel chatModel = new ChatModel(chatName, false, password);
+        ChatRoom chatRoom = new ChatRoom(currentUserId, chatName, false);
         String chatData = objectMapper.writeValueAsString(chatModel);
 
         when(createChatCommand.execute(currentUserId, chatName, true, Optional.of(password)))
-                .thenReturn(false);
+                .thenReturn(chatRoom);
 
         mockMvc.perform(post("/chats")
                 .with(csrf())
@@ -88,28 +99,13 @@ class ChatControllerTests {
     }
 
     @Test
-    void createChat_shouldReturnForbidden_whenChatCreationFails() throws Exception {
-        ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
-        String chatData = objectMapper.writeValueAsString(chatModel);
-
-        when(createChatCommand.execute(currentUserId, "ValidChatName", true, Optional.of("!password123")))
-                .thenReturn(false);
-
-        mockMvc.perform(post("/chats")
-                .with(csrf())
-                .with(user(currentUserId.toString()).password("").roles("USER"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(chatData))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     void createChat_shouldReturnCreated_whenChatCreationSucceeds() throws Exception {
         ChatModel chatModel = new ChatModel("ValidChatName", true, "!password123");
+        ChatRoom chatRoom = new ChatRoom(currentUserId, "ValidChatName", false);
         String chatData = objectMapper.writeValueAsString(chatModel);
 
         when(createChatCommand.execute(currentUserId, "ValidChatName", true, Optional.of("!password123")))
-                .thenReturn(true);
+                .thenReturn(chatRoom);
 
         mockMvc.perform(post("/chats")
                 .with(csrf())
@@ -149,6 +145,7 @@ class ChatControllerTests {
     void getChats_shouldReturnOk_whenChatsExist() throws Exception {
         ChatRoom chatRoom = new ChatRoom(UUID.randomUUID(), "Test Chat", true);
         List<ChatRoom> chats = List.of(chatRoom);
+        List<ChatRoomDto> chatsDto = ChatRoomDto.fromList(chats, currentUserId);
 
         when(chatsQuery.execute(currentUserId, 0, 20)).thenReturn(chats);
 
@@ -158,7 +155,7 @@ class ChatControllerTests {
                 .param("offset", "0")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(chats)));
+                .andExpect(content().json(objectMapper.writeValueAsString(chatsDto)));
     }
 
     @Test
@@ -181,6 +178,47 @@ class ChatControllerTests {
                 .param("offset", "-1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getChatDetails_shouldReturnNotFound_whenChatNotFound() throws Exception {
+        UUID chatId = UUID.randomUUID();
+        when(chatQuery.execute(chatId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/chats/" + chatId + "/details")
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getChatDetails_shouldReturnNotFound_whenChatMembersNotFound() throws Exception {
+        ChatRoom chat = new ChatRoom(currentUserId, "name", false);
+        when(chatQuery.execute(chat.getId())).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/chats/" + chat.getId() + "/details")
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getChatDetails_shouldReturnOkAndDto_whenAllGoesWell() throws Exception {
+        User user = new User(currentUserId, "someUserName1");
+        ChatRoom chat = new ChatRoom(currentUserId, "name", false);
+        ChatRoomDetailsDto dto = ChatRoomDetailsDto.from(chat, List.of(user), currentUserId);
+        when(chatQuery.execute(chat.getId())).thenReturn(Optional.of(chat));
+        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(user)));
+
+        mockMvc.perform(get("/chats/" + chat.getId() + "/details")
+                .with(csrf())
+                .with(user(currentUserId.toString()).password("").roles("USER"))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(dto)));
     }
 
 }

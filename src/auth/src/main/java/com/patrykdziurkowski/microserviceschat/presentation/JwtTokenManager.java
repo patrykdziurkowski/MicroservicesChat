@@ -44,24 +44,40 @@ public class JwtTokenManager {
     }
 
     private boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
+        if (extractClaims(token).isEmpty()) {
+            return true;
+        }
+        return extractClaims(token).orElseThrow().getExpiration().before(new Date());
     }
 
     private Optional<String> extractUserId(String token) {
-        return Optional.ofNullable(extractClaims(token).getSubject());
+        if (extractClaims(token).isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(extractClaims(token).orElseThrow().getSubject());
     }
 
     private Optional<String> extractUserName(String token) {
-        return Optional.ofNullable(extractClaims(token)
+        if (extractClaims(token).isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(extractClaims(token).orElseThrow()
                 .get("name", String.class));
     }
 
-    private Claims extractClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignInKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    private Optional<Claims> extractClaims(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSignInKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return Optional.of(claims);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     private SecretKey getSignInKey() {
