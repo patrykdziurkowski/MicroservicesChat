@@ -113,12 +113,13 @@ public class ChatMessageController {
         if (chat.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Optional<List<User>> chatMembers = membersQuery.execute(chat.orElseThrow().getMemberIds());
-        if (chatMembers.isEmpty()) {
+        Optional<List<User>> messageOwners = membersQuery
+                .execute(messages.orElseThrow().stream().map(UserMessage::getOwnerId).toList());
+        if (messageOwners.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        List<MessageDto> messagesDto = MessageDto.fromList(messages.orElseThrow(), currentUserId, chatMembers.get());
+        List<MessageDto> messagesDto = MessageDto.fromList(messages.orElseThrow(), currentUserId, messageOwners.get());
         return ResponseEntity.ok(messagesDto);
     }
 }

@@ -1,6 +1,7 @@
 package com.patrykdziurkowski.microserviceschat.presentation.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -142,7 +143,7 @@ class ChatMessageControllerTests {
         when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
                 .thenReturn(Optional.of(messages));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
-        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
+        when(membersQuery.execute(anyList())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -161,7 +162,7 @@ class ChatMessageControllerTests {
         when(chatMessagesQuery.execute(currentUserId, chatId, 1, 20))
                 .thenReturn(Optional.of(messages));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
-        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
+        when(membersQuery.execute(anyList())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
@@ -177,7 +178,7 @@ class ChatMessageControllerTests {
         when(chatMessagesQuery.execute(currentUserId, chatId, 0, 20))
                 .thenReturn(Optional.of(Collections.emptyList()));
         when(chatQuery.execute(chatId)).thenReturn(Optional.of(chat));
-        when(membersQuery.execute(chat.getMemberIds())).thenReturn(Optional.of(List.of(chatMember)));
+        when(membersQuery.execute(anyList())).thenReturn(Optional.of(List.of(chatMember)));
 
         mockMvc.perform(get("/chats/{chatId}/messages", chatId)
                 .with(csrf())
