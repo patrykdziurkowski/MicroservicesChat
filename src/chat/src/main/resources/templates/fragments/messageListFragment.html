@@ -1,0 +1,180 @@
+<div th:fragment="messageList">
+    <div th:replace="~{fragments/deleteMessageModal.html :: deleteMessageModal}"></div>
+    <div id="messageContainer" class="scrollable-container d-flex flex-column">
+        <div class="message your-message">
+            <div class="message-content d-flex justify-content-between">
+                <div class="message-text-container">
+                    <p class="message-text" style="opacity: 50%;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const urlParts = window.location.pathname.split('/');
+        const chatId = urlParts[urlParts.length - 1];
+
+        let offset = 0;
+
+        function loadMessages(isLoadingMore = false) {
+            fetch(`/chats/${chatId}/messages?offset=${offset}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            })
+                .then(response => {
+                    if (offset === 0) {
+                        messageContainer.innerHTML = '';
+                    }
+
+                    if (response.status === 204) {
+                        console.log("No more messages to load.");
+                        if (isLoadingMore) {
+                            removeLoadMoreButton();
+                        }
+                        return [];
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to load messages: HTTP ${response.status}`);
+                        return;
+                    }
+
+                    return response.json();
+                })
+                .then(messages => {
+                    if (messages.length === 0) {
+                        return;
+                    }
+                    const messageContainer = document.getElementById("messageContainer");
+                    if (isLoadingMore) {
+                        const loadMoreButton = document.getElementById("loadMoreButton");
+                        if (loadMoreButton) {
+                            messageContainer.removeChild(loadMoreButton);
+                        }
+                    } else {
+                        messageContainer.innerHTML = "";
+                    }
+                    messages.forEach(message => {
+                        const messageDiv = createMessageDiv(message);
+                        messageContainer.insertBefore(messageDiv, messageContainer.firstChild);
+                    });
+
+                    offset += messages.length;
+
+                    if (messages.length === 20) {
+                        createLoadMoreButton();
+                    } else if (isLoadingMore) {
+                        removeLoadMoreButton();
+                    }
+
+                    if (!isLoadingMore) {
+                        scrollToBottom();
+                    }
+                })
+                .catch(error => console.error("Error loading messages:", error));
+        }
+
+        function createLoadMoreButton() {
+            const messageContainer = document.getElementById("messageContainer");
+            if (!document.getElementById("loadMoreButton")) {
+                const loadMoreButton = document.createElement("button");
+                loadMoreButton.id = "loadMoreButton";
+                loadMoreButton.className = "btn btn-primary btn-block";
+                loadMoreButton.textContent = "Load More";
+                loadMoreButton.onclick = () => loadMessages(true);
+                messageContainer.insertBefore(loadMoreButton, messageContainer.firstChild);
+            }
+        }
+
+        function removeLoadMoreButton() {
+            const loadMoreButton = document.getElementById("loadMoreButton");
+            if (loadMoreButton) {
+                loadMoreButton.remove();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => loadMessages(false), 1000);
+        });
+
+        function createMessageDiv(message) {
+            const messageDiv = document.createElement("div");
+            const postDate = `<small class="message-date">${new Date(message.datePosted).toLocaleString(undefined, { timeZone: 'CET' })}</small>`;
+            const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                          </svg>`;
+            const deleteMessageButton = `<div class="message-button-container">
+                                        <button class="btn btn-outline-danger delete-message-button" style="padding-top: 4px;" type="button" data-bs-toggle="modal"
+                                          data-bs-target="#deleteMessage" data-message-id="${message.messageId}">${icon}</button>
+                                    </div>`;
+            if (message.isAnnouncement) {
+                messageDiv.className = "message announcement";
+                messageDiv.innerHTML = `
+                <div class="message-content d-flex justify-content-center">
+                    <div class="message-text-container">
+                        <p class="message-text">${message.text}</p>
+                    </div>
+                </div>
+            `;
+            }
+            if (isRoomOwner == false && message.isMessageOwner == false && message.isAnnouncement == false) {
+                messageDiv.className = "message other-message";
+                messageDiv.innerHTML = `
+                <div class="message-content d-flex justify-content-between">
+                    <div class="message-text-container">
+                        <p class="message-text">${message.ownerUserName}: ${message.text}</p>
+                        ${postDate}
+                    </div>
+                </div>
+            `;
+            }
+            if (isRoomOwner == true && message.isAnnouncement == false) {
+                messageDiv.className = "message other-message";
+                messageDiv.innerHTML = `
+                <div class="message-content d-flex justify-content-between">
+                    <div class="message-text-container">
+                        <p class="message-text">${message.ownerUserName}: ${message.text}</p>
+                        ${postDate}
+                    </div>
+                        ${deleteMessageButton}
+                </div>
+            `;
+            }
+            if (message.isMessageOwner) {
+                messageDiv.className = "message your-message";
+                messageDiv.innerHTML = `
+                <div class="message-content d-flex justify-content-between">
+                    <div class="message-text-container">
+                        <p class="message-text"><b>${message.ownerUserName}</b>: ${message.text}</p>
+                        ${postDate}
+                    </div>
+                        ${deleteMessageButton}
+                </div>
+                `;
+            }
+
+            return messageDiv;
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }, 0);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <script>
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            stompClient.subscribe(`/chat/${chatId}`, function (response) {
+                const message = JSON.parse(response.body);
+                const messageDiv = createMessageDiv(message);
+                const messageContainer = document.querySelector('#messageContainer');
+                messageContainer.appendChild(messageDiv, messageContainer.firstChild);
+                scrollToBottom();
+            });
+        });
+    </script>
+</div>

@@ -13,6 +13,16 @@ properties:
         ports:
          - protocol: TCP
            port: 8081
+    - name: db-auth
+      properties:
+        image: ${REGISTRY_PATH}/mc_db-auth:latest
+        resources:
+          requests:
+            cpu: 1
+            memoryInGb: 2
+        ports:
+         - protocol: TCP
+           port: 1443
     - name: chat
       properties:
         ports:
@@ -23,9 +33,9 @@ properties:
           requests:
             cpu: 1
             memoryInGb: 0.3
-    - name: db
+    - name: db-chat
       properties:
-        image: ${REGISTRY_PATH}/mc_db:latest
+        image: ${REGISTRY_PATH}/mc_db-chat:latest
         resources:
           requests:
             cpu: 1

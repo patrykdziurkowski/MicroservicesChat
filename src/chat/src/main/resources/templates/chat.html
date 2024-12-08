@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat!</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+
+<body>
+    <div th:replace="~{fragments/dissolveChatModal.html :: dissolveChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/kickMemberModal.html :: kickMemberModal}"></div>
+    <div th:replace="~{fragments/inviteMemberModal.html :: inviteMemberModal}"></div>
+    <section class="row vh-100">
+        <div class="col-3" th:insert="~{fragments/chatListFragment.html :: chatList}"></div>
+        <div class="col-9">
+            <div class="row h-100">
+                <section class="col-8 d-flex flex-column align-items-start">
+                    <div th:insert="~{fragments/messageListFragment.html :: messageList}" style="width: 100%;"></div>
+                    <div id="postMessageFromContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto"
+                        style="margin-bottom: 20px; margin-left:auto; margin-right:auto;">
+                        <form>
+                            <input type="text" id="content" placeholder="Message text...">
+                            <button type="button" class="btn btn-primary" onClick="postMessage();">Send Message</button>
+                        </form>
+                    </div>
+                </section>
+                <section class="col-4 d-flex flex-column">
+                    <div th:insert="~{fragments/memberListFragment.html :: memberList}"></div>
+                    <div id="ownerButtonsContainer" class="d-flex flex-row justify-content-center gap-3 mt-auto"
+                        style="margin-bottom: 20px;">
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+
+    <script>
+        function createDissolveButton() {
+            const button = document.createElement('button');
+
+            button.className = 'btn btn-danger';
+            button.setAttribute('id', 'dissolveChatButton');
+            button.setAttribute('data-bs-toggle', 'modal');
+            button.setAttribute('data-bs-target', '#dissolveChat');
+            button.textContent = 'Dissolve Chat';
+
+            return button;
+        }
+
+        function createInviteButton() {
+            const button = document.createElement('button');
+
+            button.className = 'btn btn-primary';
+            button.setAttribute('id', 'inviteMembersButton');
+            button.setAttribute('data-bs-toggle', 'modal');
+            button.setAttribute('data-bs-target', '#inviteMember');
+            button.textContent = 'Invite Member';
+
+            return button;
+        }
+
+        const ownerButtonsContainer = document.getElementById("ownerButtonsContainer");
+        ownerButtonsContainer.classList.add('d-none');
+        ownerButtonsContainer.appendChild(createInviteButton());
+        ownerButtonsContainer.appendChild(createDissolveButton());
+
+        function postMessage() {
+            const contentInput = document.getElementById("content");
+            if (contentInput.value !== "" || contentInput.value !== null) {
+                const content = contentInput.value;
+
+                const payload = {
+                    content: content,
+                };
+
+                fetch(`/chats/${chatId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+
+                        if (!response.ok) {
+                            throw new Error(`Error: ${response.status}`);
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        contentInput.value = "";
+                    })
+                    .catch(error => {
+                        console.error('Error posting message:', error);
+                    });
+            }
+        }
+
+    </script>
+</body>
+
+</html>

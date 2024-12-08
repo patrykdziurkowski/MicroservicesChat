@@ -1,0 +1,185 @@
+<div th:fragment="chatList" class="d-flex flex-column align-items-start h-100">
+    <div th:replace="~{fragments/userSettingsModal.html :: userSettingsModal}"></div>
+    <div th:replace="~{fragments/createChatModal.html :: createChatModal}"></div>
+    <div th:replace="~{fragments/leaveChatModal.html :: leaveChatModal}"></div>
+    <div th:replace="~{fragments/joinChatModal.html :: joinChatModal}"></div>
+    <div id="serverContainer" class="scrollable-container">
+        <section class="chat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title truncate-text" style="opacity: 50%;">Loading...</h5>
+                    <p class="card-text" style="opacity: 50%;">Loading members...</p>
+                </div>
+            </div>
+        </section>
+        <section class="chat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title truncate-text" style="opacity: 50%;">Loading...</h5>
+                    <p class="card-text" style="opacity: 50%;">Loading members...</p>
+                </div>
+            </div>
+        </section>
+        <section class="chat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title truncate-text" style="opacity: 50%;">Loading...</h5>
+                    <p class="card-text" style="opacity: 50%;">Loading members...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="d-flex justify-content-center mt-3 button-container"
+        style="padding-left: 100px; padding-right: 155px; margin-bottom: 20px">
+        <button class="btn btn-primary col" id="showCreateChatModal" data-bs-toggle="modal"
+            data-bs-target="#createChat">Create Chat</button>
+    </div>
+    <section class="mt-auto row p-3">
+        <h5 class="col" id="userNameLabel" th:text="${currentUserName}">Username</h5>
+        <button class="btn btn-primary col" data-bs-toggle="modal" data-bs-target="#userSettings"
+            id="userSettingsButton">Settings</button>
+        <form class="col" th:action="@{/logout}" method="POST">
+            <input id="logoutSubmit" type="submit" class="btn btn-primary" value="Logout">
+        </form>
+    </section>
+    <script>
+        let selectedChatId = null;
+        let isSelectedChatPasswordProtected = false;
+        document.addEventListener("DOMContentLoaded", () => {
+            let offset = 0;
+
+            function loadChats() {
+                fetch(`/chats/load?offset=${offset}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => {
+                        const serverContainer = document.getElementById('serverContainer');
+                        if (offset === 0) {
+                            serverContainer.innerHTML = '';
+                        }
+
+                        if (response.status === 204) {
+                            console.log("No content received");
+                            return [];
+                        }
+
+                        if (response.ok === false) {
+                            throw new Error(`Failed to load chats: HTTP ${response.status}`);
+                            return;
+                        }
+
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data || data.length === 0) return;
+
+                        data.forEach(chat => {
+                            const section = createChatCard(chat);
+                            serverContainer.appendChild(section);
+                        });
+                        let loadMoreButton = document.getElementById('loadMoreButton');
+                        if (loadMoreButton) {
+                            loadMoreButton.remove();
+                            loadMoreButton = null;
+                        }
+                        if (data.length === 20) {
+                            offset += 20;
+                            if (!loadMoreButton) {
+                                createLoadMoreButton();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function createLoadMoreButton() {
+                const serverContainer = document.getElementById('serverContainer');
+                const button = document.createElement('button');
+                button.id = 'loadMoreButton';
+                button.classList.add('btn', 'btn-secondary', 'mt-3', 'w-100');
+                button.textContent = 'Load More';
+                button.addEventListener('click', () => loadChats());
+                serverContainer.appendChild(button);
+            }
+
+            loadChats();
+        });
+
+        function createChatCard(chat) {
+            const section = document.createElement('section');
+            section.classList.add('chat-card', 'p-3');
+            if (chat.isFavorite) {
+                section.classList.add('favorite');
+            }
+            section.style.cursor = 'pointer';
+            section.setAttribute('data-chat-id', chat.id);
+            section.innerHTML = cardText(chat);
+            return section;
+        }
+
+        function cardText(chat) {
+            return `
+            <div class="d-flex justify-content-between align-items-center" onclick="if(${chat.isMember}) window.location.href = '/chats/${chat.id}'">
+                <div>
+                    <h5 class="card-title truncate-text">${chat.name}</h5>
+                    <p class="card-text">${chat.memberCount} members</p>
+                </div>
+
+                <div>
+                    <button class="btn btn-secondary btn-sm" style="line-height:100%" data-chat-id="${chat.id}" data-is-favorite=${chat.isFavorite} onclick="toggleFavorite(event);event.stopPropagation();">
+                        ${(chat.isFavorite) ? getStarIcon(true) : getStarIcon(false)}
+                    </button>
+
+                    <button class="btn btn-primary btn-sm modify-membership-button" data-bs-toggle="modal"
+                    data-bs-target="#${chat.isMember ? 'leaveChat' : 'joinChat'}"
+                    onclick="selectedChatId='${chat.id}';isSelectedChatPasswordProtected=${chat.isPasswordProtected};event.stopPropagation();">
+                        ${chat.isMember ? 'Leave' : 'Join'}
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function getStarIcon(isFilled) {
+            if (isFilled) {
+                return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                </svg>`;
+            }
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                    <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+                </svg>`;
+        }
+
+        async function toggleFavorite(event) {
+            const button = event.currentTarget;
+            const chatId = button.getAttribute('data-chat-id');
+            const isFavorite = JSON.parse(button.getAttribute('data-is-favorite'));
+            const serverCard = button.parentElement.parentElement.parentElement;
+
+            const httpMethod = (isFavorite) ? 'DELETE' : 'POST';
+            const response = await fetch(`/favorites?chatId=${chatId}`, {
+                method: httpMethod,
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.status === 201 && !response.status === 204) {
+                console.error(`Failed toggling the favorite for chat ${chatId}`);
+                return;
+            }
+
+            if (response.status === 201) {
+                button.setAttribute('data-is-favorite', true);
+                button.innerHTML = getStarIcon(true);
+                serverCard.classList.add('favorite');
+                return;
+            }
+
+            button.setAttribute('data-is-favorite', false);
+            button.innerHTML = getStarIcon(false);
+            serverCard.classList.remove('favorite');
+        }
+
+    </script>
+</div>
