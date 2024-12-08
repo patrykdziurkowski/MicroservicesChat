@@ -13,6 +13,13 @@ properties:
         ports:
          - protocol: TCP
            port: 8081
+        environmentVariables:
+          - name: JWT_SECRET
+            value: ${JWT_SECRET}
+          - name: MSSQL_SA_PASSWORD
+            value: ${MSSQL_SA_PASSWORD}
+          - name: DOMAIN_LOCALHOST
+            value: localhost 
     - name: chat
       properties:
         ports:
@@ -23,6 +30,13 @@ properties:
           requests:
             cpu: 1
             memoryInGb: 0.3
+        environmentVariables:
+          - name: MSSQL_SA_PASSWORD
+            value: ${MSSQL_SA_PASSWORD}
+          - name: IS_PRODUCTION
+            value: true
+          - name: DOMAIN_LOCALHOST
+            value: localhost 
     - name: db
       properties:
         image: ${REGISTRY_PATH}/mc_db:latest

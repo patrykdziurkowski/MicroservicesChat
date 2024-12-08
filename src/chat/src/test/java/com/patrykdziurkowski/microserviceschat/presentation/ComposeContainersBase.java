@@ -11,8 +11,6 @@ public class ComposeContainersBase {
     protected static DockerComposeContainer<?> containers = new DockerComposeContainer<>(
             new File("../../docker-compose.yaml"))
             .withExposedService("auth", 8081)
-            .waitingFor("db", Wait.forHealthcheck())
-            .waitingFor("auth", Wait.forHealthcheck())
             .waitingFor("chat", Wait.forHealthcheck())
             .withEnv("MSSQL_SA_PASSWORD", TEST_DB_PASSWORD)
             .withEnv("JWT_SECRET", "8bRmGYY9bsVaS6G4HlIREIQqkPOTUNVRZtF6hgh+qyZitTwD/kuYOOYs7XnQ5vnz")
