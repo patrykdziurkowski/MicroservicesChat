@@ -1,4 +1,5 @@
 services:
+
   https-proxy:
     image: ${REGISTRY_PATH:-localhost}/mc_http-proxy:latest
     build:
@@ -13,8 +14,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-    networks:
-      - chat
+
   chat:
     image: ${REGISTRY_PATH:-localhost}/mc_chat:latest
     build:
@@ -26,27 +26,23 @@ services:
     ports:
       - 5006:5006
     depends_on:
-      db-chat:
+      db:
         condition: service_healthy
       auth:
         condition: service_started
-    networks:
-      - shared
-      - chat
     volumes:
       - ./src/chat/src/main/resources/templates:/app/src/main/resources/templates
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
-  db-chat:
-    image: ${REGISTRY_PATH:-localhost}/mc_db-chat:latest
+
+  db:
+    image: ${REGISTRY_PATH:-localhost}/mc_db:latest
     build:
-      context: ./src/db-chat
+      context: ./src/db
       dockerfile: Dockerfile
       args:
         password: ${MSSQL_SA_PASSWORD}
     environment:
       - ACCEPT_EULA=Y
-    networks:
-      - chat
   auth:
     image: ${REGISTRY_PATH:-localhost}/mc_auth:latest
     build:
@@ -58,29 +54,9 @@ services:
     ports:
       - 5005:5005
     depends_on:
-      db-auth:
+      db:
         condition: service_healthy
-    networks:
-      - auth
-      - shared
-  db-auth:
-    image: ${REGISTRY_PATH:-localhost}/mc_db-auth:latest
-    build:
-      context: ./src/db-auth
-      dockerfile: Dockerfile
-      args:
-        password: ${MSSQL_SA_PASSWORD}
-    environment:
-      - ACCEPT_EULA=Y
-    networks:
-      - auth
+
 volumes:
   caddy_data:
   caddy_config:
-networks:
-  chat:
-    driver: bridge
-  auth:
-    driver: bridge
-  shared:
-    driver: bridge

@@ -4,3 +4,4 @@ while ! /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $1 -Q "SELECT 1" -b 
     sleep 5
 done
 /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $1 -Q "CREATE DATABASE chatdb" -No
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $1 -Q "CREATE DATABASE chatauth" -No
