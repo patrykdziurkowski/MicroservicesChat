@@ -40,6 +40,7 @@ services:
         password: ${MSSQL_SA_PASSWORD}
     environment:
       - ACCEPT_EULA=Y
+
   auth:
     image: ${REGISTRY_PATH:-localhost}/mc_auth:latest
     build:

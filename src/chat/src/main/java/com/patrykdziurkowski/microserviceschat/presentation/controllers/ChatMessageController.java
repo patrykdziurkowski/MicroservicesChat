@@ -1,6 +1,7 @@
 package com.patrykdziurkowski.microserviceschat.presentation.controllers;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -93,7 +94,8 @@ public class ChatMessageController {
     }
 
     @GetMapping("/chats/{chatId}/messages")
-    public ResponseEntity<List<MessageDto>> getMessages(Authentication authentication,
+    public ResponseEntity<List<MessageDto>> getMessages(
+            Authentication authentication,
             @PathVariable UUID chatId,
             @RequestParam(defaultValue = "0") int offset) {
         if (offset < 0) {
@@ -114,7 +116,10 @@ public class ChatMessageController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<List<User>> messageOwners = membersQuery
-                .execute(messages.orElseThrow().stream().map(UserMessage::getOwnerId).toList());
+                .execute(messages.orElseThrow().stream()
+                        .map(UserMessage::getOwnerId)
+                        .filter(Objects::nonNull)
+                        .toList());
         if (messageOwners.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
