@@ -68,10 +68,10 @@ public class ChatRoom extends AggreggateRoot {
     }
 
     public boolean inviteMember(UUID newMemberId, String newMemberUsername, UUID currentUserId) {
-        if (isPublic == false && currentUserId != ownerId) {
+        if (isPublic == false && currentUserId.equals(ownerId) == false) {
             return false;
         }
-        if (getPasswordHash().isPresent() && currentUserId != ownerId) {
+        if (getPasswordHash().isPresent() && currentUserId.equals(ownerId) == false) {
             return false;
         }
         if (memberIds.contains(newMemberId)) {
