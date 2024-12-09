@@ -9,9 +9,14 @@
             </div>
         </div>
     </div>
-    <script>
+    <script th:inline="javascript">
         const urlParts = window.location.pathname.split('/');
         const chatId = urlParts[urlParts.length - 1];
+
+        const currentUserId = /*[[${ currentUserId }]]*/ null;
+
+        console.log(currentUserId + " CURRENT USER ID");
+        console.log("--------------------");
 
         let offset = 0;
 
@@ -106,6 +111,7 @@
                                         <button class="btn btn-outline-danger delete-message-button" style="padding-top: 4px;" type="button" data-bs-toggle="modal"
                                           data-bs-target="#deleteMessage" data-message-id="${message.messageId}">${icon}</button>
                                     </div>`;
+            let isMessageOwner = (message.ownerId === currentUserId);
             if (message.isAnnouncement) {
                 messageDiv.className = "message announcement";
                 messageDiv.innerHTML = `
@@ -116,7 +122,7 @@
                 </div>
             `;
             }
-            if (isRoomOwner == false && message.isMessageOwner == false && message.isAnnouncement == false) {
+            if (isRoomOwner == false && isMessageOwner == false && message.isAnnouncement == false) {
                 messageDiv.className = "message other-message";
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-between">
@@ -139,7 +145,7 @@
                 </div>
             `;
             }
-            if (message.isMessageOwner) {
+            if (isMessageOwner) {
                 messageDiv.className = "message your-message";
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-between">
