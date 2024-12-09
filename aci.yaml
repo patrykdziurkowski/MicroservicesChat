@@ -9,7 +9,7 @@ properties:
         resources:
           requests:
             cpu: 1
-            memoryInGb: 0.3
+            memoryInGb: 1
         ports:
          - protocol: TCP
            port: 8081
@@ -29,7 +29,7 @@ properties:
         resources:
           requests:
             cpu: 1
-            memoryInGb: 0.3
+            memoryInGb: 2
         environmentVariables:
           - name: MSSQL_SA_PASSWORD
             value: ${MSSQL_SA_PASSWORD}
@@ -53,7 +53,7 @@ properties:
         resources:
           requests:
             cpu: 1
-            memoryInGb: 0.3
+            memoryInGb: 0.5
         ports:
           - port: 80
           - port: 443
