@@ -15,9 +15,6 @@
 
         const currentUserId = /*[[${ currentUserId }]]*/ null;
 
-        console.log(currentUserId + " CURRENT USER ID");
-        console.log("--------------------");
-
         let offset = 0;
 
         function loadMessages(isLoadingMore = false) {
@@ -101,6 +98,12 @@
             setTimeout(() => loadMessages(false), 1000);
         });
 
+        function escapeHTML(text) {
+            const div = document.createElement("div");
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
         function createMessageDiv(message) {
             const messageDiv = document.createElement("div");
             const postDate = `<small class="message-date">${new Date(message.datePosted).toLocaleString(undefined, { timeZone: 'CET' })}</small>`;
@@ -112,12 +115,13 @@
                                           data-bs-target="#deleteMessage" data-message-id="${message.messageId}">${icon}</button>
                                     </div>`;
             let isMessageOwner = (message.ownerId === currentUserId);
+            const escapedText = escapeHTML(message.text);
             if (message.isAnnouncement) {
                 messageDiv.className = "message announcement";
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-center">
                     <div class="message-text-container">
-                        <p class="message-text">${message.text}</p>
+                        <p class="message-text">${escapedText}</p>
                     </div>
                 </div>
             `;
@@ -127,7 +131,7 @@
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-between">
                     <div class="message-text-container">
-                        <p class="message-text">${message.ownerUserName}: ${message.text}</p>
+                        <p class="message-text">${message.ownerUserName}: ${escapedText}</p>
                         ${postDate}
                     </div>
                 </div>
@@ -138,7 +142,7 @@
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-between">
                     <div class="message-text-container">
-                        <p class="message-text">${message.ownerUserName}: ${message.text}</p>
+                        <p class="message-text">${message.ownerUserName}: ${escapedText}</p>
                         ${postDate}
                     </div>
                         ${deleteMessageButton}
@@ -150,7 +154,7 @@
                 messageDiv.innerHTML = `
                 <div class="message-content d-flex justify-content-between">
                     <div class="message-text-container">
-                        <p class="message-text"><b>${message.ownerUserName}</b>: ${message.text}</p>
+                        <p class="message-text"><b>${message.ownerUserName}</b>: ${escapedText}</p>
                         ${postDate}
                     </div>
                         ${deleteMessageButton}
